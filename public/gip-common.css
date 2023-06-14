@@ -1,0 +1,155 @@
+/*
+# PHP/HTML/JavaScript utility to process BBC iPlayer radio URIs and convert them
+# into the format used by the RhobGetIPlayerUtils Perl package.
+# On startup, loads the program data file from the server.
+# On exit, save the program data file to the server, merging it if the file has
+# been externally modified since this page was opened.
+#
+# Date        Who          Description
+# ---------   ---------    -----------
+# 10-Feb-23   Rhob Weber   Replace globals with contants
+*/
+body
+{
+  background-color: lightblue !important;
+}
+.gip-grid
+{
+  margin: 3px;
+}
+.gip-row {
+  display: grid;
+  margin: 3px;
+}
+.gip-col {
+  display: inline-block;
+}
+.gip-col-options {
+  display: inline-block;
+}
+.gip-col-buttons
+{
+  margin: 0px;
+}
+.gip-label
+{
+  text-align:  left;
+  color:       black;
+  font-family: arial;
+  white-space: nowrap;
+  min-width:   120px;
+}
+.gip-program-entry-text-input
+{
+  width: 100%;
+  font-family: courier;
+  font-size: 85%;
+}
+.gip-program-entry-info
+{
+  display: grid;
+  grid-template-columns: 1fr 11fr; 
+  width: 100%;
+}
+.gip-program-entry-image-div
+{
+  height: 100%;
+  margin: 2px;
+  min-width: 160px;
+}
+.gip-program-entry-synopsis-div
+{
+  width: auto;
+  height: 100%;
+  margin: 2px;
+}
+.gip-program-entry-synopsis
+{
+  font-size: 85%;
+  user-select: "none";
+  width: 100%;
+  min-height: 160px;
+  white-space: pre;
+  overflow-y: scroll;
+  overflow-x: none;
+  font-family: courier;
+  resize: vertical;
+}
+.gip-program-entry-image
+{
+  width: 160px;
+  height: 160px;
+}
+.gip-action-button
+{
+  background-color: #AAAAAA;
+  border: 2px solid #000000;
+  border-radius: 25px;
+  color: black;
+  padding: 3px 3px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 10px;
+  width: 80px;
+  margin: 2px 6px 4px 0px;
+}
+.gip-action-button:active
+{
+  background-color: #FFFFFF;
+  border: 2px solid #FF0000;
+}
+.gip-action-button:hover
+{
+  border: 2px solid #FFFFFF;
+}
+.gip-table-wrapper {
+  display: inline-grid;
+  width: 100%;
+  grid-template-columns: 3ch 10ch 10ch 50ch 10ch 10ch 18ch 120ch 64ch; 
+  font-size: 85%;
+  font-family: courier;
+  white-space: nowrap;
+  border-spacing: 8px 1px;
+  position: relative;
+  background: lightgrey;
+  overflow: auto;
+  min-height: 40px;
+  padding: 0px;
+}
+.gip-prog-item-row {
+  display: contents;
+  font-family: courier;
+  border-width: 0px;
+}
+.gip-prog-item-col {
+  font-family: courier;
+  white-space: nowrap;
+  margin: 1px;
+}
+.gip-prog-item-data-row {
+  background: white;
+}
+.gip-prog-item-data-col {
+  background: white;
+}
+.gip-prog-item-col-count {
+  padding-left: 4px;
+}
+.gip-prog-option-field {
+  margin: 4px 6px 4px 0px;
+  width: 150px;
+  padding: 1px;
+  border: 1px solid black;
+}
+.gip-prog-option-field:hover {
+  border: 2px solid blue;
+  padding: 0px;
+}
+.gip-prog-item-field {
+  border: 0px;
+  width: 100%;
+  background: inherit;
+}
+.gip-prog-item-field:focus {
+  outline: none;
+}

@@ -1,0 +1,15 @@
+- Effect: "Allow"
+  Principal: "*"
+  Action: "execute-api:Invoke"
+  Resource:
+    Fn::Join:
+      - ":"
+      - - "arn:aws:execute-api"
+        - Ref: "AWS::Region"
+        - Ref: "AWS::AccountId"
+        - Fn::Join:
+          - "/"
+          - - "*"
+            - "${self:custom.stage}"
+            - "*"
+            - "*"

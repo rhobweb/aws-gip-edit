@@ -1,0 +1,6 @@
+Resources:
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ${self:custom.apiGatewayRestApiName}
+      Description: "GIP Program Editor."

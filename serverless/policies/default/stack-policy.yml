@@ -1,0 +1,17 @@
+- Effect: "Allow"
+  Principal: "*"
+  Action: "Update:*"
+  Resource: "*"
+#
+# Prevent deletion of the logs.
+#
+- Effect: "Deny"
+  Principal: "*"
+  Resource: "*"
+  Condition:
+    StringEquals:
+      ResourceType:
+        - "AWS::Logs::LogGroup"
+  Action:
+    - "Update:Replace"
+    - "Update:Delete"
