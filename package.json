@@ -1,6 +1,6 @@
 {
-  "name": "serverless-react-boilerplate",
-  "version": "0.1.0",
+  "name": "aws-gip-edit",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "start": "cross-env IS_OFFLINE=1 concurrently --kill-others \"npm run start:devserver\" \"npm run start:offline\"",
@@ -47,7 +47,6 @@
     "@types/url-parse": "^1.4.8",
     "@types/webpack": "^5.28.0",
     "@types/webpack-dev-server": "^4.3.1",
-    "aws-sdk": "^2.834.0",
     "babel-jest": "^29.5.0",
     "babel-loader": "^9.1.2",
     "clean-webpack-plugin": "^4.0.0",
