@@ -10,8 +10,10 @@ import process    from 'node:process';
 import assert     from 'node:assert';
 import logger     from '@rhobweb/console-logger';
 
-const AWS_REGION = process.env.AWS_REGION   || 'eu-west-1';
-const STAGE      = process.env.STAGE        || 'dev';
+const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';
+const STAGE                    = process.env.STAGE        || 'dev';
+const IS_LOCAL                 = ( process.env.IS_LOCAL === 'true' ? true : false );
+const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;
 
 assert( AWS_REGION, 'AWS_REGION not defined' );
 assert( STAGE,      'STAGE not defined' );
@@ -22,6 +24,10 @@ const DEFAULT_DB_CLIENT_CONFIG : DynamoDBClientConfig = {
   region: AWS_REGION,
 };
 
+if ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) {
+  DEFAULT_DB_CLIENT_CONFIG.endpoint = LOCAL_DYNAMO_DB_ENDPOINT;
+}
+
 import {
   DB_FIELD_STATUS, DB_FIELD_PID, DB_FIELD_TITLE, DB_FIELD_SYNOPSIS, DB_FIELD_GENRE, DB_FIELD_QUALITY, DB_FIELD_MODIFY_TIME, DB_FIELD_DOWNLOAD_TIME, DB_FIELD_DAY_OF_WEEK, DB_FIELD_POS, DB_FIELD_IMAGE_URI,
   VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY, TypeDbProgramItem
@@ -30,16 +36,17 @@ import {
 type TYPE_DB_RECORD = Record< string, AttributeValue >;
 
 const DB_FIELD_TYPES : Record<string,string> = {
-  [DB_FIELD_PID]:         "S",
-  [DB_FIELD_STATUS]:      "S",
-  [DB_FIELD_GENRE]:       "S",
-  [DB_FIELD_DAY_OF_WEEK]: "S",
-  [DB_FIELD_QUALITY]:     "S",
-  [DB_FIELD_TITLE]:       "S",
-  [DB_FIELD_SYNOPSIS]:    "S",
-  [DB_FIELD_MODIFY_TIME]: "S",
-  [DB_FIELD_IMAGE_URI]:   "S",
-  [DB_FIELD_POS]:         "N",
+  [DB_FIELD_PID]:           "S",
+  [DB_FIELD_STATUS]:        "S",
+  [DB_FIELD_GENRE]:         "S",
+  [DB_FIELD_DAY_OF_WEEK]:   "S",
+  [DB_FIELD_QUALITY]:       "S",
+  [DB_FIELD_TITLE]:         "S",
+  [DB_FIELD_SYNOPSIS]:      "S",
+  [DB_FIELD_MODIFY_TIME]:   "S",
+  [DB_FIELD_IMAGE_URI]:     "S",
+  [DB_FIELD_POS]:           "N",
+  [DB_FIELD_DOWNLOAD_TIME]: "S",
 };
 
 const PROGRAM_FIELDS = [
@@ -82,20 +89,15 @@ WITH upd AS ( UPDATE ${TABLE_PROGRAM} SET ${DB_FIELD_STATUS} = $1 WHERE ${DB_FIE
 INSERT INTO ${TABLE_PROGRAM_HISTORY} ( ${ARR_PROG_HISTORY_FIELD.join(',')} ) SELECT ${ARR_PROG_HISTORY_SOURCE_FIELD.join(',')} FROM upd
 `;
 
+class HttpError extends Error {
+  statusCode : number;
 
-const DUMMY_PROGRAM_1 : TypeDbProgramItem = {
-  [DB_FIELD_STATUS]:        'Pending',
-  [DB_FIELD_PID]:           'Piddly',
-  [DB_FIELD_TITLE]:         'Sir',
-  [DB_FIELD_SYNOPSIS]:      'Dummy',
-  [DB_FIELD_GENRE]:         'Comedy',
-  [DB_FIELD_QUALITY]:       'Normal',
-  [DB_FIELD_IMAGE_URI]:     'https://upload.wikimedia.org/wikipedia/commons/3/34/Common_Goldeneye_%28Bucephala_clangula%29.jpg',
-  [DB_FIELD_DAY_OF_WEEK]:   null,
-  [DB_FIELD_MODIFY_TIME]:   '2023-06-14T13:05:00Z',
-  [DB_FIELD_POS]:           1,
-  [DB_FIELD_DOWNLOAD_TIME]: '',
-};
+  constructor ( { statusCode, message } : { statusCode: number, message: string }) {
+    const err : unknown = super( message );
+    ( err as HttpError ).statusCode = statusCode;
+    return this;
+  }
+}
 
 function genAttributeValue( { field, value } : { field: string, value: string } ) : AttributeValue {
   let attributeValue : AttributeValue;
@@ -155,6 +157,26 @@ function programToRecord( { program, programPos } : { program: TypeDbProgramItem
   }
 
   delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // Not stored in the program table
+
+  const saveRecord : TYPE_DB_RECORD = {};
+
+  Object.entries( cookedRecord ).forEach( ( [ field, value ] : [ string, string ] ) => {
+    saveRecord[ field ] = genAttributeValue( { field, value } );
+  } );
+
+  return saveRecord;
+}
+
+function programToHistoryRecord( program : TypeDbProgramItem ) : TYPE_DB_RECORD {
+
+  const cookedRecord = JSON.parse( JSON.stringify( program ) );
+
+  delete cookedRecord[ DB_FIELD_DAY_OF_WEEK ];
+  delete cookedRecord[ DB_FIELD_POS ];
+
+  const strTime = new Date().toISOString();
+  cookedRecord[ DB_FIELD_MODIFY_TIME ]   = strTime;
+  cookedRecord[ DB_FIELD_DOWNLOAD_TIME ] = strTime;
 
   const saveRecord : TYPE_DB_RECORD = {};
 
@@ -286,7 +308,14 @@ function genSaveCommandParams( programs : TypeDbProgramItem[] ) {
 }
 
 function validateUpdate( program: TypeDbProgramItem ) {
-
+  const pid    = program[ DB_FIELD_PID ] || '';
+  const status = program[ DB_FIELD_STATUS ];
+  if ( pid.length === 0 ) {
+    throw new HttpError( { statusCode: 400, message: 'Invalid PID' } );
+  }
+  if ( ARR_HISTORY_STATUSES.indexOf( status ) < 0 ) {
+    throw new HttpError( { statusCode: 400, message: 'Invalid Status' } );
+  }
 }
 
 function genUpdateItem( program: TypeDbProgramItem ) : TransactWriteItem {
@@ -305,7 +334,36 @@ function genUpdateItem( program: TypeDbProgramItem ) : TransactWriteItem {
   return thisWriteItem
 }
 
-function genUpdateCommandParams( programs : TypeDbProgramItem[] ) {
+function genUpdateHistoryItemCommand( program: TypeDbProgramItem ) : TransactWriteItem {
+  const writeItem : TransactWriteItem = {
+    Put: {
+      TableName: TABLE_PROGRAM_HISTORY,
+      Item:      programToHistoryRecord( program ),
+    },
+  };
+
+  return writeItem;
+}
+
+function genUpdateHistoryCommandParams( { programs, actualPrograms } : { programs : TypeDbProgramItem[], actualPrograms : TypeDbProgramItem[] } ) : TransactWriteItem[] {
+  const arrWriteItem : TransactWriteItem[] = [];
+
+  for ( let i = 0; i < programs.length; i++ ) {
+    const updateProgram                                        = programs[ i ];
+    const { [DB_FIELD_PID] : pid, [DB_FIELD_STATUS] : status } = updateProgram;
+    const program = actualPrograms.find( e => e[ DB_FIELD_PID ] === pid );
+    if ( ! program ) {
+      throw new HttpError( { statusCode: 400, message: `Program not found: ${pid}` } );
+    }
+    program[ DB_FIELD_STATUS ] = status;
+    const thisWriteItem        = genUpdateHistoryItemCommand( program );
+    arrWriteItem.push( thisWriteItem );
+  }
+
+  return arrWriteItem;
+}
+
+async function genUpdateCommandParams( { programs, actualPrograms } : { programs : TypeDbProgramItem[], actualPrograms : TypeDbProgramItem[] } ) : Promise<TransactWriteItemsCommandInput> {
   const arrWriteItem : TransactWriteItem[] = [];
   const commandParams: TransactWriteItemsCommandInput = {
     TransactItems: arrWriteItem,
@@ -316,6 +374,9 @@ function genUpdateCommandParams( programs : TypeDbProgramItem[] ) {
     const thisWriteItem = genUpdateItem( program );
     arrWriteItem.push( thisWriteItem );
   }
+
+  const arrHistoryWriteItems = genUpdateHistoryCommandParams( { programs, actualPrograms } );
+  arrWriteItem.push( ...arrHistoryWriteItems );
 
   return commandParams;
 }
@@ -533,8 +594,9 @@ class GipDynamoDB {
     }
   
     try {
-      const commandParams = genUpdateCommandParams( programs );
-      const command       = new TransactWriteItemsCommand( commandParams )
+      const actualPrograms = await this.loadProgs();
+      const commandParams  = await genUpdateCommandParams( { programs, actualPrograms } );
+      const command        = new TransactWriteItemsCommand( commandParams )
       await this.dbClient.send( command );
     }
     catch ( err ) {

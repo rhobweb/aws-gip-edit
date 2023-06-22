@@ -47,17 +47,20 @@ provider:
           - Ref: AWS::Region
           - .amazonaws.com/
           - ${self:provider.stage}
+    IS_LOCAL: ${self:custom.isLocal}
+    LOCAL_DYNAMO_DB_ENDPOINT: ${self:custom.localDynamodbEndpoint}
 
 custom:
   serviceName: ${self:service}
   stage: ${self:provider.stage}
   apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
   baseDomain: "rhobweb.com"
-  envIsOffline: ${env:IS_OFFLINE, "0"}
+  envIsOffline: ${env:IS_OFFLINE, "false"}
   isOfflineMap:
     true:    "true"
     default: "false"
   isLocal: ${self:custom.isOfflineMap.${self:custom.envIsOffline}, "${self:custom.isOfflineMap.default}"}
+  localDynamodbEndpoint: "http://localhost:8000"
   # basePath: the URL base path, all API endpoints are below this
   basePath: "gip_edit"
   # But sls offline doesn't handle basePath
