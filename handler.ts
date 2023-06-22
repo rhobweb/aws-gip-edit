@@ -1,8 +1,12 @@
 import "source-map-support/register";
 import { Context, APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
+import logger from '@rhobweb/console-logger';
 
 export const serve = async (event: APIGatewayEvent, _context: Context): Promise<APIGatewayProxyResultV2> => {
   try {
+    logger.log( 'info',  `handler:serve: `, { httpMethod: event.httpMethod, path: event.path } );
+    logger.log( 'debug', `handler:serve: `, { event } );
+
     // We use asynchronous import here so we can better catch server-side errors during development
     const render = (await import("./src/server/render")).default;
     return {

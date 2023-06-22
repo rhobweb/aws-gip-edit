@@ -9,6 +9,7 @@ jspm_packages
 # Webpack and distribution directories
 .webpack
 dist
+test-out
 
 # Other
 .DS_Store

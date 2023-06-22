@@ -1,5 +1,6 @@
 import Url         from 'url-parse';
 import queryString from 'query-string';
+
 //import logger      from '@rhobweb/console-logger';
 const logger = ( ...args : any[] ) => console.log( ...args );
 logger.info  = ( ...args : any[] ) => console.log( ...args );
@@ -12,7 +13,7 @@ type TypeGenURIRet     = { uri: string, params: Nullable<TypeHttpParams> };
 
 type TypeRawQueryParamScalarValue    = string | null | undefined;
 type TypeRawQueryParamValue          = TypeRawQueryParamScalarValue | string[];
-type TypeRawQueryParams              = Partial<{ [key: string]: TypeRawQueryParamValue }>
+export type TypeRawQueryParams              = Partial<{ [key: string]: TypeRawQueryParamValue }>
 type TypeCookedQueryParamScalarValue = string | boolean | null;
 type TypeCookedQueryParamValue       = TypeCookedQueryParamScalarValue | (TypeCookedQueryParamScalarValue)[];
 type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>;
@@ -184,15 +185,74 @@ export function processEndpointDef( { endpointDef, params = {}, headers = {} } :
  * @param rawObject 
  * @returns 
  */
-export async function extractJsonResponse( response : { json: () => object, type: string } ) {
-  let body : object = [];
-  //logger.info( `extractJsonResponse: `, response.type );
+//export async function extractJsonResponse( response : { json: () => object, type: string } ) {
+//  let body : object = [];
+//  //logger.info( `extractJsonResponse: `, response.type );
+//  try {
+//    body = await response.json();
+//    //logger.info( `JSON response extracted: `, body );
+//  }
+//  catch ( err ) {
+//    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message, rawResponse: response } ) );
+//  }
+//
+//  return body;
+//}
+
+export async function extractStringFromStream( stream : ReadableStream<Uint8Array> ) : Promise<string> {
+  let arrChunk   = [];
+  let reader     = stream.getReader();
+  let bDone      = false;
+  while ( ! bDone ) {
+    const { done, value } = await reader.read();
+    if ( ! done ) {
+      arrChunk.push( value );
+    } else {
+      bDone = true;
+    }
+  }
+  const str = Buffer.concat( arrChunk ).toString();
+  return str;
+//  return new Promise( ( resolve, reject ) => {
+//    stream.setEncoding('utf8');
+//    stream.on( 'data', chunk => {
+//      str += chunk;
+//    })
+//    stream.on('end', () {
+//      resolve( str );
+//    });
+//    stream.on('error', () {
+//      reject( new Error('Stream error') );
+//    });
+//  } );
+}
+
+export async function extractJsonResponse( response : Response ) {
+  let body = [];
   try {
-    body = await response.json();
+    const strBody = await response.json();
+    logger.info( `extractJsonResponse: `, { strBody } );
+    body = strBody;
+    //body = JSON.parse( strBody );
     //logger.info( `JSON response extracted: `, body );
   }
   catch ( err ) {
-    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message, rawResponse: response } ) );
+    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message } ) );
+  }
+
+  return body;
+}
+
+export async function extractJsonResponseStream( response : Response ) {
+  let body = [];
+  try {
+    const strBody = await response.text();
+    logger.info( `extractJsonResponseStream: `, { strBody } );
+    body = JSON.parse( strBody );
+    //logger.info( `JSON response extracted: `, body );
+  }
+  catch ( err ) {
+    logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: err.message } ) );
   }
 
   return body;
@@ -202,7 +262,7 @@ export async function extractJsonResponse( response : { json: () => object, type
  * @param {TypeRawQueryParams} rawParams : object with properties being the query parameter names and values being the values; note that a value may be an array.
  * @returns the query parameter object with undefined values set to null and case insenstive 'false' or 'true' set to the boolean equivalent.
  */
-export function parseQueryParams( rawParams : TypeRawQueryParams = {} ) : TypeCookedQueryParams
+export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQueryParams
 {
   const mapQueryParamVal = ( rawValue : TypeRawQueryParamScalarValue ) => { 
     let cookedValue : TypeCookedQueryParamValue = rawValue || null;

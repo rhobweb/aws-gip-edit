@@ -1,0 +1,6 @@
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.programTableReadCapacityUnits}
+        WriteCapacityUnits: ${self:custom.programTableWriteCapacityUnits}
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.programHistoryTableReadCapacityUnits}
+        WriteCapacityUnits: ${self:custom.programHistoryTableWriteCapacityUnits}

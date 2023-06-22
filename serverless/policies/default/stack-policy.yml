@@ -3,7 +3,7 @@
   Action: "Update:*"
   Resource: "*"
 #
-# Prevent deletion of the logs.
+# Prevent deletion of the logs and DynamoDB tables.
 #
 - Effect: "Deny"
   Principal: "*"
@@ -12,6 +12,7 @@
     StringEquals:
       ResourceType:
         - "AWS::Logs::LogGroup"
+        - "AWS::DynamoDB::Table"
   Action:
     - "Update:Replace"
     - "Update:Delete"

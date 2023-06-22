@@ -7,7 +7,7 @@ import {
   TypeEndpointDef, TypeProgramItem, TypeProgramList, TypeProgramEditInput, TypeProgramEditOptions
 } from '../utils/gip_types';
 import { TypeDbProgramItem } from '../utils/gip_prog_fields';
-import { processEndpointDef, extractJsonResponse } from '../utils/gip_http_utils';
+import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
 import { GipProgramEntry }    from './gip_program_entry';
 import { GipProgramTable }    from './gip_program_table';
 import { GipActionButtons }   from './gip_action_buttons';
@@ -26,13 +26,14 @@ type TypeGipEditState = {
 const ENDPOINT_LOAD : TypeEndpointDef = {
   method: 'GET',
   //uri:    '/api/programs',
-  uri:    'http:/localhost:3300/api/programs',
+  uri:    '/gip_edit/api/programs', // TODO: Fix it so that gip_edit is used on local also
   params: { all: true },
 };
 
 const ENDPOINT_SAVE : TypeEndpointDef = {
   method: 'POST',
-  uri:    'http:/localhost:3300/api/programs',
+  //uri:    '/api/programs',
+  uri:    '/gip_edit/api/programs', // TODO: Fix it so that gip_edit is used on local also
 };
 
 const DOC_TITLE = 'GIP Program Edit';
@@ -68,15 +69,14 @@ async function loadPrograms() : Promise<TypeProgramItem[]> {
 
 async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgramItem[]> {
   const dbPrograms = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
-  // const params     = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
-  // //console.log( "Save progs: Programs: ", params );
-  // const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
-  // const response         = await fetch( uri, options as RequestInit );
-  // //console.log( "Save progs: response: ", response );
-  // const rawPrograms      = (await extractJsonResponse( response ) || [] ) as TypeDbProgramItem[];
-  // const newPrograms      = rawPrograms.map( prog => processLoadedProgram( prog ) );
-  //console.log( "saveProgs: response: ", newPrograms );
-  const newPrograms : TypeProgramItem[] = [];
+  const params     = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
+  const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
+  console.log( "savePrograms: Programs: ", JSON.stringify( { uri, options, params } ) );
+  const response         = await fetch( uri, options as RequestInit );
+  console.log( "savePrograms: response: ", response );
+  const rawPrograms      = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
+  const newPrograms      = rawPrograms.map( prog => processLoadedProgram( prog ) );
+  console.log( "savePrograms: response: ", newPrograms );
   return newPrograms;
 }
 

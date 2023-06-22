@@ -15,3 +15,7 @@ The bucket permissions for the distribution bucket need to be set to not block p
   "Block public access to buckets and objects granted through any access control lists (ACLs)"
 
 Example distribution bucket name: "gip-edit-react-dev-distbucket-1nwc3jfascj1t"
+
+Dynamo DB
+---------
+dynamodb local

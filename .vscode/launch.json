@@ -16,6 +16,64 @@
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
-    }
+      "env": {
+        "AWS_REGION":     "eu-west-1",
+        "AWS_ENDPOINT":   "http://localhost:8000",
+        "STAGE":          "dev",
+        "NODE_LOG_LEVEL": "debug"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "API System Test",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/test/system/api/gip_db_dynamodb_utils.spec.js",
+      "preLaunchTask": "tsc: build - tsconfig-test.json",
+      "outFiles": ["${workspaceFolder}/test-out/**/*.js"],
+      "env": {
+        "AWS_REGION":   "eu-west-1",
+        "AWS_ENDPOINT": "http://localhost:8000",
+        "STAGE":        "dev"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Create Tables",
+      "program": "${workspaceFolder}/test/dynamodb/dynCreateTables",
+      "args": [
+        "--exec"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Delete Tables",
+      "program": "${workspaceFolder}/test/dynamodb/dynDeleteTables",
+      "args": [
+        "--exec"
+      ]
+    },
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Deploy",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "command": "npx sls deploy",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "env": {
+        "AWS_REGION":     "eu-west-1",
+        "STAGE":          "dev",
+        "NODE_LOG_LEVEL": "debug"
+      }
+    },
   ]
 }

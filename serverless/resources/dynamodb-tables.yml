@@ -1,0 +1,28 @@
+Resources:
+  ProgramTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "${self:custom.dynamoTableNamePrefix}Program"
+      AttributeDefinitions:
+        - AttributeName: pid
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pid
+          KeyType:       HASH
+      BillingMode: PAY_PER_REQUEST
+  ProgramHistoryTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "${self:custom.dynamoTableNamePrefix}ProgramHistory"
+      AttributeDefinitions:
+        - AttributeName: pid
+          AttributeType: S
+        - AttributeName: download_time
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pid
+          KeyType:       HASH
+        - AttributeName: download_time
+          KeyType:       RANGE
+      BillingMode: PAY_PER_REQUEST
+

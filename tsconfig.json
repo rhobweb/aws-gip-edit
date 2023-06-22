@@ -5,7 +5,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
-    "lib": ["dom", "esnext"],
+    "lib": [ "dom" ],
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
@@ -13,6 +13,7 @@
     "sourceMap": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "esModuleInterop": false,
   }
 }

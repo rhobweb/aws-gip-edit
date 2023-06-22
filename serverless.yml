@@ -24,10 +24,18 @@ provider:
   apiGateway:
     shouldStartNameWithService: true # for upcoming Serverless v3
 
+  iam:
+    role:
+      statements:
+        ${file(serverless/policies/default/lambda-execution-role-policy.yml)}
+  stackPolicy:
+    ${file(serverless/policies/default/stack-policy.yml)}
+
   environment:
     SERVERLESS_PROJECT: ${self:service}
     SERVERLESS_REGION: ${self:provider.region}
     SERVERLESS_STAGE: ${self:provider.stage}
+    NODE_LOG_LEVEL: ${self:custom.NODE_LOG_LEVEL}
     APP_DIST_URL: ${self:custom.distBucketUrl.${self:provider.region}, self:custom.distBucketUrl.default}
     APP_PUBLIC_URL: ${self:custom.distBucketUrl.${self:provider.region}, self:custom.distBucketUrl.default}
     APIGATEWAY_URL:
@@ -43,9 +51,21 @@ provider:
 custom:
   serviceName: ${self:service}
   stage: ${self:provider.stage}
-  apiGatewayRestApiName:  ${self:custom.stage}-${self:custom.serviceName}
+  apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
   baseDomain: "rhobweb.com"
+  envIsOffline: ${env:IS_OFFLINE, "0"}
+  isOfflineMap:
+    true:    "true"
+    default: "false"
+  isLocal: ${self:custom.isOfflineMap.${self:custom.envIsOffline}, "${self:custom.isOfflineMap.default}"}
+  # basePath: the URL base path, all API endpoints are below this
   basePath: "gip_edit"
+  # But sls offline doesn't handle basePath
+  basePathMap:
+    true:  "/${self:custom.basePath}"
+    false: ""
+  apiBasePath: ${self:custom.basePathMap.${self:custom.isLocal}}
+  NODE_LOG_LEVEL: ${env:NODE_LOG_LEVEL, "info"}
   stageToDefaultCustomDomainMap:
     lcl:  "localhost"
     dev:  "dev.${self:custom.baseDomain}"
@@ -74,6 +94,11 @@ custom:
           - Ref: AWS::Region
           - .amazonaws.com/
           - Ref: DistBucket
+  ##################################################
+  # Dynamo DB
+  dynamoTableNamePrefix:         ${env:dynamoTableNamePrefix, "${self:custom.stage}_${self:custom.serviceName}_"}
+  dynamoTableNameProgram:        "${self:custom.dynamoTableNamePrefix}Program"
+  dynamoTableNameProgramHistory: "${self:custom.dynamoTableNamePrefix}Program"
 
   scripts:
     hooks:
@@ -105,60 +130,74 @@ custom:
     lambdaPort: 3002
 
 functions:
+  programs:
+    # Any web request regardless of path or method will be handled by a single Lambda function
+    handler: src/api/programs.handler
+    events:
+      - http:
+          path: ${self:custom.apiBasePath}/api/programs
+          method: any
+          cors: true
+          integration: aws_proxy
   serve:
     # Any web request regardless of path or method will be handled by a single Lambda function
     handler: handler.serve
     events:
       - http:
-          path: /
+          path: ${self:custom.apiBasePath}/
           method: any
           cors: true
       - http:
-          path: /{any+}
-          method: any
-          cors: true
+          path: /favicon.ico
+          method: get
+          cors: false
+#      - http:
+#          path: /{any+}
+#          method: any
+#          cors: true
 
 resources:
-  Resources:
-    # Customize the API Gateway resource
-    ApiGatewayRestApi:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:custom.apiGatewayRestApiName}
-        Description: "GIP Program Editor."
-        # Enable gzip compression
-        MinimumCompressionSize: 1000
+  - ${file(serverless/resources/dynamodb-tables.yml)}
+  - Resources:
+      # Customize the API Gateway resource
+      ApiGatewayRestApi:
+        Type: AWS::ApiGateway::RestApi
+        Properties:
+          Name: ${self:custom.apiGatewayRestApiName}
+          Description: "GIP Program Editor."
+          # Enable gzip compression
+          MinimumCompressionSize: 1000
 
-    # S3 Bucket for the distribution bundles
-    DistBucket:
-      Type: AWS::S3::Bucket
-      DeletionPolicy: Delete
-      Properties:
-        CorsConfiguration:
-          CorsRules:
-            - AllowedHeaders:
-                - "*"
-              AllowedMethods:
-                - "GET"
-              AllowedOrigins:
-                - Fn::Join:
-                    - ""
-                    - - https://
-                      - Ref: ApiGatewayRestApi
-                      - .execute-api.
-                      - Ref: AWS::Region
-                      - .amazonaws.com
-                - Fn::Join:
-                    - ""
-                    - - https://
-                      - ${self:custom.customDomain.domainName}
-              MaxAge: 3000
-  Outputs:
-    ApiGatewayRestApi:
-      Description: API Gateway Endpoint
-      Value:
-        Ref: ApiGatewayRestApi
-    DistBucket:
-      Description: Distribution S3 Bucket
-      Value:
-        Ref: DistBucket
+      # S3 Bucket for the distribution bundles
+      DistBucket:
+        Type: AWS::S3::Bucket
+        DeletionPolicy: Delete
+        Properties:
+          CorsConfiguration:
+            CorsRules:
+              - AllowedHeaders:
+                  - "*"
+                AllowedMethods:
+                  - "GET"
+                AllowedOrigins:
+                  - Fn::Join:
+                      - ""
+                      - - https://
+                        - Ref: ApiGatewayRestApi
+                        - .execute-api.
+                        - Ref: AWS::Region
+                        - .amazonaws.com
+                  - Fn::Join:
+                      - ""
+                      - - https://
+                        - ${self:custom.customDomain.domainName}
+                MaxAge: 3000
+    Outputs:
+      ApiGatewayRestApi:
+        Description: API Gateway Endpoint
+        Value:
+          Ref: ApiGatewayRestApi
+      DistBucket:
+        Description: Distribution S3 Bucket
+        Value:
+          Ref: DistBucket

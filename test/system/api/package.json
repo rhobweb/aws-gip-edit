@@ -1,0 +1,9 @@
+{
+  "name": "system-api-test",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "chai": "^4.3.7",
+    "sinon": "^15.2.0"
+  }
+}
