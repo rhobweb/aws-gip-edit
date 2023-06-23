@@ -49,25 +49,31 @@ provider:
           - ${self:provider.stage}
     IS_LOCAL: ${self:custom.isLocal}
     LOCAL_DYNAMO_DB_ENDPOINT: ${self:custom.localDynamodbEndpoint}
+    GIP_MAX_PROGRAMS: ${self:custom.maxPrograms}
 
 custom:
   serviceName: ${self:service}
   stage: ${self:provider.stage}
   apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
   baseDomain: "rhobweb.com"
-  envIsOffline: ${env:IS_OFFLINE, "false"}
+  envIsOffline: ${env:IS_OFFLINE, "default"}
   isOfflineMap:
     true:    "true"
     default: "false"
-  isLocal: ${self:custom.isOfflineMap.${self:custom.envIsOffline}, "${self:custom.isOfflineMap.default}"}
+  isOffline: ${self:custom.isOfflineMap.${self:custom.envIsOffline}, "${self:custom.isOfflineMap.default}"}
+  isLocalMap:
+    true:    "true"
+    default: ""
+  isLocal:   ${self:custom.isLocalMap.${self:custom.envIsOffline}, "${self:custom.isLocalMap.default}"}
   localDynamodbEndpoint: "http://localhost:8000"
+  maxPrograms: "40"
   # basePath: the URL base path, all API endpoints are below this
   basePath: "gip_edit"
   # But sls offline doesn't handle basePath
   basePathMap:
     true:  "/${self:custom.basePath}"
     false: ""
-  apiBasePath: ${self:custom.basePathMap.${self:custom.isLocal}}
+  apiBasePath: ${self:custom.basePathMap.${self:custom.isOffline}}
   NODE_LOG_LEVEL: ${env:NODE_LOG_LEVEL, "info"}
   stageToDefaultCustomDomainMap:
     lcl:  "localhost"

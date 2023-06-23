@@ -5,24 +5,27 @@ import {
   BatchWriteItemCommandInput, BatchWriteItemCommand, WriteRequest, AttributeValue,
   TransactWriteItem, TransactWriteItemsCommandInput, TransactWriteItemsCommand
 } from '@aws-sdk/client-dynamodb';
-//import { DynamoDBDocumentClient, PutItemCommand                     } from '@aws-sdk/lib-dynamodb';
 import process    from 'node:process';
 import assert     from 'node:assert';
 import logger     from '@rhobweb/console-logger';
 
 const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';
 const STAGE                    = process.env.STAGE        || 'dev';
-const IS_LOCAL                 = ( process.env.IS_LOCAL === 'true' ? true : false );
+const IS_LOCAL                 = ( process.env.IS_LOCAL ? true : false );
 const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;
+const GIP_MAX_PROGRAMS         = parseInt( process.env.GIP_MAX_PROGRAMS || '0' );
 
 assert( AWS_REGION, 'AWS_REGION not defined' );
 assert( STAGE,      'STAGE not defined' );
+assert( GIP_MAX_PROGRAMS > 0, 'GIP_MAX_PROGRAMS not defined' );
 
 const MODULE_NAME = 'gip_db_dynamodb_utils';
 
 const DEFAULT_DB_CLIENT_CONFIG : DynamoDBClientConfig = {
   region: AWS_REGION,
 };
+
+logger.log( 'debug', `gip_db_dynamodb_utils: `, { IS_LOCAL, LOCAL_DYNAMO_DB_ENDPOINT } );
 
 if ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) {
   DEFAULT_DB_CLIENT_CONFIG.endpoint = LOCAL_DYNAMO_DB_ENDPOINT;
@@ -63,31 +66,10 @@ const PROGRAM_FIELDS = [
   DB_FIELD_DOWNLOAD_TIME,
 ];
 
-const TABLE_PROGRAM           = `${STAGE}_gip-edit-react_Program`;
-const TABLE_PROGRAM_HISTORY   = `${STAGE}_gip-edit-react_ProgramHistory`;
-//const QUERY_LOAD_PROGRAMS     = `SELECT * FROM ${TABLE_PROGRAM} ORDER BY ${DB_FIELD_POS}`;
-const ARR_PROG_FIELD          = [ DB_FIELD_STATUS, DB_FIELD_PID, DB_FIELD_TITLE, DB_FIELD_SYNOPSIS, DB_FIELD_GENRE, DB_FIELD_QUALITY, DB_FIELD_DAY_OF_WEEK, DB_FIELD_IMAGE_URI ];
-const ARR_PROG_FIELD_WITH_POS = [ ...ARR_PROG_FIELD, DB_FIELD_POS ];
-//const ARR_PROG_HISTORY_FIELD = [ DB_FIELD_STATUS, DB_FIELD_PID, DB_FIELD_TITLE, DB_FIELD_SYNOPSIS, DB_FIELD_DAY_OF_WEEK, DB_FIELD_GENRE, DB_FIELD_QUALITY, DB_FIELD_DOWNLOAD_TIME ];
-const ARR_PROG_HISTORY_FIELD_MAP = [
-  [ DB_FIELD_STATUS,        DB_FIELD_STATUS      ],
-  [ DB_FIELD_PID,           DB_FIELD_PID         ],
-  [ DB_FIELD_TITLE,         DB_FIELD_TITLE       ],
-  [ DB_FIELD_SYNOPSIS,      DB_FIELD_SYNOPSIS    ],
-  [ DB_FIELD_GENRE,         DB_FIELD_GENRE       ],
-  [ DB_FIELD_QUALITY,       DB_FIELD_QUALITY     ],
-  [ DB_FIELD_DOWNLOAD_TIME, DB_FIELD_MODIFY_TIME ],
-  [ DB_FIELD_IMAGE_URI,     DB_FIELD_IMAGE_URI   ],
-];
-const ARR_PROG_HISTORY_FIELD        = ARR_PROG_HISTORY_FIELD_MAP.map( el => el[ 0 ] );
-const ARR_PROG_HISTORY_SOURCE_FIELD = ARR_PROG_HISTORY_FIELD_MAP.map( el => el[ 1 ] );
-
+const SERVICE_NAME          = 'gip-edit-react';
+const TABLE_PROGRAM         = [ STAGE, SERVICE_NAME, 'Program' ].join( '_' );
+const TABLE_PROGRAM_HISTORY = [ STAGE, SERVICE_NAME, 'ProgramHistory' ].join( '_' );
 const ARR_HISTORY_STATUSES  = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ERROR, VALUE_STATUS_ALREADY ];
-
-const UPDATE_QUERY_TEXT     = `
-WITH upd AS ( UPDATE ${TABLE_PROGRAM} SET ${DB_FIELD_STATUS} = $1 WHERE ${DB_FIELD_PID} = $2 RETURNING * )
-INSERT INTO ${TABLE_PROGRAM_HISTORY} ( ${ARR_PROG_HISTORY_FIELD.join(',')} ) SELECT ${ARR_PROG_HISTORY_SOURCE_FIELD.join(',')} FROM upd
-`;
 
 class HttpError extends Error {
   statusCode : number;
@@ -254,12 +236,6 @@ function extractPrograms( records : TYPE_DB_RECORD[] ) : TypeDbProgramItem[] {
     programs.push( cookedRecord );
   } );
 
-  //rawResult = {
-  //  rows: [
-  //    DUMMY_PROGRAM_1,
-  //  ],
-  //};
-  //programs  = rawResult.rows as TypeDbProgramItem[];
   return programs;
 }
 
@@ -382,21 +358,18 @@ async function genUpdateCommandParams( { programs, actualPrograms } : { programs
 }
 
 class GipDynamoDB {
-  config:      DynamoDBClientConfig;
-  dbClient:    Nullable<DynamoDBClient> = null;
-  //dbDocClient: Nullable<DynamoDBDocumentClient>;
+  config:   DynamoDBClientConfig;
+  dbClient: Nullable<DynamoDBClient> = null;
 
   constructor( { config } : { config: Nullable<DynamoDBClientConfig> } = { config: DEFAULT_DB_CLIENT_CONFIG } ) {
     this.config = config as DynamoDBClientConfig;
     this.connect();
-    //this.dbDocClient = null;
   }
 
   destroy() {
     if ( this.dbClient ) {
       this.dbClient.destroy();
       this.dbClient    = null;
-      //this.dbDocClient = null;
     }
   }
 
@@ -404,7 +377,6 @@ class GipDynamoDB {
     if ( ! this.dbClient ) {
       try {
         this.dbClient = new DynamoDBClient( this.config );
-        //this.dbDocClient = DynamoDBDocumentClient.from( this.dbClient );
       }
       catch ( err ) {
         logger.log( 'error', `${MODULE_NAME}: GipDynamoDB:connect: ${err.message}`, err.stack );
@@ -434,98 +406,8 @@ class GipDynamoDB {
       throw err;
     }
   
-    //const SYNOPSIS = 'My synopsis which is really long as I want to try to get a horizontal scroll bar to be displayed if I can but it is proving troublesome';
-    //const programs = [
-    //  { pid: 'pid1234', title: 'MyProg', synopsis: SYNOPSIS, day_of_week: '***', genre: 'C', quality: 'Normal' },
-    //];
-  
     return programs;
   }
-
-  /**
-   * @param arrProgram : array of program items;
-   * @returns a query object that will insert the programs into the DB.
-   */
-  //function genSaveQuery( arrProgram: TypeDbProgramItem[] ) : TypeQuery {
-  //  const query = {
-  //    text:   '',
-  //    values: [],
-  //  };
-  //  const strInsQuery = `INSERT INTO ${TABLE_PROGRAM} ( ${ARR_PROG_FIELD_WITH_POS.join( ', ' )} )`;
-  //  const arrPos      = [];
-  //  const arrValue    = [];
-  //  arrProgram.forEach( ( program, i ) => {
-  //    arrValue[ i ] = arrValue[ i ] || [];
-  //    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //    // @ts-ignore 'field' only contains valid property names
-  //    ARR_PROG_FIELD.forEach( field => arrValue[ i ].push( program[ field ] ) )
-  //    arrValue[ i ].push( i ); // Add the pos field value
-  //  } );
-  //  let iParam = 1;
-  //  arrValue.forEach( ( arrRecordValue, i ) => {
-  //    arrPos[ i ] = arrPos[ i ] || [];
-  //    arrRecordValue.forEach( val => {
-  //      arrPos[ i ].push( `$${iParam}` );
-  //      ++iParam;
-  //      query.values.push( val );
-  //    } );
-  //  } );
-  //  query.text = `${strInsQuery} VALUES( ${ arrPos.map( arrRec => arrRec.join( ',' ) ).join( '),(' ) } ) RETURNING *`;
-  //
-  //  return query;
-  //}
-
-  /**
-   * @param program : a program item;
-   * @returns a query object that will update the programs into the DB or null if no updates are required.
-   */
-  //function genUpdateQuery( program: TypeDbProgramItem ) : ( TypeQuery | null ) {
-  //  let   query = null;
-  //  const newStatus = program[ DB_FIELD_STATUS ];
-  //  const pid       = program[ DB_FIELD_PID ];
-  //
-  //  if ( ARR_HISTORY_STATUSES.indexOf( newStatus ) >= 0 ) {
-  //    query = {
-  //      text:   UPDATE_QUERY_TEXT,
-  //      values: [ newStatus, pid ],
-  //    };
-  //  }
-  //
-  //  return query;
-  //}
-
-  /**
-   * @param arrProgram : array of program items;
-   * @return array of query objects to update the database.
-   */
-  //function genUpdateQueries( arrProgram: TypeDbProgramItem[] ) : TypeQuery[] {
-  //  const arrQuery : TypeQuery[] = [];
-  //
-  //  arrProgram.forEach( prog => {
-  //    const query = genUpdateQuery( prog );
-  //    if ( query ) {
-  //      arrQuery.push( query );
-  //    }
-  //  } );
-  //
-  //  return arrQuery;
-  //}
-
-  //async function runDeleteQuery() {
-  //  const numRecordsDeleted = 0;
-  //
-  //  //try {
-  //  //  const strDelQuery = `DELETE FROM ${TABLE_PROGRAM}`;
-  //  //  const result      = await dbClient.query( strDelQuery );
-  //  //  numRecordsDeleted = result.rowCount;
-  //  //}
-  //  //catch ( err ) {
-  //  //  logger.log( 'error', 'runDeleteQuery: ', (err as Error).message );
-  //  //  throw err;
-  //  //}
-  //
-  //  return numRecordsDeleted;
-  //}
 
   async clearProgs() {
     if ( ! this.dbClient ) {
@@ -559,6 +441,10 @@ class GipDynamoDB {
 
     if ( ! this.dbClient ) {
       throw new Error( 'DB not connected' );
+    }
+
+    if ( programs.length > GIP_MAX_PROGRAMS ) {
+      throw new HttpError( { statusCode: 400, message: `Too many programs ${JSON.stringify( { numPrograms: programs.length, max: GIP_MAX_PROGRAMS } )}` } );
     }
 
     try {
