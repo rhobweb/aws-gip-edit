@@ -6,7 +6,7 @@ import {
   PROG_FIELD_URI, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_SELECTED, PROG_FIELD_IMAGE_URI,
   TypeEndpointDef, TypeProgramItem, TypeProgramList, TypeProgramEditInput, TypeProgramEditOptions
 } from '../utils/gip_types';
-import { TypeDbProgramItem } from '../utils/gip_prog_fields';
+import { TypeDbProgramItem }  from '../utils/gip_prog_fields';
 import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
 import { GipProgramEntry }    from './gip_program_entry';
 import { GipProgramTable }    from './gip_program_table';
@@ -15,7 +15,7 @@ import GipProgramEditInput    from '../utils/gip_program_edit_input';
 import GipProgramEditOptions  from '../utils/gip_program_edit_options';
 import GipProgramItem         from '../utils/gip_program_item';
 import { dbToProg, progToDb } from '../utils/gip_prog_db_utils';
-//import logger from '@rhobweb/console-logger';
+import logger                 from '@rhobweb/console-logger';
 
 type TypeGipEditState = {
   programEditInput:   TypeProgramEditInput,
@@ -25,15 +25,13 @@ type TypeGipEditState = {
 
 const ENDPOINT_LOAD : TypeEndpointDef = {
   method: 'GET',
-  //uri:    '/api/programs',
-  uri:    '/gip_edit/api/programs', // TODO: Fix it so that gip_edit is used on local also
+  uri:    '/gip_edit/api/programs',
   params: { all: true },
 };
 
 const ENDPOINT_SAVE : TypeEndpointDef = {
   method: 'POST',
-  //uri:    '/api/programs',
-  uri:    '/gip_edit/api/programs', // TODO: Fix it so that gip_edit is used on local also
+  uri:    '/gip_edit/api/programs',
 };
 
 const DOC_TITLE = 'GIP Program Edit';
@@ -41,7 +39,7 @@ const DOC_TITLE = 'GIP Program Edit';
 //function beforeUnload( event ) {
 //  event.preventDefault();
 //  // Chrome requires returnValue to be set
-//  console.log( "Before Unload" );
+//  logger.log( "Before Unload" );
 //  event.returnValue = '';
 //}
 
@@ -58,12 +56,11 @@ function processProgramForSaving( prog : TypeProgramItem ) : TypeDbProgramItem {
 
 async function loadPrograms() : Promise<TypeProgramItem[]> {
   const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_LOAD } );
-  console.log( `loadPrograms: URI: `, uri );
+  logger.log( 'info', `loadPrograms: URI: `, uri );
   const response         = await fetch( uri, options as RequestInit );
   const rawPrograms      = await extractJsonResponse( response ) as TypeDbProgramItem[];
   const programs         = rawPrograms.map( prog => processLoadedProgram( prog ) );
-  //console.log( `loadPrograms: Programs: `, programs );
-  ////const programs : TypeProgramItem[] = [];
+  logger.log( 'info', `loadPrograms: Programs: `, programs );
   return programs;
 }
 
@@ -71,12 +68,12 @@ async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgra
   const dbPrograms = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
   const params     = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
   const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
-  console.log( "savePrograms: Programs: ", JSON.stringify( { uri, options, params } ) );
+  logger.log( 'verbose', 'savePrograms: Programs: ', JSON.stringify( { uri, options, params } ) );
   const response         = await fetch( uri, options as RequestInit );
-  console.log( "savePrograms: response: ", response );
+  logger.log( 'verbose', 'savePrograms: ', { response } );
   const rawPrograms      = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
   const newPrograms      = rawPrograms.map( prog => processLoadedProgram( prog ) );
-  console.log( "savePrograms: response: ", newPrograms );
+  logger.log( 'info', 'savePrograms: ', { newPrograms } );
   return newPrograms;
 }
 
@@ -91,7 +88,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
     newProgramList = [];
     newProgramList = JSON.parse( JSON.stringify( programs ) );
 
-    //console.log( `processProgram: `, { newOrUpdatedPid, title } );
+    logger.log( 'verbose', `processProgram: `, { newOrUpdatedPid } );
 
     programs.forEach( prog => prog[ PROG_FIELD_SELECTED ] = false ); // Clear the selection
 
@@ -100,7 +97,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
     if ( existingProgram ) {
       Object.assign( existingProgram, newOrUpdatedProgram );
     } else {
-      newProgramList.push( newOrUpdatedProgram as TypeProgramItem );
+      newProgramList.push( newOrUpdatedProgram );
     }
   } else {
     alert( 'Incomplete program info' );
@@ -110,12 +107,12 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 }
 
 function processDrop( event : DragEvent ) {
-  let   result = null;
+  let result = null;
 
   if ( event.dataTransfer ) {
     const textHTML = event.dataTransfer.getData( 'text/html' );
 
-    //console.log( "processDrop: ", textHTML );
+    logger.log( 'debug', "processDrop: ", textHTML );
   
     if ( textHTML.length > 0 )
     {
@@ -131,7 +128,7 @@ function processDrop( event : DragEvent ) {
         programEditInput,
       };
   
-      //console.log( "processDrop: ", { result } );
+      logger.log( 'debug', 'processDrop: ', { result } );
     }
   }
 
@@ -150,16 +147,16 @@ function GipEdit() {
   };
 
   function setFocus( inputFieldName : string ) {
-    // console.log( "setFocus: Requested: ", inputFieldName );
+    logger.log( 'debug', 'setFocus: Requested: ', inputFieldName );
     // Focus the text input using the raw DOM API
     if ( refs[ inputFieldName ]?.current ) {
-      // console.log( "setFocus: Performing" );
+      // logger.log( "setFocus: Performing" );
       refs[ inputFieldName ].current.focus();
     }
   }
   
   function setInitialFocus() {
-    // console.log( 'setInitialFocus' );
+    //logger.log( 'debug', 'setInitialFocus' );
     setFocus( PROG_FIELD_URI );
   }
   
@@ -169,7 +166,7 @@ function GipEdit() {
   };
 
   const onInputChange = ( { paramName, newValue } : { paramName: string, newValue: string } ) => {
-    // console.log( 'onInputChange: ', { paramName, newValue } );
+    // logger.log( 'debug', 'onInputChange: ', { paramName, newValue } );
     const newProgramEditInput = new GipProgramEditInput();
     newProgramEditInput.assign( programEditInput );
     newProgramEditInput.setField( paramName, newValue );
@@ -200,13 +197,13 @@ function GipEdit() {
   }
 
   const onOptionChange = ( newProgramEditOptions : TypeProgramEditOptions ) => {
-    // console.log( 'Program Options Changed ' );
+    logger.log( 'debug', 'Program Options Changed ' );
     const objNewProgramOptions = new GipProgramEditOptions( newProgramEditOptions );
     setProgramEditOptions( objNewProgramOptions );
   }
 
   const onProgramChange = ( newPrograms: TypeProgramList ) => {
-    // console.log( 'Programs Changed ', newPrograms );
+    logger.log( 'debug', 'Programs Changed ', newPrograms );
     setPrograms( newPrograms );
     setInputToSelected( newPrograms );
   }    
@@ -220,7 +217,7 @@ function GipEdit() {
   }
 
   const onKeyDown = ( event: TypeEventKeyboardAny ) => {
-    // console.log( 'onKeyDown' );
+    logger.log( 'silly', 'onKeyDown' );
     if ( event.key === 'Enter' ) {
       const newPrograms = processProgram( { programEditInput, programEditOptions, programs } );
       if ( newPrograms ) {
@@ -257,7 +254,7 @@ function GipEdit() {
   // eslint moans about the empty dependencies array, but if it isn't present useEffect gets called on every load!
   useEffect( () => {
     document.title = DOC_TITLE;
-    //console.log( "Use Effect" );
+    logger.log( 'silly', 'Use Effect' );
     loadPrograms()
     .then( newPrograms => {
       setPrograms( newPrograms );

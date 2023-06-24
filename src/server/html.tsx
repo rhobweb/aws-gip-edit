@@ -1,5 +1,5 @@
-import { Config } from "./config";
-import { Stats } from './types'
+import { Config } from './config';
+import { Stats }  from './types'
 
 /**
  * This HTML file acts as a template that we insert all our generated

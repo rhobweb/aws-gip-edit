@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "outDir": "test-out",
+    "target": "es6",
+    "sourceMap": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+  },
+  "files": [
+    "src/global.d.ts",
+    "src/utils/gip_date_utils.ts",
+  ]
+}

@@ -1,13 +1,14 @@
-const path = require("path");
-const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { StatsWriterPlugin } = require("webpack-stats-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-const { HotModuleReplacementPlugin } = require("webpack");
+const path                            = require("path");
+const ReactRefreshWebpackPlugin       = require("@pmmmwh/react-refresh-webpack-plugin");
+const MiniCssExtractPlugin            = require("mini-css-extract-plugin");
+const { StatsWriterPlugin }           = require("webpack-stats-plugin");
+const { CleanWebpackPlugin }          = require("clean-webpack-plugin");
+const CopyWebpackPlugin               = require("copy-webpack-plugin");
+const TsconfigPathsPlugin             = require("tsconfig-paths-webpack-plugin");
+const { ProvidePlugin, DefinePlugin } = require("webpack");
 
-const isOffline = !!process.env.IS_OFFLINE;
+const isOffline      = !!process.env.IS_OFFLINE;
+const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
 
 module.exports = {
   entry: {
@@ -16,7 +17,7 @@ module.exports = {
   target: "web",
   mode: isOffline ? "development" : "production",
   node: {
-    __dirname: true,
+    __dirname:  true,
     __filename: true,
   },
   devServer: {
@@ -97,8 +98,10 @@ module.exports = {
         return stats;
       },
     }),
-    isOffline && new HotModuleReplacementPlugin(),
+    //isOffline && new HotModuleReplacementPlugin(),
     isOffline && new ReactRefreshWebpackPlugin(),
+    new ProvidePlugin( { process: 'process/browser' } ),
+    new DefinePlugin( { "process.env.NODE_LOG_LEVEL": JSON.stringify(NODE_LOG_LEVEL) } ),
   ].filter(Boolean),
   module: {
     rules: [
@@ -124,8 +127,9 @@ module.exports = {
   },
   resolve: {
     // TsconfigPathsPlugin applies the path aliases defined in `.tsconfig.json`
-    plugins: [new TsconfigPathsPlugin()],
+    plugins: [new TsconfigPathsPlugin() ],
     extensions: [".browser.tsx", ".browser.ts", ".browser.jsx", ".browser.js", ".tsx", ".ts", ".jsx", ".js"],
+    fallback: { "stream": require.resolve("stream-browserify"), "os": require.resolve("os-browserify") }
   },
   output: {
     path: path.join(__dirname, "dist"),

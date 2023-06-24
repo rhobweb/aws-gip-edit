@@ -4,7 +4,7 @@ import * as React from "react";
 import { Helmet } from "react-helmet";
 
 import useConfig from "./components/useConfig";
-import GipEdit from './components/gip_edit';
+import GipEdit   from './components/gip_edit';
 
 
 /**

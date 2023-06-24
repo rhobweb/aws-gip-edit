@@ -1,9 +1,9 @@
 import Url         from 'url-parse';
 import queryString from 'query-string';
 
-//import logger      from '@rhobweb/console-logger';
-const logger = ( ...args : any[] ) => console.log( ...args );
-logger.info  = ( ...args : any[] ) => console.log( ...args );
+import logger      from '@rhobweb/console-logger';
+//const logger = ( ...args : any[] ) => console.log( ...args );
+//logger.info  = ( ...args : any[] ) => console.log( ...args );
 
 import { TypeEndpointDef, TypeEndpoint, TypeEndpointOptions } from './gip_types';
 
@@ -62,7 +62,6 @@ function genParams( { endpointDef, params } : { endpointDef: TypeEndpointDef, pa
     if ( typeof cookedParams !== 'string' ) {
       Object.assign( cookedParams, queryParams );
     } else {
-      console.error( 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
       logger( 'error', 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
       throw new Error( 'Type mismatch between endpoint params and query params' );
     }
@@ -247,7 +246,7 @@ export async function extractJsonResponseStream( response : Response ) {
   let body = [];
   try {
     const strBody = await response.text();
-    logger.info( `extractJsonResponseStream: `, { strBody } );
+    logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
     body = JSON.parse( strBody );
     //logger.info( `JSON response extracted: `, body );
   }
