@@ -107,7 +107,7 @@ custom:
   # Dynamo DB
   dynamoTableNamePrefix:         ${env:dynamoTableNamePrefix, "${self:custom.stage}_${self:custom.serviceName}_"}
   dynamoTableNameProgram:        "${self:custom.dynamoTableNamePrefix}Program"
-  dynamoTableNameProgramHistory: "${self:custom.dynamoTableNamePrefix}Program"
+  dynamoTableNameProgramHistory: "${self:custom.dynamoTableNamePrefix}ProgramHistory"
 
   scripts:
     hooks:
