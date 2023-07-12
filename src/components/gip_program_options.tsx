@@ -14,15 +14,14 @@ type TypeProgramOptionSelectProps = {
 
 function ProgramOptionSelect( props : TypeProgramOptionSelectProps ) {
   const { fieldName } = props;
-  const fieldMap      = FIELD_MAP_COLLECTION[ fieldName ] || null;
-  const fieldValue    = props.optionFields[ fieldName ] || 'UNK';
+  const fieldMap      = FIELD_MAP_COLLECTION[ fieldName ]   || null;
+  const fieldValue    = props.optionFields[ fieldName ]     || 'UNK';
   const arrOption     = FIELD_ORDER_COLLECTION[ fieldName ] || [];
   const onChange  = ( event: TypeEventChangeSelect ) => {
     const newOptions = props.optionFields;
     props.optionFields[ fieldName ] = event.target.value;
     props.onChange( newOptions );
   };
-  //console.log( 'ProgramOptionSelect: ', { fieldName, minLength } );
 
   return (
     <select

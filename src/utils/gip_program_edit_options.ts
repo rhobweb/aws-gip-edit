@@ -24,9 +24,9 @@ export default class GipProgramEditOptions implements TypeProgramEditOptions {
   }
 
   assign( source: TypeProgramEditOptions ) {
-    this[ PROG_FIELD_GENRE ]       = source[PROG_FIELD_GENRE ];
-    this[ PROG_FIELD_DAY_OF_WEEK ] = source[PROG_FIELD_DAY_OF_WEEK ];
-    this[ PROG_FIELD_QUALITY ]     = source[PROG_FIELD_QUALITY ];
+    this[ PROG_FIELD_GENRE ]       = source[ PROG_FIELD_GENRE ];
+    this[ PROG_FIELD_DAY_OF_WEEK ] = source[ PROG_FIELD_DAY_OF_WEEK ];
+    this[ PROG_FIELD_QUALITY ]     = source[ PROG_FIELD_QUALITY ];
   }
 
   assignFromProgram( programItem: TypeProgramItem ) {

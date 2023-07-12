@@ -73,10 +73,10 @@ const DISPLAY_VALUE_UNKNOWN        = 'UNKNOWN';
 
 // Genre - actual values and display values
 const VALUE_GENRE_COMEDY           = 'Comedy';
-const VALUE_GENRE_BOOKS_AND_SPOKEN = 'Books&Spoken';
+const VALUE_GENRE_BOOKS_AND_SPOKEN = 'Books & Spoken';
 
 const DISPLAY_GENRE_COMEDY         = 'Comedy';
-const DISPLAY_GENRE_BOOKS          = 'Books & Spoken';
+const DISPLAY_GENRE_BOOKS          = 'Books&Spoken';
 
 // Day of week - actual values and display values
 const VALUE_DAY_ANY         = 'Any';

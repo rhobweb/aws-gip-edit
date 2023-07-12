@@ -11,7 +11,7 @@ import * as httpUtils      from '../utils/gip_http_utils';
 
 //const AUTH_URI = 'http://localhost:3013/sso';
 const AUTH_URI = process.env.AUTH_URI || 'undefined';
-logger.log( 'info', 'authenticator: ', { env: process.env } );
+//logger.log( 'info', 'authenticator: ', { env: process.env } );
 
 const ENDPOINT_LOAD : TypeEndpointDef = {
   method: 'GET',

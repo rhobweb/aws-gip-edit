@@ -50,22 +50,26 @@ type TypeProgInputFieldProps = {
   selected:   boolean,
 };
 
+function progToDisplayValue( { fieldName, fieldValue } : { fieldName: string, fieldValue: string | number | null } ) : string {
+  const valueMap = FIELD_MAP_COLLECTION[ fieldName ] || null;
+  let   retValue = '';
+
+  if ( valueMap && fieldValue ) {
+    retValue = valueMap[ fieldValue ] || ( fieldValue as string );
+  } else {
+    retValue = ( fieldValue || '' ) as string;
+  }
+
+  return retValue;
+}
+
 function ProgInputField( props: TypeProgInputFieldProps ) {
   const { fieldName, fieldValue, selected, onClick, onKeyDown } = props;
-
-  //const inputFieldProps           = { fieldName, selected, onClick, fieldValue: null };
-  //console.log( 'ProgInputField: ', { fieldName, fieldValue, FIELD_MAP_COLLECTION } );
-  //const fieldMap = FIELD_MAP_COLLECTION[ fieldName ] || null;
-  //if ( fieldMap ) {
-  //  inputFieldProps.fieldValue = fieldMap[ fieldValue ];
-  //} else {
-  //  inputFieldProps.fieldValue = fieldValue;
-  //}
 
   return (
     <input type="text"
       className={ `gip-prog-item-field gip-prog-item-field-${fieldName}` }
-      value={ fieldValue }
+      value={ progToDisplayValue( { fieldName, fieldValue } ) }
       onClick={ onClick }
       onKeyDown={ onKeyDown }
       readOnly

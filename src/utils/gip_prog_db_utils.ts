@@ -29,6 +29,36 @@ import {
 const PROG_TO_DB_FIELD_MAP = FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 const DB_TO_PROG_FIELD_MAP = REVERSE_FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 
+function dbValueToProgValue( { field, value } : { field: string, value: string | number | null } ) : string | number | null {
+  let   retValue : string | number | null = value;
+  const valueMap = FIELD_MAP_COLLECTION[ field ] || null;
+
+  if ( valueMap && ( value !== null ) ) {
+    retValue = valueMap[ value ];
+  }
+
+  if ( field === 'genre' ) {
+    console.log( 'dbValueToProgValue ', { field, value, retValue } );
+  }
+
+  return retValue;
+}
+
+function progValueToDbValue( { field, value } : { field: string, value: string | number | null } ) : string | number | null {
+  let   retValue : string | number | null = value;
+  const valueMap = REVERSE_FIELD_MAP_COLLECTION[ field ] || null;
+
+  if ( valueMap && ( value !== null ) ) {
+    retValue = valueMap[ value ];
+  }
+
+  if ( field === 'genre' ) {
+    console.log( 'progValueToDbValue ', { field, value, retValue } );
+  }
+
+  return retValue;
+}
+
 /**
  * @param prog : a DB Program Item object;
  * @returns a Program Item object.
@@ -50,7 +80,7 @@ export function dbToProg( dbProg : TypeDbProgramItem ) : TypeProgramItem {
     const progField = DB_TO_PROG_FIELD_MAP[ dbField ];
 
     if ( progField ) {
-      prog[ progField ] = dbValue;
+      prog[ progField ] = dbValue; // dbValueToProgValue( { field: dbField, value: dbValue } );
     }
   } );
 
@@ -85,7 +115,7 @@ export function progToDb( prog: TypeProgramItem ) : TypeDbProgramItem {
     const dbField = PROG_TO_DB_FIELD_MAP[ field ];
 
     if ( dbField ) {
-      dbProg[ field ] = value;
+      dbProg[ field ] = value; //progValueToDbValue( { field: field, value: value } );;
     }
   } );
 
