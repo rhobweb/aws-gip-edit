@@ -1,151 +1,21 @@
-import Url         from 'url-parse';
-import queryString from 'query-string';
-
-import logger      from '@rhobweb/console-logger';
-//const logger = ( ...args : any[] ) => console.log( ...args );
-//logger.info  = ( ...args : any[] ) => console.log( ...args );
+import logger        from '@rhobweb/console-logger';
+import queryString   from 'query-string';
+import * as privDefs from './gip_http_utils_priv';
 
 import { TypeEndpointDef, TypeEndpoint, TypeEndpointOptions } from './gip_types';
 
-type TypeGetContentRet = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
-type TypeGenParamsRet  = { uri: string, params: TypeHttpParams };
-type TypeGenURIRet     = { uri: string, params: Nullable<TypeHttpParams> };
-
 type TypeRawQueryParamScalarValue    = string | null | undefined;
 type TypeRawQueryParamValue          = TypeRawQueryParamScalarValue | string[];
-export type TypeRawQueryParams              = Partial<{ [key: string]: TypeRawQueryParamValue }>
 type TypeCookedQueryParamScalarValue = string | boolean | null;
 type TypeCookedQueryParamValue       = TypeCookedQueryParamScalarValue | (TypeCookedQueryParamScalarValue)[];
 type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>;
 
-const METHOD_GET                     = 'GET';
-const HEADER_PROP_CONTENT_TYPE       = 'Content-Type';
-const HEADER_CONTENT_TYPE_PLAIN_TEXT = 'text/plain; charset=UTF-8';
-const HEADER_CONTENT_TYPE_JSON       = 'application/json; charset=UTF-8';
+export type TypeRawQueryParams       = Partial<{ [key: string]: TypeRawQueryParamValue }>
 
-/**
- * @param object with properties:
- *          - endpointDef : the endpoint definition with properties: uri, method and params (optional);
- *          - params:       object containing additional endpoint parameters.
- * @returns object with properties:
- *          - uri:    the URI with any query parameters removed;
- *          - params: object or string if the endpointDef parameters are stringified.
- * @exception if the endpointDef parameters are stringified and any additional parameters are specified.
- * @exception if the endpointDef parameters are stringified and any query parameters are specified.
- */
-function genParams( { endpointDef, params } : { endpointDef: TypeEndpointDef, params?: TypeRawHttpParams } ) : TypeGenParamsRet
-{
-  const { uri, params: endpointParams } = endpointDef;
-  let   cookedURI    = uri;
-  let   cookedParams : Nullable<TypeHttpParams> = null;
-
-  if ( ( params !== undefined ) && ( endpointParams !== undefined ) ) {
-    if ( typeof params !== typeof endpointParams ) {
-      throw new Error( 'Type mismatch between fixed params and variable params' );
-    } else if ( typeof params === 'string' ) {
-      throw new Error( 'Invalid to specify both fixed string params and variable string params' );
-    }
-    cookedParams = {};
-    Object.assign( cookedParams, endpointParams, params );
-  } else {
-    cookedParams = params || endpointParams || {};
-  }
-
-  const objURI = new Url( endpointDef.uri );
-  if ( objURI.query ) {
-    const strQueryParams = objURI.query;
-    const queryParams    = queryString.parse( strQueryParams ); // queryParams shall be an empty object
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
-    objURI.query         = '';
-    cookedURI            = objURI.toString();
-    if ( typeof cookedParams !== 'string' ) {
-      Object.assign( cookedParams, queryParams );
-    } else {
-      logger( 'error', 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
-      throw new Error( 'Type mismatch between endpoint params and query params' );
-    }
-  }
-
-  return { uri: cookedURI, params: cookedParams };
-}
-
-/**
- * @param object with properties:
- *         - uri:    the URI without query parameters (if present for a GET they shall be overwritten);
- *         - method: one of GET,POST,PUT,PATCH,DELETE;
- *         - params: object containing the paramters.
- * @returns object with properties:
- *          - uri:    the URI, if GET with query parameters appended;
- *          - params: the parameters, if GET shall be null.
- */
-function genURI( { uri, method, params = null } : { uri: string, method: string, params: Nullable<TypeHttpParams> } ) : TypeGenURIRet
-{
-  let cookedURI    = uri;
-  let cookedParams = params;
-
-  if ( method === METHOD_GET ) {
-    const objURI         = new Url( uri );
-    let   newQueryParams = null;
-    if ( params ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newQueryParams = queryString.stringify( params as Record<string,any> );
-      cookedParams   = null;
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
-    objURI.query = newQueryParams;
-
-    cookedURI = objURI.toString();
-  }
-
-  return { uri: cookedURI, params: cookedParams };
-}
-
-/**
- * @param object with properies:
- *         - headers:    object with properties being the header name and values the header value;
- *         - headerProp: the header name. 
- * @returns true if the case insensitive headerProp is found in the headers and is not the empty string, false otherwise.
- */
-function containsHeader( { headers, headerProp } : { headers: TypeHttpHeaders, headerProp: string } ) {
-  const lcSearch = headerProp.toLowerCase();
-  let   bFound   = false;
-  if ( Object.keys( headers ).filter( h => (h.toLowerCase() === lcSearch) ).length > 0 ) {
-    bFound = true;
-  }
-
-  return bFound;
-}
-
-/**
- * @param object with properties:
- *         - endpointDef: object with properties: method, headers, uri (ignored), params (ignored);
- *         - headers:     object with properties being the header name and values the header value;
- *         - params:      either an object, a string or null.
- * @returns object with properties:
- *           - headers: object with possible addition of content type header;
- *           - body:    either the stringified parameters or null.
- */
-function genContent( { endpointDef, headers = {}, params = null } : { endpointDef: TypeEndpointDef, headers?: TypeHttpHeaders, params?: Nullable<TypeHttpParams> } ) : TypeGetContentRet
-{
-  const { method, headers: endpointHeaders = {} } = endpointDef;
-  const cookedHeaders : TypeHttpHeaders           = {};
-  let   cookedParams = params;
-
-  if ( method !== METHOD_GET ) {
-    if ( ! ( containsHeader( { headers, headerProp: HEADER_PROP_CONTENT_TYPE } ) || containsHeader( { headers: endpointHeaders, headerProp: HEADER_PROP_CONTENT_TYPE } ) ) ) {
-      const contentType = ( ( typeof params === 'string' ) ? HEADER_CONTENT_TYPE_PLAIN_TEXT : HEADER_CONTENT_TYPE_JSON );
-      cookedHeaders[ HEADER_PROP_CONTENT_TYPE ] = contentType;
-    }
-    if ( ( params !== null ) && ( typeof params !== 'string' ) ) {
-      cookedParams = JSON.stringify( params );
-    }
-  }
-  Object.assign( cookedHeaders, headers, endpointHeaders );
-
-  return { headers: cookedHeaders, body: cookedParams };
-}
+type TypeProcessEndpointDefArgs = {
+  endpointDef: TypeEndpointDef, params?: TypeRawHttpParams, headers?: TypeHttpHeaders,
+};
+type TypeProcessEndpointDefRet = TypeEndpoint;
 
 /**
  * @param object with properties:
@@ -154,11 +24,11 @@ function genContent( { endpointDef, headers = {}, params = null } : { endpointDe
  *         - params:      either an object, a string or null.
  * @returns 
  */
-export function processEndpointDef( { endpointDef, params = {}, headers = {} } : { endpointDef: TypeEndpointDef, params?: TypeRawHttpParams, headers?: TypeHttpHeaders } ) : TypeEndpoint {
+export function processEndpointDef( { endpointDef, params = {}, headers = {} } : TypeProcessEndpointDefArgs ) : TypeProcessEndpointDefRet {
   const method                                       = endpointDef.method.toUpperCase();
-  const { uri: strippedURI, params: cookedParams }   = genParams( { endpointDef, params } );
-  const { uri: cookedURI,   params: recookedParams } = genURI( { uri: strippedURI, method, params: cookedParams } );
-  const { headers: cookedHeaders, body }             = genContent( { endpointDef, headers, params: recookedParams } );
+  const { uri: strippedURI, params: cookedParams }   = privDefs.genParams( { endpointDef, params } );
+  const { uri: cookedURI,   params: recookedParams } = privDefs.genURI( { uri: strippedURI, method, params: cookedParams } );
+  const { headers: cookedHeaders, body }             = privDefs.genContent( { endpointDef, headers, params: recookedParams } );
   const options : TypeEndpointOptions                = { method, headers: cookedHeaders };
 
   if ( body ) {
@@ -296,4 +166,15 @@ export function stringifyUTF16( rawObject: object ) : string {
   const rawString    = JSON.stringify( rawObject );
   const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
   return cookedString;
+}
+
+export function stripQueryParams( rawURI : string ) : string {
+  const decodedURI = decodeURIComponent( rawURI );
+  const cookedURI  = decodedURI.replace( /\?.*/, '' );
+  return cookedURI;
+}
+
+export function genURI( { uri, queryParams } : { uri : string, queryParams: Record<string,string> } ) : string {
+  const cookedURI = `${uri}?${queryString.stringify( queryParams )}`;
+  return cookedURI;
 }

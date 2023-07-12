@@ -1,6 +1,10 @@
 const path = require("path");
 const slsw = require("serverless-webpack");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+const { DefinePlugin }    = require("webpack");
+
+const AUTH_URI       = process.env.AUTH_URI || 'undefined';
+console.log( "webpack: server.config: env: " + AUTH_URI );
 
 module.exports = {
   entry: slsw.lib.entries,
@@ -38,7 +42,9 @@ module.exports = {
   },
   resolve: {
     // TsconfigPathsPlugin applies the path aliases defined in `.tsconfig.json`
-    plugins: [new TsconfigPathsPlugin()],
+    plugins: [
+      new TsconfigPathsPlugin(),
+    ],
     extensions: [".server.tsx", ".server.ts", ".server.jsx", ".server.js", ".tsx", ".ts", ".jsx", ".js"],
   },
   output: {

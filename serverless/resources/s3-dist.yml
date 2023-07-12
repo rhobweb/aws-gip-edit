@@ -1,0 +1,30 @@
+Resources:
+  # S3 Bucket for the distribution bundles
+  DistBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - "GET"
+            AllowedOrigins:
+              - Fn::Join:
+                  - ""
+                  - - https://
+                    - Ref: ApiGatewayRestApi
+                    - .execute-api.
+                    - Ref: AWS::Region
+                    - .amazonaws.com
+              - Fn::Join:
+                  - ""
+                  - - https://
+                    - ${self:custom.customDomain.domainName}
+            MaxAge: 3000
+Outputs:
+  DistBucket:
+    Description: Distribution S3 Bucket
+    Value:
+      Ref: DistBucket

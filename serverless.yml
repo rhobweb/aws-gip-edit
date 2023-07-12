@@ -50,10 +50,11 @@ provider:
     IS_LOCAL: ${self:custom.isLocal}
     LOCAL_DYNAMO_DB_ENDPOINT: ${self:custom.localDynamodbEndpoint}
     GIP_MAX_PROGRAMS: ${self:custom.maxPrograms}
+    AUTH_URI: ${self:custom.authURI}
 
 custom:
   serviceName: ${self:service}
-  stage: ${self:provider.stage}
+  stage: ${env:STAGE, "${self:provider.stage}"}
   apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
   baseDomain: "rhobweb.com"
   envIsOffline: ${env:IS_OFFLINE, "default"}
@@ -88,6 +89,12 @@ custom:
     stage: ${self:custom.stage}
     # NOTE: enableCustomDomain must be set to true before first deployment
     enabled: true
+  stageToAuthUriMap:
+    lcl:  "localhost:3013/sso"
+    dev:  "dev.${self:custom.baseDomain}/sso"
+    test: "test.${self:custom.baseDomain}/sso"
+    prod: "${self:custom.baseDomain}/sso"
+  authURI: ${self:custom.stageToAuthUriMap.${self:custom.stage}}
   distBucketUrl:
     us-east-1:
       # us-east-1 uses a different URL format than the other regions
@@ -156,6 +163,7 @@ functions:
           path: ${self:custom.apiBasePath}/
           method: any
           cors: true
+          integration: aws_proxy
       - http:
           path: /favicon.ico
           method: get
@@ -167,46 +175,5 @@ functions:
 
 resources:
   - ${file(serverless/resources/dynamodb-tables.yml)}
-  - Resources:
-      # Customize the API Gateway resource
-      ApiGatewayRestApi:
-        Type: AWS::ApiGateway::RestApi
-        Properties:
-          Name: ${self:custom.apiGatewayRestApiName}
-          Description: "GIP Program Editor."
-          # Enable gzip compression
-          MinimumCompressionSize: 1000
-
-      # S3 Bucket for the distribution bundles
-      DistBucket:
-        Type: AWS::S3::Bucket
-        DeletionPolicy: Delete
-        Properties:
-          CorsConfiguration:
-            CorsRules:
-              - AllowedHeaders:
-                  - "*"
-                AllowedMethods:
-                  - "GET"
-                AllowedOrigins:
-                  - Fn::Join:
-                      - ""
-                      - - https://
-                        - Ref: ApiGatewayRestApi
-                        - .execute-api.
-                        - Ref: AWS::Region
-                        - .amazonaws.com
-                  - Fn::Join:
-                      - ""
-                      - - https://
-                        - ${self:custom.customDomain.domainName}
-                MaxAge: 3000
-    Outputs:
-      ApiGatewayRestApi:
-        Description: API Gateway Endpoint
-        Value:
-          Ref: ApiGatewayRestApi
-      DistBucket:
-        Description: Distribution S3 Bucket
-        Value:
-          Ref: DistBucket
+  - ${file(serverless/resources/api-gateway.yml)}
+  - ${file(serverless/resources/s3-dist.yml)}

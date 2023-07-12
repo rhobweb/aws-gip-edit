@@ -1,6 +1,7 @@
 //import React from 'react';
 
 import React, { useState, useEffect, useRef, ForwardedRef } from 'react';
+import { Helmet }                                           from 'react-helmet';
 import { getProgDetailsFromLink, cookTitle, cookText }      from '../utils/gip_prog_edit_utils';
 import {
   PROG_FIELD_URI, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_SELECTED, PROG_FIELD_IMAGE_URI,
@@ -108,6 +109,8 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 
 function processDrop( event : DragEvent ) {
   let result = null;
+
+  logger.log( 'debug', 'processDrop', event.dataTransfer );
 
   if ( event.dataTransfer ) {
     const textHTML = event.dataTransfer.getData( 'text/html' );
@@ -240,6 +243,7 @@ function GipEdit() {
   }
 
   const onDrop = ( event : TypeEventDragAny ) => {
+    logger.log( 'debub', 'onDrop' );
     event.preventDefault();
     event.stopPropagation();
     const stateUpdates = processDrop( event );
@@ -263,33 +267,36 @@ function GipEdit() {
   }, [] ); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <>
-    <div className="container-fluid gip-grid"
-      onDragOver={ event => onDragOver( event ) }
-      onDrop={ event => onDrop( event ) }
-    >
-      <GipProgramEntry
-        programEditInput={ programEditInput }
-        programEditOptions={ programEditOptions }
-        onInputChange={ ( { paramName, newValue } ) => onInputChange( { paramName, newValue } ) }
-        onOptionChange={ newOptions => onOptionChange( newOptions ) }
-        onKeyDown={ event => onKeyDown( event ) }
-        //refCallback={ inputFieldName => setRef( inputFieldName ) }
-        ref={ refs as ForwardedRef<HTMLInputElement> } // Expects 'ref' to be a simple reference, even though it can handle objects
-      />
-      <GipActionButtons
-        programs={ programs }
-        onProgramChange={ ( newPrograms ) => onProgramChange( newPrograms ) }
-        savePrograms={ savePrograms }
-        programsSaved={ () => setInitialFocus() }
-      />
-      <GipProgramTable
-        programs={ programs }
-        onProgramChange={ newPrograms => onProgramChange( newPrograms ) }
-        onKeyDown={ event => onProgramTableKeyDown( event ) }
-      />
+    <div className="app">
+      <Helmet>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossOrigin="anonymous"/>
+      </Helmet>
+      <div className="container-fluid gip-grid"
+        onDragOver={ event => onDragOver( event ) }
+        onDrop={ event => onDrop( event ) }
+      >
+        <GipProgramEntry
+          programEditInput={ programEditInput }
+          programEditOptions={ programEditOptions }
+          onInputChange={ ( { paramName, newValue } ) => onInputChange( { paramName, newValue } ) }
+          onOptionChange={ newOptions => onOptionChange( newOptions ) }
+          onKeyDown={ event => onKeyDown( event ) }
+          //refCallback={ inputFieldName => setRef( inputFieldName ) }
+          ref={ refs as ForwardedRef<HTMLInputElement> } // Expects 'ref' to be a simple reference, even though it can handle objects
+        />
+        <GipActionButtons
+          programs={ programs }
+          onProgramChange={ ( newPrograms ) => onProgramChange( newPrograms ) }
+          savePrograms={ savePrograms }
+          programsSaved={ () => setInitialFocus() }
+        />
+        <GipProgramTable
+          programs={ programs }
+          onProgramChange={ newPrograms => onProgramChange( newPrograms ) }
+          onKeyDown={ event => onProgramTableKeyDown( event ) }
+        />
+      </div>
     </div>
-    </>
   );
 }
 

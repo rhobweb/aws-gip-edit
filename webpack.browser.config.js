@@ -9,6 +9,8 @@ const { ProvidePlugin, DefinePlugin } = require("webpack");
 
 const isOffline      = !!process.env.IS_OFFLINE;
 const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
+const AUTH_URI       = process.env.AUTH_URI || 'undefined';
+console.log( "webpack: browser.config: env: " + AUTH_URI );
 
 module.exports = {
   entry: {
@@ -39,6 +41,7 @@ module.exports = {
         return /\bstats\.json$/.test(filePath);
       },
     },
+    port: 8082,
   },
   performance: {
     // Turn off size warnings for entry points
@@ -101,7 +104,10 @@ module.exports = {
     //isOffline && new HotModuleReplacementPlugin(),
     isOffline && new ReactRefreshWebpackPlugin(),
     new ProvidePlugin( { process: 'process/browser' } ),
-    new DefinePlugin( { "process.env.NODE_LOG_LEVEL": JSON.stringify(NODE_LOG_LEVEL) } ),
+    new DefinePlugin( {
+      "process.env.NODE_LOG_LEVEL": JSON.stringify(NODE_LOG_LEVEL),
+      "process.env.AUTH_URI":       JSON.stringify(AUTH_URI)
+    } ),
   ].filter(Boolean),
   module: {
     rules: [

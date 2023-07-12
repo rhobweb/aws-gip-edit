@@ -1,0 +1,297 @@
+import Url         from 'url-parse';
+import queryString from 'query-string';
+
+import logger      from '@rhobweb/console-logger';
+
+import { TypeEndpointDef, TypeEndpoint, TypeEndpointOptions } from './gip_types';
+
+type TypeGetContentRet = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
+type TypeGenParamsRet  = { uri: string, params: TypeHttpParams };
+type TypeGenURIRet     = { uri: string, params: Nullable<TypeHttpParams> };
+
+type TypeRawQueryParamScalarValue    = string | null | undefined;
+type TypeRawQueryParamValue          = TypeRawQueryParamScalarValue | string[];
+export type TypeRawQueryParams       = Partial<{ [key: string]: TypeRawQueryParamValue }>
+type TypeCookedQueryParamScalarValue = string | boolean | null;
+type TypeCookedQueryParamValue       = TypeCookedQueryParamScalarValue | (TypeCookedQueryParamScalarValue)[];
+type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>;
+
+const METHOD_GET                     = 'GET';
+const HEADER_PROP_CONTENT_TYPE       = 'Content-Type';
+const HEADER_CONTENT_TYPE_PLAIN_TEXT = 'text/plain; charset=UTF-8';
+const HEADER_CONTENT_TYPE_JSON       = 'application/json; charset=UTF-8';
+
+/**
+ * @param object with properties:
+ *          - endpointDef : the endpoint definition with properties: uri, method and params (optional);
+ *          - params:       object containing additional endpoint parameters.
+ * @returns object with properties:
+ *          - uri:    the URI with any query parameters removed;
+ *          - params: object or string if the endpointDef parameters are stringified.
+ * @exception if the endpointDef parameters are stringified and any additional parameters are specified.
+ * @exception if the endpointDef parameters are stringified and any query parameters are specified.
+ */
+function genParams( { endpointDef, params } : { endpointDef: TypeEndpointDef, params?: TypeRawHttpParams } ) : TypeGenParamsRet
+{
+  const { uri, params: endpointParams } = endpointDef;
+  let   cookedURI    = uri;
+  let   cookedParams : Nullable<TypeHttpParams> = null;
+
+  if ( ( params !== undefined ) && ( endpointParams !== undefined ) ) {
+    if ( typeof params !== typeof endpointParams ) {
+      throw new Error( 'Type mismatch between fixed params and variable params' );
+    } else if ( typeof params === 'string' ) {
+      throw new Error( 'Invalid to specify both fixed string params and variable string params' );
+    }
+    cookedParams = {};
+    Object.assign( cookedParams, endpointParams, params );
+  } else {
+    cookedParams = params || endpointParams || {};
+  }
+
+  const objURI = new Url( endpointDef.uri );
+  if ( objURI.query ) {
+    const strQueryParams = objURI.query;
+    const queryParams    = queryString.parse( strQueryParams ); // queryParams shall be an empty object
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
+    objURI.query         = '';
+    cookedURI            = objURI.toString();
+    if ( typeof cookedParams !== 'string' ) {
+      Object.assign( cookedParams, queryParams );
+    } else {
+      logger( 'error', 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
+      throw new Error( 'Type mismatch between endpoint params and query params' );
+    }
+  }
+
+  return { uri: cookedURI, params: cookedParams };
+}
+
+/**
+ * @param object with properties:
+ *         - uri:    the URI without query parameters (if present for a GET they shall be overwritten);
+ *         - method: one of GET,POST,PUT,PATCH,DELETE;
+ *         - params: object containing the paramters.
+ * @returns object with properties:
+ *          - uri:    the URI, if GET with query parameters appended;
+ *          - params: the parameters, if GET shall be null.
+ */
+function genURI( { uri, method, params = null } : { uri: string, method: string, params: Nullable<TypeHttpParams> } ) : TypeGenURIRet
+{
+  let cookedURI    = uri;
+  let cookedParams = params;
+
+  if ( method === METHOD_GET ) {
+    const objURI         = new Url( uri );
+    let   newQueryParams = null;
+    if ( params ) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      newQueryParams = queryString.stringify( params as Record<string,any> );
+      cookedParams   = null;
+    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
+    objURI.query = newQueryParams;
+
+    cookedURI = objURI.toString();
+  }
+
+  return { uri: cookedURI, params: cookedParams };
+}
+
+/**
+ * @param object with properies:
+ *         - headers:    object with properties being the header name and values the header value;
+ *         - headerProp: the header name. 
+ * @returns true if the case insensitive headerProp is found in the headers and is not the empty string, false otherwise.
+ */
+function containsHeader( { headers, headerProp } : { headers: TypeHttpHeaders, headerProp: string } ) {
+  const lcSearch = headerProp.toLowerCase();
+  let   bFound   = false;
+  if ( Object.keys( headers ).filter( h => (h.toLowerCase() === lcSearch) ).length > 0 ) {
+    bFound = true;
+  }
+
+  return bFound;
+}
+
+/**
+ * @param object with properties:
+ *         - endpointDef: object with properties: method, headers, uri (ignored), params (ignored);
+ *         - headers:     object with properties being the header name and values the header value;
+ *         - params:      either an object, a string or null.
+ * @returns object with properties:
+ *           - headers: object with possible addition of content type header;
+ *           - body:    either the stringified parameters or null.
+ */
+function genContent( { endpointDef, headers = {}, params = null } : { endpointDef: TypeEndpointDef, headers?: TypeHttpHeaders, params?: Nullable<TypeHttpParams> } ) : TypeGetContentRet
+{
+  const { method, headers: endpointHeaders = {} } = endpointDef;
+  const cookedHeaders : TypeHttpHeaders           = {};
+  let   cookedParams = params;
+
+  if ( method !== METHOD_GET ) {
+    if ( ! ( containsHeader( { headers, headerProp: HEADER_PROP_CONTENT_TYPE } ) || containsHeader( { headers: endpointHeaders, headerProp: HEADER_PROP_CONTENT_TYPE } ) ) ) {
+      const contentType = ( ( typeof params === 'string' ) ? HEADER_CONTENT_TYPE_PLAIN_TEXT : HEADER_CONTENT_TYPE_JSON );
+      cookedHeaders[ HEADER_PROP_CONTENT_TYPE ] = contentType;
+    }
+    if ( ( params !== null ) && ( typeof params !== 'string' ) ) {
+      cookedParams = JSON.stringify( params );
+    }
+  }
+  Object.assign( cookedHeaders, headers, endpointHeaders );
+
+  return { headers: cookedHeaders, body: cookedParams };
+}
+
+/**
+ * @param object with properties:
+ *         - endpointDef: object with properties: method, headers, uri, params;
+ *         - headers:     object with properties being the header name and values the header value;
+ *         - params:      either an object, a string or null.
+ * @returns 
+ */
+export function processEndpointDef( { endpointDef, params = {}, headers = {} } : { endpointDef: TypeEndpointDef, params?: TypeRawHttpParams, headers?: TypeHttpHeaders } ) : TypeEndpoint {
+  const method                                       = endpointDef.method.toUpperCase();
+  const { uri: strippedURI, params: cookedParams }   = genParams( { endpointDef, params } );
+  const { uri: cookedURI,   params: recookedParams } = genURI( { uri: strippedURI, method, params: cookedParams } );
+  const { headers: cookedHeaders, body }             = genContent( { endpointDef, headers, params: recookedParams } );
+  const options : TypeEndpointOptions                = { method, headers: cookedHeaders };
+
+  if ( body ) {
+    options.body = body;
+  }
+
+  return { uri: cookedURI, options };
+}
+
+//fnHeaders: ( len ) => ( {
+//  'Content-Type':   'application/json; charset=UTF-8',
+//  'Content-Length': len,
+//} ),
+
+//async function extractTextResponse( response ) {
+//  const buffer       = await response.arrayBuffer();
+//  const decoder      = new TextDecoder( 'iso-8859-1' );
+//  const textResponse = decoder.decode( buffer );
+//  return textResponse;
+//}
+
+/**
+ * @param rawObject 
+ * @returns 
+ */
+//export async function extractJsonResponse( response : { json: () => object, type: string } ) {
+//  let body : object = [];
+//  //logger.info( `extractJsonResponse: `, response.type );
+//  try {
+//    body = await response.json();
+//    //logger.info( `JSON response extracted: `, body );
+//  }
+//  catch ( err ) {
+//    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message, rawResponse: response } ) );
+//  }
+//
+//  return body;
+//}
+
+export async function extractStringFromStream( stream : ReadableStream<Uint8Array> ) : Promise<string> {
+  let arrChunk   = [];
+  let reader     = stream.getReader();
+  let bDone      = false;
+  while ( ! bDone ) {
+    const { done, value } = await reader.read();
+    if ( ! done ) {
+      arrChunk.push( value );
+    } else {
+      bDone = true;
+    }
+  }
+  const str = Buffer.concat( arrChunk ).toString();
+  return str;
+//  return new Promise( ( resolve, reject ) => {
+//    stream.setEncoding('utf8');
+//    stream.on( 'data', chunk => {
+//      str += chunk;
+//    })
+//    stream.on('end', () {
+//      resolve( str );
+//    });
+//    stream.on('error', () {
+//      reject( new Error('Stream error') );
+//    });
+//  } );
+}
+
+export async function extractJsonResponse( response : Response ) {
+  let body = [];
+  try {
+    const strBody = await response.json();
+    logger.info( `extractJsonResponse: `, { strBody } );
+    body = strBody;
+    //body = JSON.parse( strBody );
+    //logger.info( `JSON response extracted: `, body );
+  }
+  catch ( err ) {
+    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message } ) );
+  }
+
+  return body;
+}
+
+export async function extractJsonResponseStream( response : Response ) {
+  let body = [];
+  try {
+    const strBody = await response.text();
+    logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
+    body = JSON.parse( strBody );
+    //logger.info( `JSON response extracted: `, body );
+  }
+  catch ( err ) {
+    logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: err.message } ) );
+  }
+
+  return body;
+}
+
+/**
+ * @param {TypeRawQueryParams} rawParams : object with properties being the query parameter names and values being the values; note that a value may be an array.
+ * @returns the query parameter object with undefined values set to null and case insenstive 'false' or 'true' set to the boolean equivalent.
+ */
+export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQueryParams
+{
+  const mapQueryParamVal = ( rawValue : TypeRawQueryParamScalarValue ) => { 
+    let cookedValue : TypeCookedQueryParamValue = rawValue || null;
+    if ( ( rawValue === null ) || ( rawValue === undefined ) ) { // Need to check for null so that TS doesn't moan about the subsequent if statements
+      cookedValue = null;
+    } else if ( rawValue.match( /false/i ) ) {
+      cookedValue = false;
+    } else if ( rawValue.match( /true/i ) || ( rawValue === '' ) ) {
+      cookedValue = true;
+    }
+    return cookedValue;
+  };
+
+  const cookedParams : TypeCookedQueryParams = {};
+
+  Object.entries( rawParams ).forEach( ( [ param, value ] ) => {
+    if ( value && Array.isArray( value ) ) {
+      cookedParams[ param ] = value.map( el => mapQueryParamVal( el ) );
+    } else {
+      cookedParams[ param ] = mapQueryParamVal( value );
+    }
+  } );
+
+  return cookedParams;
+}
+
+/**
+ * @param rawObject : an object
+ * @returns object in UTF-16 format, with all characters 0x7F and above replaced with escaped character codes
+ */
+export function stringifyUTF16( rawObject: object ) : string {
+  const rawString    = JSON.stringify( rawObject );
+  const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
+  return cookedString;
+}

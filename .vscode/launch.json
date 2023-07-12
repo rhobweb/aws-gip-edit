@@ -19,8 +19,9 @@
       "env": {
         "AWS_REGION":     "eu-west-1",
         "AWS_ENDPOINT":   "http://localhost:8000",
-        "STAGE":          "dev",
-        "NODE_LOG_LEVEL": "info"
+        "STAGE":          "lcl",
+        "NODE_LOG_LEVEL": "info",
+        "AUTH_URI":       "http://localhost:3013/sso",
       }
     },
     {
@@ -43,6 +44,7 @@
         "--colors",
         //"${workspaceFolder}/test/unit/**/*.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_date_utils.spec.ts",
+        //"${workspaceFolder}/test/unit/**/gip_http_utils_priv.spec.ts",
         "${workspaceFolder}/test/unit/**/gip_http_utils.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_browser_utils.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_db_utils.spec.ts",
@@ -78,6 +80,7 @@
         //"${workspaceFolder}/test/unit/**/*.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_date_utils.spec.ts",
         "${workspaceFolder}/test/unit/**/gip_http_utils.spec.ts",
+        //"${workspaceFolder}/test/unit/**/gip_http_utils_priv.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_browser_utils.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_db_utils.spec.ts",
         //"${workspaceFolder}/test/unit/**/gip_prog_db_utils.spec.ts",

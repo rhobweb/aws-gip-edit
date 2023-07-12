@@ -4,3 +4,10 @@ Resources:
     Properties:
       Name: ${self:custom.apiGatewayRestApiName}
       Description: "GIP Program Editor."
+      # Enable gzip compression
+      MinimumCompressionSize: 1000
+Outputs:
+  ApiGatewayRestApi:
+    Description: API Gateway Endpoint
+    Value:
+      Ref: ApiGatewayRestApi
