@@ -20,7 +20,7 @@
         "AWS_REGION":     "eu-west-1",
         "AWS_ENDPOINT":   "http://localhost:8000",
         "STAGE":          "lcl",
-        "NODE_LOG_LEVEL": "info",
+        "NODE_LOG_LEVEL": "debug",
         "AUTH_URI":       "http://localhost:3013/sso",
       }
     },

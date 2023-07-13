@@ -92,10 +92,15 @@ async function handlePATCH( event: APIGatewayEvent ) : Promise<TypeHandlerRespon
     statusCode: 200,
   };
   try {
-    const rawBody                           = event.body || '[]';
-    const newPrograms : TypeDbProgramItem[] = JSON.parse( rawBody );
-    logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
-    await updateProgs( { programs: newPrograms } );
+    const rawBody = event.body || '[]';
+    if ( rawBody.length > 0 ) {
+      const newPrograms : TypeDbProgramItem[] = JSON.parse( rawBody );
+      logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
+      await updateProgs( { programs: newPrograms } );
+    } else {
+      logger.log( 'info', 'handlePATCH: called with no programs' );
+      result.statusCode = 400;
+    }
   }
   catch ( err ) {
     result.statusCode = err.statusCode || 500;
