@@ -142,8 +142,9 @@ custom:
   serverless-offline:
     useChildProcesses: true
     noPrependStageInUrl: true
-    httpPort: 3003
-    lambdaPort: 3002
+    host: 0.0.0.0
+    httpPort: 13003
+    lambdaPort: 13002
 
 functions:
   programs:

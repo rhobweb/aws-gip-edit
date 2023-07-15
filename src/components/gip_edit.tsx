@@ -7,16 +7,16 @@ import {
   PROG_FIELD_URI, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_SELECTED, PROG_FIELD_IMAGE_URI,
   TypeEndpointDef, TypeProgramItem, TypeProgramList, TypeProgramEditInput, TypeProgramEditOptions
 } from '../utils/gip_types';
-import { TypeDbProgramItem }  from '../utils/gip_prog_fields';
+import { TypeDbProgramItem }       from '../utils/gip_prog_fields';
 import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
-import { GipProgramEntry }    from './gip_program_entry';
-import { GipProgramTable }    from './gip_program_table';
-import { GipActionButtons }   from './gip_action_buttons';
-import GipProgramEditInput    from '../utils/gip_program_edit_input';
-import GipProgramEditOptions  from '../utils/gip_program_edit_options';
-import GipProgramItem         from '../utils/gip_program_item';
-import { dbToProg, progToDb } from '../utils/gip_prog_db_utils';
-import logger                 from '@rhobweb/console-logger';
+import { GipProgramEntry }         from './gip_program_entry';
+import { GipProgramTable }         from './gip_program_table';
+import { GipActionButtons }        from './gip_action_buttons';
+import GipProgramEditInput         from '../utils/gip_program_edit_input';
+import GipProgramEditOptions       from '../utils/gip_program_edit_options';
+import GipProgramItem              from '../utils/gip_program_item';
+import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
+import logger                      from '@rhobweb/console-logger';
 
 type TypeGipEditState = {
   programEditInput:   TypeProgramEditInput,
@@ -44,10 +44,6 @@ const DOC_TITLE = 'GIP Program Edit';
 //  event.returnValue = '';
 //}
 
-function processLoadedProgram( rawProg: TypeDbProgramItem ) : TypeProgramItem {
-  return dbToProg( rawProg );
-}
-
 function processProgramForSaving( prog : TypeProgramItem ) : TypeDbProgramItem {
   const cookedProgram                  = JSON.parse( JSON.stringify( prog ) );
   cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
@@ -60,7 +56,7 @@ async function loadPrograms() : Promise<TypeProgramItem[]> {
   logger.log( 'info', `loadPrograms: URI: `, uri );
   const response         = await fetch( uri, options as RequestInit );
   const rawPrograms      = await extractJsonResponse( response ) as TypeDbProgramItem[];
-  const programs         = rawPrograms.map( prog => processLoadedProgram( prog ) );
+  const programs         = dbToProgArray( rawPrograms );
   logger.log( 'info', `loadPrograms: Programs: `, programs );
   return programs;
 }
@@ -72,8 +68,8 @@ async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgra
   logger.log( 'verbose', 'savePrograms: Programs: ', JSON.stringify( { uri, options, params } ) );
   const response         = await fetch( uri, options as RequestInit );
   logger.log( 'verbose', 'savePrograms: ', { response } );
-  const rawPrograms      = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
-  const newPrograms      = rawPrograms.map( prog => processLoadedProgram( prog ) );
+  const newDbPrograms    = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
+  const newPrograms      = dbToProgArray( newDbPrograms );
   logger.log( 'info', 'savePrograms: ', { newPrograms } );
   return newPrograms;
 }
@@ -243,7 +239,7 @@ function GipEdit() {
   }
 
   const onDrop = ( event : TypeEventDragAny ) => {
-    logger.log( 'debub', 'onDrop' );
+    logger.log( 'debug', 'onDrop' );
     event.preventDefault();
     event.stopPropagation();
     const stateUpdates = processDrop( event );
@@ -254,6 +250,24 @@ function GipEdit() {
       setFocus( PROG_FIELD_TITLE );
     }
   }
+
+  /*
+  const onTouchEnd = ( event : TypeEventTouchAny ) => {
+    logger.log( 'debug', 'onTouchEnd', { event: Object.keys( event ) } );
+    //event.stopPropagation();
+  }
+  const onTouchEndCapture= ( event : TypeEventTouchAny ) => {
+    logger.log( 'debug', 'onTouchEndCapture' );
+    //event.stopPropagation();
+  }
+  const onTouchCancelCapture=  ( event : TypeEventTouchAny ) => {
+    logger.log( 'debug', 'onTouchCancelCapture' );
+    //event.stopPropagation();
+  }
+  onTouchEnd={ event => onTouchEnd( event ) }
+  onTouchEndCapture={ event => onTouchEndCapture( event ) }
+  onTouchCancelCapture={ event => onTouchCancelCapture( event ) }
+  */
 
   // eslint moans about the empty dependencies array, but if it isn't present useEffect gets called on every load!
   useEffect( () => {

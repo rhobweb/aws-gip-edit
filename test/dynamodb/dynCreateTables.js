@@ -1,5 +1,5 @@
 /**
- * Node utility to create the AWS Dynamo DB tables for local testing of ROKIT/MyROK
+ * Node utility to create the AWS Dynamo DB tables for local testing of aws-gip-edit
  */
 const dynCommon = require( "./dynCommon" );
 

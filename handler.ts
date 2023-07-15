@@ -8,7 +8,8 @@ export const serve = async (event: APIGatewayEvent, _context: Context): Promise<
     logger.log( 'debug', `handler:serve: `, { event } );
 
     // We use asynchronous import here so we can better catch server-side errors during development
-    const render = (await import("./src/server/render")).default;
+    // @ts-ignore "Relative import paths need explicit file extensions in EcmaScript imports"
+    const render = ( await import( './src/server/render' ) ).default;
     return {
       statusCode: 200,
       headers: {

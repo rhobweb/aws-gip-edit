@@ -9,7 +9,8 @@ interface TypeRefs extends Record<string,TypeRef> {
 type TypeEventKeyboardAny     = KeyboardEvent<HTMLElement>;
 type TypeEventHandlerKeyboard = (event: TypeEventKeyboardAny)    => void;
 
-type TypeEventDragAny = DragEvent<HTMLElement>
+type TypeEventDragAny  = DragEvent<HTMLElement>
+type TypeEventTouchAny = TouchEvent<HTMLElement>
 
 type TypeHttpHeaders   = Record<string, string>;
 type TypeRawHttpParams = Record<string, string | string[] | boolean>;

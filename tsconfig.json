@@ -7,13 +7,13 @@
     "jsx": "react",
     "lib": [ "dom" ],
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "noImplicitAny": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "baseUrl": "./",
-    "esModuleInterop": false,
+    "esModuleInterop": true,
   }
 }

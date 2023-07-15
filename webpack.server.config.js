@@ -4,7 +4,7 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const { DefinePlugin }    = require("webpack");
 
 const AUTH_URI       = process.env.AUTH_URI || 'undefined';
-console.log( "webpack: server.config: env: " + AUTH_URI );
+//console.log( "webpack: server.config: env: " + AUTH_URI );
 
 module.exports = {
   entry: slsw.lib.entries,
