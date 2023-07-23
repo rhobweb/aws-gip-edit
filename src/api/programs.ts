@@ -10,7 +10,7 @@ import logger                                                from '@rhobweb/cons
 //from '../../utils/gip_prog_fields';
 import { filterPrograms }                                       from '../utils/gip_prog_filter_utils';
 import { parseQueryParams, stringifyUTF16, TypeRawQueryParams } from '../utils/gip_http_utils';
-import { TypeDbProgramItem }                                    from '../utils/gip_prog_fields';
+import { TypeDbProgramItem, DB_FIELD_POS }                      from '../utils/gip_prog_fields';
 
 type TypeHandlerResponse = {
   statusCode: Number,

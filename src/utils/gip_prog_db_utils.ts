@@ -125,10 +125,6 @@ export function progToDb( prog: TypeProgramItem ) : TypeDbProgramItem {
 }
 
 export function dbToProgArray( rawPrograms: TypeDbProgramItem[] ) : TypeProgramItem[] {
-  const orderedRawPrograms = rawPrograms.sort( ( a, b ) => {
-    // @ts-ignore - pos should always be null here
-    return a[ DB_FIELD_POS ] - b[ DB_FIELD_POS ];
-  } );
-  const programs = orderedRawPrograms.map( prog => dbToProg( prog ) );
+  const programs = rawPrograms.map( prog => dbToProg( prog ) );
   return programs;
 }
