@@ -17,6 +17,7 @@ import GipProgramEditOptions       from '../utils/gip_program_edit_options';
 import GipProgramItem              from '../utils/gip_program_item';
 import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
 import logger                      from '@rhobweb/console-logger';
+import ourPackage                  from '../../package.json';
 
 type TypeGipEditState = {
   programEditInput:   TypeProgramEditInput,
@@ -39,7 +40,7 @@ const ENDPOINT_SAVE : TypeEndpointDef = {
   uri:    '/gip_edit/api/programs',
 };
 
-const DOC_TITLE = 'GIP Program Edit';
+const DOC_TITLE = `GIP Program Edit v${ourPackage.version}`;
 
 //function beforeUnload( event ) {
 //  event.preventDefault();
