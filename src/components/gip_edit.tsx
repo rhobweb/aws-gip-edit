@@ -24,6 +24,10 @@ type TypeGipEditState = {
   programs:           TypeProgramItem[],
 };
 
+interface TypeErrorWithBody extends Error {
+  body?: Record<string,any>
+};
+
 const ENDPOINT_LOAD : TypeEndpointDef = {
   method: 'GET',
   uri:    '/gip_edit/api/programs',
@@ -62,15 +66,33 @@ async function loadPrograms() : Promise<TypeProgramItem[]> {
 }
 
 async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgramItem[]> {
-  const dbPrograms = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
-  const params     = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
+  let   newPrograms = null;
+  const dbPrograms  = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
+  const params      = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
   const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
   logger.log( 'verbose', 'savePrograms: Programs: ', JSON.stringify( { uri, options, params } ) );
-  const response         = await fetch( uri, options as RequestInit );
-  logger.log( 'verbose', 'savePrograms: ', { response } );
-  const newDbPrograms    = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
-  const newPrograms      = dbToProgArray( newDbPrograms );
+  try {
+    const response      = await fetch( uri, options as RequestInit );
+    if ( response.ok ) {
+      logger.log( 'verbose', 'savePrograms: OK', );
+      const newDbPrograms = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
+      newPrograms         = dbToProgArray( newDbPrograms );
+    } else {
+      const body    = await extractJsonResponseStream( response );
+      const errSave : TypeErrorWithBody = new Error( 'savePrograms error: ' + JSON.stringify( { status: response.status, statusText: response.statusText } ) );
+      errSave.body = body;
+      throw errSave;
+    }
+  }
+  catch ( err ) {
+    logger.log( 'error', 'savePrograms: FAILED', { err } );
+    newPrograms = programs; // Default to return the request programs so they are not lost
+    const alertMessage = `saveFailed! ${err?.body?.message}`;
+    window.alert( alertMessage );
+  }
+
   logger.log( 'info', 'savePrograms: ', { newPrograms } );
+
   return newPrograms;
 }
 

@@ -18,6 +18,8 @@ type TypeHandlerResponse = {
   body?:      string,
 };
 
+const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
+
 /**
  * @param {*} req : the request object, with properties:
  *                  - query : the query parameters:
@@ -42,7 +44,7 @@ async function handleGET( event: APIGatewayEvent ) : Promise<TypeHandlerResponse
   
     //console.log( 'handleGET: ', { result: cookedPrograms } );
     const headers        = {
-      'Content-Type':   'application/json; charset=UTF-16',
+      'Content-Type':   CONTENT_TYPE_JSON,
       'Content-Length': body.length,
       //'Access-Control-Allow-Origin': '*',
       //'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
@@ -71,7 +73,7 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerRespons
     const strPrograms = stringifyUTF16( newPrograms );
     logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
     const headers = {
-      'Content-Type':  'application/json; charset=UTF-16',
+      'Content-Type':  CONTENT_TYPE_JSON,
       'Content-Length': strPrograms.length,
       //'Access-Control-Allow-Origin': '*',
       //'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
@@ -82,6 +84,12 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerRespons
   }
   catch ( err ) {
     result.statusCode = err.statusCode || 500;
+    const retMessage  = JSON.stringify( { message: err.message || '' } );
+    result.body       = retMessage;
+    result.headers = {
+      'Content-Type':   CONTENT_TYPE_JSON,
+      'Content-Length': retMessage.length,
+    };
   }
 
   return result;
