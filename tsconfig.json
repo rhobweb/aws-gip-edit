@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "lib": [ "dom" ],
-    "module": "commonjs",
+    "module": "NodeNext",
     "moduleResolution": "nodenext",
     "noImplicitAny": true,
     "skipLibCheck": true,

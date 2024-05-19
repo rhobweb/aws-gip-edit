@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, ForwardedRef } from 'react';
 import { Helmet }                                           from 'react-helmet';
-import { getProgDetailsFromLink, cookTitle, cookText }      from '../utils/gip_prog_edit_utils';
+import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils';
 import {
   PROG_FIELD_URI, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_SELECTED, PROG_FIELD_IMAGE_URI,
   TypeEndpointDef, TypeProgramItem, TypeProgramList, TypeProgramEditInput, TypeProgramEditOptions
@@ -52,7 +52,7 @@ const DOC_TITLE = `GIP Program Edit v${ourPackage.version}`;
 function processProgramForSaving( prog : TypeProgramItem ) : TypeDbProgramItem {
   const cookedProgram                  = JSON.parse( JSON.stringify( prog ) );
   cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
-  cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookText( cookedProgram[ PROG_FIELD_SYNOPSIS ] );
+  cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( cookedProgram[ PROG_FIELD_SYNOPSIS ] );
   return progToDb( cookedProgram );
 }
 
