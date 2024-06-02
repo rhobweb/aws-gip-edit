@@ -154,13 +154,19 @@ function getDecendentsByTagNameAndClassTag( elem : TypeHtmlElement, arrTagNameAn
         if ( childClass != null ) {
           arrTagNameAndClassTag.forEach( tagNameAndClassTag => {
             if ( ( child.tagName.toLowerCase() === tagNameAndClassTag.tagName.toLowerCase() ) && elementClassTagMatches( childClass, tagNameAndClassTag.classTag ) ) {
-              objFoundElement[ tagNameAndClassTag.retProp ] = child;
+              if ( ! objFoundElement[ tagNameAndClassTag.retProp ] ) {
+                objFoundElement[ tagNameAndClassTag.retProp ] = child;
+              } else {
+                console.log( `Found multiple: ${tagNameAndClassTag.retProp}` );
+              }
             }
           } );
           const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
+          Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
           Object.assign( objFoundElement, objFoundChildElements );
         } else {
           const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
+          Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
           Object.assign( objFoundElement, objFoundChildElements );
         }
       }
@@ -189,19 +195,6 @@ function getProgAttributes( linkElem: TypeHtmlElement ) {
   ];
   const objFoundItem = getDecendentsByTagNameAndClassTag( linkElem, arrSearchItem );
 
-  //const arrSearchItem : TypeElementTagNameAndClassTag[] = [
-  //  { tagName: 'img',  classTag: 'sw-object-cover', retProp: 'image' },
-  //  { tagName: 'div',  classTag: 'sw-text-primary', retProp: 'info' },
-  //];
-  //const objFoundItem = getDecendentsByTagNameAndClassTag( linkElem, arrSearchItem );
-  //
-  //// The div tag sw-text-primary is expected to have three children.
-  //const infoItem     = objFoundItem?.info || {};
-  //const arrChildren  = infoItem[ 'children' ] || [];
-  //objFoundItem[ 'title' ]     = arrChildren[ 0 ];
-  //objFoundItem[ 'primary' ]   = arrChildren[ 1 ];
-  //objFoundItem[ 'secondary' ] = arrChildren[ 2 ];
-
   const objProgAttributes : TypeProgramAttributes = {
     title:     '',
     episode:   '',
@@ -226,108 +219,6 @@ function getProgAttributes( linkElem: TypeHtmlElement ) {
   }
   console.log('objProgAttributes');
   console.log(objProgAttributes);
-
-/*
-<a
-href="https://www.bbc.co.uk/sounds/play/m001zdx3"
-aria-label="18:15, Loose Ends, Frank Skinner, Maxine Peake, Kathryn Hughes, Rachel Fairburn join Stuart Maconie with music by Willy Vlautin and Phoebe Green, Stuart Maconie and guests with an eclectic mix of conversation, music and comedy."
-data-bbc-container="schedule_items"
-data-bbc-content-label="content"
-data-bbc-event-type="select"
-data-bbc-metadata="{&quot;APP&quot;:&quot;responsive::sounds&quot;,&quot;BID&quot;:&quot;b006qjym&quot;,&quot;POS&quot;:&quot;3::1&quot;,&quot;SIS&quot;:&quot;on-demand&quot;}"
-data-bbc-source="bbc_radio_fourfm"
-class="sw-group sw-block sw-w-full">
-<div class="sw-max-w-schedule sw-flex sw-flex-wrap">
-<div class="sw-w-5/24"><time class="sw-text-great-primer sw-text-primary">18:15</time></div>
-<div class="sw-w-19/24 sw--ml-2 m:sw--ml-4 sw-pl-4"><div class="sw-relative sw-group sw-flex">
-<div class="sw-w-full sw-flex sw-grow">
-<div class="sw-relative sw-hidden m:sw-block sw-w-1/5 sw-self-start">
-<div class="sw-bg-grey-6">
-<div class="sw-aspect-w-1 sw-aspect-h-1">
-<picture>
-<source type="image/webp" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0hyq32k.jpg.webp 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0hyq32k.jpg.webp 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0hyq32k.jpg.webp 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0hyq32k.jpg.webp 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0hyq32k.jpg.webp 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0hyq32k.jpg.webp 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0hyq32k.jpg.webp 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0hyq32k.jpg.webp 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0hyq32k.jpg.webp 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0hyq32k.jpg.webp 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0hyq32k.jpg.webp 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px"><source type="image/jpg" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0hyq32k.jpg 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0hyq32k.jpg 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0hyq32k.jpg 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0hyq32k.jpg 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0hyq32k.jpg 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0hyq32k.jpg 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0hyq32k.jpg 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0hyq32k.jpg 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0hyq32k.jpg 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0hyq32k.jpg 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0hyq32k.jpg 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
-<img src="https://ichef.bbci.co.uk/images/ic/400x400/p0hyq32k.jpg" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">
-</picture>
-</div></div>
-<div class="sw-absolute sw-w-full sw-h-full sw-top-0 sw-opacity-0 sw-bg-[rgba(0,_0,_0,_0.85)] sw-duration-350 sw-transition-bg-color group-active:sw-opacity-100 group-focus:sw-opacity-100 group-hover:sw-opacity-100 motion-reduce:sw-transition-none sw-border-2 sw-border-[transparent] sw-border-solid xl:sw-border-4"><svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-absolute sw-ml-0.5 sw-left-1/2 sw-top-1/2 -sw-translate-x-1/2 -sw-translate-y-1/2 sw-fill-grey-1 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false"><path d="M3 32l26-16L3 0z"></path></svg></div></div><div class="sw-pl-2 m:sw-pl-4 sw-w-10/12 m:sw-w-4/5">
-<div class="sw-text-primary">
-<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-color sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus:sw-text-accent group-focus:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Loose Ends</span>
-<p class="sw-text-long-primer sw-mt-1">Frank Skinner, Maxine Peake, Kathryn Hughes, Rachel Fairburn join Stuart Maconie with music by Willy Vlautin and Phoebe Green</p>
-<p class="sw-text-secondary sw-text-long-primer sw-mt-1 sw-hidden m:sw-block">Stuart Maconie and guests with an eclectic mix of conversation, music and comedy.</p>
-</div></div>
-<div class="sw-w-1/4 m:sw-hidden sw-flex sw-items-center sw-justify-end sw-grow sw-shrink-0"><div class="sw-flex sw-items-center sw-justify-center sw-rounded-full sw-fill-grey-1 sw-bg-sounds-core sw-w-6 sw-h-6 group-hover:sw-bg-sounds-dark"><svg width="10px" height="10px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-fill-grey-1 sw-ml-0.5 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false"><path d="M3 32l26-16L3 0z">
-</path></svg></div></div></div></div></div></div></a>
-
-
-<a href="https://www.bbc.co.uk/sounds/play/m001z6t0" aria-label="12:30, Dead Ringers, Series 24, Politics, world affairs, the culture wars and Mr Blobby." data-bbc-container="schedule_items" data-bbc-content-label="content" data-bbc-event-type="select" data-bbc-metadata="{&quot;APP&quot;:&quot;responsive::sounds&quot;,&quot;BID&quot;:&quot;b007gd85&quot;,&quot;POS&quot;:&quot;3::1&quot;,&quot;SIS&quot;:&quot;on-demand&quot;}" data-bbc-source="bbc_radio_fourfm" class="sw-group sw-block sw-w-full">
-<div class="sw-max-w-schedule sw-flex sw-flex-wrap">
-<div class="sw-w-5/24">
-<time class="sw-text-great-primer sw-text-primary">12:30</time></div><div class="sw-w-19/24 sw--ml-2 m:sw--ml-4 sw-pl-4">
-<div class="sw-relative sw-group sw-flex">
-<div class="sw-w-full sw-flex sw-grow">
-<div class="sw-relative sw-hidden m:sw-block sw-w-1/5 sw-self-start"><div class="sw-bg-grey-6">
-<div class="sw-aspect-w-1 sw-aspect-h-1">
-<picture><source type="image/webp" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0cc5g9v.jpg.webp 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0cc5g9v.jpg.webp 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0cc5g9v.jpg.webp 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0cc5g9v.jpg.webp 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0cc5g9v.jpg.webp 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0cc5g9v.jpg.webp 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0cc5g9v.jpg.webp 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0cc5g9v.jpg.webp 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0cc5g9v.jpg.webp 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0cc5g9v.jpg.webp 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0cc5g9v.jpg.webp 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px"><source type="image/jpg" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0cc5g9v.jpg 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0cc5g9v.jpg 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0cc5g9v.jpg 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0cc5g9v.jpg 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0cc5g9v.jpg 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0cc5g9v.jpg 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0cc5g9v.jpg 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0cc5g9v.jpg 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0cc5g9v.jpg 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0cc5g9v.jpg 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0cc5g9v.jpg 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
-<img src="https://ichef.bbci.co.uk/images/ic/400x400/p0cc5g9v.jpg" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">
-</picture>
-</div></div>
-<div class="sw-absolute sw-w-full sw-h-full sw-top-0 sw-opacity-0 sw-bg-[rgba(0,_0,_0,_0.85)] sw-duration-350 sw-transition-bg-color group-active:sw-opacity-100 group-focus:sw-opacity-100 group-hover:sw-opacity-100 motion-reduce:sw-transition-none sw-border-2 sw-border-[transparent] sw-border-solid xl:sw-border-4"><svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-absolute sw-ml-0.5 sw-left-1/2 sw-top-1/2 -sw-translate-x-1/2 -sw-translate-y-1/2 sw-fill-grey-1 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false">
-<path d="M3 32l26-16L3 0z"></path>
-</svg></div></div>
-<div class="sw-pl-2 m:sw-pl-4 sw-w-10/12 m:sw-w-4/5">
-<div class="sw-text-primary">
-<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-color sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus:sw-text-accent group-focus:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Dead Ringers</span>
-<p class="sw-text-long-primer sw-mt-1">Series 24</p>
-<p class="sw-text-secondary sw-text-long-primer sw-mt-1 sw-hidden m:sw-block">Politics, world affairs, the culture wars and Mr Blobby.</p>
-</div></div>
-<div class="sw-w-1/4 m:sw-hidden sw-flex sw-items-center sw-justify-end sw-grow sw-shrink-0">
-<div class="sw-flex sw-items-center sw-justify-center sw-rounded-full sw-fill-grey-1 sw-bg-sounds-core sw-w-6 sw-h-6 group-hover:sw-bg-sounds-dark">
-<svg width="10px" height="10px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-fill-grey-1 sw-ml-0.5 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false">
-<path d="M3 32l26-16L3 0z"></path>
-</svg></div></div></div></div></div></div></a>
-
-
-<a href="https://www.bbc.co.uk/sounds/play/m001743x"
-  aria-label="22:00, Stand-Up Specials, Mike Bubbins: Retrosexual, Mike Bubbins, wearing Cuban heels and driving a Ford Cortina, whisks us back to the 70s."
-  data-bbc-container="schedule_items" data-bbc-content-label="content" data-bbc-event-type="select"
-  data-bbc-metadata="{&quot;APP&quot;:&quot;responsive::sounds&quot;,&quot;BID&quot;:&quot;b0b22qhr&quot;,&quot;POS&quot;:&quot;3::1&quot;,&quot;SIS&quot;:&quot;on-demand&quot;}"
-  data-bbc-source="bbc_radio_four_extra" class="sw-group sw-block sw-w-full">
-<div class="sw-max-w-schedule sw-flex sw-flex-wrap">
-<div class="sw-w-5/24">
-<time class="sw-text-great-primer sw-text-primary">22:00</time></div>
-<div class="sw-w-19/24 sw--ml-2 m:sw--ml-4 sw-pl-4">
-<div class="sw-relative sw-group sw-flex">
-<div class="sw-w-full sw-flex sw-grow">
-<div class="sw-relative sw-hidden m:sw-block sw-w-1/5 sw-self-start">
-<div class="sw-bg-grey-6">
-<div class="sw-aspect-w-1 sw-aspect-h-1">
-<picture>
-<source type="image/webp" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0c38h9q.jpg.webp 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0c38h9q.jpg.webp 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0c38h9q.jpg.webp 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0c38h9q.jpg.webp 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0c38h9q.jpg.webp 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0c38h9q.jpg.webp 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0c38h9q.jpg.webp 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0c38h9q.jpg.webp 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0c38h9q.jpg.webp 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0c38h9q.jpg.webp 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0c38h9q.jpg.webp 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
-<source type="image/jpg" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p0c38h9q.jpg 160w,https://ichef.bbci.co.uk/images/ic/192x192/p0c38h9q.jpg 192w,https://ichef.bbci.co.uk/images/ic/224x224/p0c38h9q.jpg 224w,https://ichef.bbci.co.uk/images/ic/288x288/p0c38h9q.jpg 288w,https://ichef.bbci.co.uk/images/ic/368x368/p0c38h9q.jpg 368w,https://ichef.bbci.co.uk/images/ic/400x400/p0c38h9q.jpg 400w,https://ichef.bbci.co.uk/images/ic/448x448/p0c38h9q.jpg 448w,https://ichef.bbci.co.uk/images/ic/496x496/p0c38h9q.jpg 496w,https://ichef.bbci.co.uk/images/ic/512x512/p0c38h9q.jpg 512w,https://ichef.bbci.co.uk/images/ic/576x576/p0c38h9q.jpg 576w,https://ichef.bbci.co.uk/images/ic/624x624/p0c38h9q.jpg 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
-<img src="https://ichef.bbci.co.uk/images/ic/400x400/p0c38h9q.jpg" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">
-</picture>
-</div></div>
-<div class="sw-absolute sw-w-full sw-h-full sw-top-0 sw-opacity-0 sw-bg-[rgba(0,_0,_0,_0.85)] sw-duration-350 sw-transition-bg-color group-active:sw-opacity-100 group-focus:sw-opacity-100 group-hover:sw-opacity-100 motion-reduce:sw-transition-none sw-border-2 sw-border-[transparent] sw-border-solid xl:sw-border-4"><svg width="32px" height="32px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-absolute sw-ml-0.5 sw-left-1/2 sw-top-1/2 -sw-translate-x-1/2 -sw-translate-y-1/2 sw-fill-grey-1 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false">
-<path d="M3 32l26-16L3 0z"></path>
-</svg></div></div>
-<div class="sw-pl-2 m:sw-pl-4 sw-w-10/12 m:sw-w-4/5">
-<div class="sw-text-primary">
-<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-color sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus:sw-text-accent group-focus:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Stand-Up Specials</span>
-<p class="sw-text-long-primer sw-mt-1">Mike Bubbins: Retrosexual</p>
-<p class="sw-text-secondary sw-text-long-primer sw-mt-1 sw-hidden m:sw-block">Mike Bubbins, wearing Cuban heels and driving a Ford Cortina, whisks us back to the 70s.</p>
-</div>
-</div>
-<div class="sw-w-1/4 m:sw-hidden sw-flex sw-items-center sw-justify-end sw-grow sw-shrink-0">
-<div class="sw-flex sw-items-center sw-justify-center sw-rounded-full sw-fill-grey-1 sw-bg-sounds-core sw-w-6 sw-h-6 group-hover:sw-bg-sounds-dark">
-<svg width="10px" height="10px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sw-fill-grey-1 sw-ml-0.5 sw-transition sw-ease sw-duration-350 motion-reduce:sw-transition-none" aria-hidden="true" focusable="false">
-<path d="M3 32l26-16L3 0z"></path></svg>
-</div></div></div></div></div></div></a>
-
-parent: div "sw-text-primary"
-Program Title:   child 0
-Program Summary: child 1
-Program Detail:  child 2
-*/
 
   return objProgAttributes;
 }
@@ -378,14 +269,37 @@ function cookEpisode( rawText : string ) : string[]
 {
   let arrCookedText : string[] = [];
   let matched;
+
+  const matchEpisodeOf = (strText: string) => {
+    let arrCookedEpisode : string[] = [];
+    let matchedEpisode;
+    if ( matchedEpisode = strText.match( /(.*?)([0-9]+)\/([0-9]+)/ ) ) {
+      arrCookedEpisode = [ matchedEpisode[1], `${matchedEpisode[2]}of${matchedEpisode[3]}` ];
+      console.log( `Cooked ${arrCookedEpisode.join(' ')}` );
+    }
+    return arrCookedEpisode;
+  };
+
+  //console.log( `Cooking episode` );
+  //console.log( rawText );
   if ( matched = rawText.match( /(Series) ([0-9]+)/i ) ) {
     arrCookedText = [ `${matched[1]}${matched[2]}` ];
   } else if ( matched = rawText.match( /^([0-9]+)\.(.*)/ ) ) {
-     arrCookedText = [ matched[1], matched[2] ];
-  } else if ( matched = rawText.match( /(.*?)([0-9]+)\/([0-9]+)/ ) ) {
-    arrCookedText = [ matched[1], `${matched[2]}of${matched[3]}` ];
+    arrCookedText = [ matched[1], matched[2] ];
+  }
+  let episodeItem : string;
+  let arrEpisode;
+  if ( arrCookedText.length ) {
+    episodeItem = arrCookedText.pop() || ''; // Will never hit the default unless the previous code is changed
   } else {
-    arrCookedText = [ rawText ];
+    episodeItem = rawText;
+  }
+  arrEpisode = matchEpisodeOf( episodeItem );
+
+  if ( arrEpisode.length ) {
+    arrCookedText.push( ...arrEpisode );
+  } else {
+    arrCookedText.push( episodeItem );
   }
 
   return arrCookedText;
