@@ -272,7 +272,7 @@ describe(MODULE_NAME + ':containsHeader', () => {
   let   testModule:     TypeTestModule;
   let   testArgs:       TypeContainsHeaderArgs;
   let   testHeaders:    Record<string,string>;
-  let   testHeaderProp: string;
+  let   testHeaderProp: string = '';
   let   actualResult:   TypeContainsHeaderRet;
   let   expectedResult: TypeContainsHeaderRet;
 

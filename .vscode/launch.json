@@ -22,7 +22,6 @@
         "STAGE":          "lcl",
         "NODE_LOG_LEVEL": "debug",
         "AUTH_URI":       "http://localhost:3013/sso",
-        "NODE_OPTIONS":   "--dns-result-order=ipv4first",
       }
     },
     {
@@ -31,7 +30,7 @@
       "name": "Unit Tests",
       "program": "${workspaceFolder}/node_modules/ts-mocha/bin/ts-mocha",
       //"runtimeExecutable": "ts-mocha",
-      "runtimeVersion": "18.16.1",
+      "runtimeVersion": "22.14.0",
       "env": {
         "NODE_ENV":        "test-unit",
         "TS_NODE_PROJECT": "./tsconfig-unittest.json",
@@ -66,7 +65,7 @@
       "name": "Unit Test Coverage",
       "program": "${workspaceFolder}/node_modules/nyc/bin/nyc",
       //"runtimeExecutable": "ts-mocha",
-      "runtimeVersion": "18.16.1",
+      "runtimeVersion": "22.14.0",
       "env": {
         "NODE_ENV":        "test-unit",
         "TS_NODE_PROJECT": "./tsconfig-unittest.json",
@@ -144,7 +143,7 @@
       "env": {
         "AWS_REGION":     "eu-west-1",
         "STAGE":          "dev",
-        "NODE_LOG_LEVEL": "debug"
+        "NODE_LOG_LEVEL": "info"
       }
     },
   ]

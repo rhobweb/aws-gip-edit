@@ -13,7 +13,9 @@ type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>
 export type TypeRawQueryParams       = Partial<{ [key: string]: TypeRawQueryParamValue }>
 
 type TypeProcessEndpointDefArgs = {
-  endpointDef: TypeEndpointDef, params?: TypeRawHttpParams, headers?: TypeHttpHeaders,
+  endpointDef: TypeEndpointDef,
+  params?:     TypeRawHttpParams,
+  headers?:    TypeHttpHeaders,
 };
 type TypeProcessEndpointDefRet = TypeEndpoint;
 

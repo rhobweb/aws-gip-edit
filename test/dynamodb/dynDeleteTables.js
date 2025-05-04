@@ -1,5 +1,5 @@
 /**
- * Node utility to create the AWS Dynamo DB tables for local testing of aws-gip-edit
+ * Node utility to create the AWS DynamoDB tables for local testing
  */
 const dynCommon = require( "./dynCommon" );
 

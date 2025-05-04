@@ -1,6 +1,6 @@
 ---
 service: gip-edit-react
-frameworkVersion: "3"
+frameworkVersion: "4"
 useDotenv: true
 disabledDeprecations:
   - CLI_OPTIONS_SCHEMA # some Serverless plugins haven't been updated yet and generate warnings
@@ -12,9 +12,12 @@ plugins:
   - serverless-s3-deploy
   - serverless-domain-manager
 
+build:
+  esbuild: false
+
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs22.x
   region: ${opt:region, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
   memorySize: 512
