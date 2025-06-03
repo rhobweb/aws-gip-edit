@@ -105,9 +105,10 @@
       "preLaunchTask": "tsc: build - tsconfig-systemtest.json",
       "outFiles": ["${workspaceFolder}/test-out/**/*.js"],
       "env": {
-        "AWS_REGION":   "eu-west-1",
-        "AWS_ENDPOINT": "http://localhost:8000",
-        "STAGE":        "dev"
+        "AWS_REGION":       "eu-west-1",
+        "AWS_ENDPOINT":     "http://localhost:8000",
+        "STAGE":            "dev",
+        "GIP_MAX_PROGRAMS": "20",
       }
     },
     {
@@ -146,5 +147,12 @@
         "NODE_LOG_LEVEL": "info"
       }
     },
+		{
+			"type": "node-terminal",
+			"name": "Clean",
+			"request": "launch",
+			"preLaunchTask": "clean",
+			"command": "exit",
+		},
   ]
 }

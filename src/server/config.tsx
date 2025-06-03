@@ -15,6 +15,8 @@ const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE;
  * hook. However, due to this behavior, it is important NOT to expose any sensitive information
  * such as passwords or tokens through the config.
  */
+const LOCAL_APIGATEWAY_URL = 'http://localhost:8082';
+
 const config = {
   /** Application Config */
   app: {
@@ -23,11 +25,11 @@ const config = {
     /** Theme is also loaded from the `manifest.json` */
     THEME_COLOR: manifest.theme_color,
     /** URL to our public API Gateway endpoint */
-    URL: isLocal ? `http://localhost:8082` : String(process.env.APIGATEWAY_URL),
+    URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APIGATEWAY_URL),
     /** Where the bundled distribution files (`main.js`, `main.css`) are hosted */
-    DIST_URL: isLocal ? "http://localhost:8082" : String(process.env.APP_DIST_URL),
+    DIST_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_DIST_URL),
     /** Where the contents of the `public` folder are hosted (might be the same as `config.app.DIST_URL`) */
-    PUBLIC_URL: isLocal ? "http://localhost:8082" : String(process.env.APP_PUBLIC_URL),
+    PUBLIC_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_PUBLIC_URL),
   },
 };
 

@@ -357,13 +357,17 @@ async function genUpdateCommandParams( { programs, actualPrograms } : { programs
   return commandParams;
 }
 
-//function sortPrograms( rawPrograms: TypeDbProgramItem[] ) : TypeDbProgramItem[] {
-//  const orderedRawPrograms = rawPrograms.sort( ( a, b ) => {
-//    // @ts-ignore - pos should always be null here
-//    return a[ DB_FIELD_POS ] - b[ DB_FIELD_POS ];
-//  } );
-//  return orderedRawPrograms;
-//}
+/**
+ * @param rawPrograms : array of program objects
+ * @returns array of program objects in the same order they were created.
+ */
+function sortPrograms( rawPrograms: TypeDbProgramItem[] ) : TypeDbProgramItem[] {
+  const orderedRawPrograms = rawPrograms.sort( ( a, b ) => {
+    // @ts-ignore - a and b shall not be null
+    return a[ DB_FIELD_POS ] - b[ DB_FIELD_POS ];
+  } );
+  return orderedRawPrograms;
+}
 
 class GipDynamoDB {
   config:   DynamoDBClientConfig;
@@ -406,10 +410,8 @@ class GipDynamoDB {
 
     try {
       const records  = await loadTable( { dbClient: this.dbClient, tableName: TABLE_PROGRAM } );
-      programs = extractPrograms( records );
-      //const records           = await loadTable( { dbClient: this.dbClient, tableName: TABLE_PROGRAM } );
-      //const unorderedPrograms = extractPrograms( records );
-      //programs = sortPrograms( unorderedPrograms );
+      const unorderedPrograms = extractPrograms( records );
+      programs = sortPrograms( unorderedPrograms );
       logger.log( 'debug', 'loadProgs: success', { programs } );
     }
     catch ( err ) {

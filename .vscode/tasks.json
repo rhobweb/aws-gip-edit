@@ -1,0 +1,12 @@
+{
+  // See https://code.visualstudio.com/docs/editor/tasks for more information
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "/bin/rm -rf \"${workspaceFolder}/dist\" \"${workspaceFolder}/output\" \"${workspaceFolder}/.webpack\"",
+      "problemMatcher": []
+    },
+  ]
+}
