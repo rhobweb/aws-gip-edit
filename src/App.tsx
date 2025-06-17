@@ -10,10 +10,10 @@ import Authenticator from './components/authenticator';
  * Our Web Application
  */
 export default function App() : React.JSX.Element {
-  const config = useConfig();
-  return (
-    <Authenticator>
-      <GipEdit />
-    </Authenticator>
-  );
+	const config = useConfig();
+	return (
+		<Authenticator>
+			<GipEdit />
+		</Authenticator>
+	);
 }

@@ -13,9 +13,9 @@ import { parseQueryParams, stringifyUTF16, TypeRawQueryParams } from '../utils/g
 import { TypeDbProgramItem, DB_FIELD_POS }                      from '../utils/gip_prog_fields';
 
 type TypeHandlerResponse = {
-  statusCode: Number,
-  headers?:   Record<string,any>,
-  body?:      string,
+	statusCode: Number,
+	headers?:   Record<string,any>,
+	body?:      string,
 };
 
 const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
@@ -28,124 +28,124 @@ const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
  * @returns 
  */
 async function handleGET( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-  const result : TypeHandlerResponse = {
-    statusCode: 200,
-  };
-  try {
-    const rawQueryParams = event.queryStringParameters || {};
-    const params         = parseQueryParams( rawQueryParams as TypeRawQueryParams );
-    logger.log( 'debug', 'handleGET: START: ', { params } );
-    const programs       = await loadProgs();
-    logger.log( 'debug', 'handleGET: filterPrograms: START' );
-    const cookedPrograms = filterPrograms( { programs, params } );
-    logger.log( 'debug', 'handleGET: filterPrograms: success: ', cookedPrograms );
-    const body           = stringifyUTF16( cookedPrograms );
-    logger.log( 'debug', 'handleGET: stringifyUTF16: success: ', body );
-  
-    //console.log( 'handleGET: ', { result: cookedPrograms } );
-    const headers        = {
-      'Content-Type':   CONTENT_TYPE_JSON,
-      'Content-Length': body.length,
-      //'Access-Control-Allow-Origin': '*',
-      //'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
-      //'Access-Control-Allow-Headers': '*',
-     };
-    result.headers = headers;
-    result.body    = body;
-  }
-  catch ( err ) {
-    result.statusCode = err.statusCode || 500;
-  }
+	const result : TypeHandlerResponse = {
+		statusCode: 200,
+	};
+	try {
+		const rawQueryParams = event.queryStringParameters || {};
+		const params         = parseQueryParams( rawQueryParams as TypeRawQueryParams );
+		logger.log( 'debug', 'handleGET: START: ', { params } );
+		const programs       = await loadProgs();
+		logger.log( 'debug', 'handleGET: filterPrograms: START' );
+		const cookedPrograms = filterPrograms( { programs, params } );
+		logger.log( 'debug', 'handleGET: filterPrograms: success: ', cookedPrograms );
+		const body           = stringifyUTF16( cookedPrograms );
+		logger.log( 'debug', 'handleGET: stringifyUTF16: success: ', body );
+	
+		//console.log( 'handleGET: ', { result: cookedPrograms } );
+		const headers        = {
+			'Content-Type':   CONTENT_TYPE_JSON,
+			'Content-Length': body.length,
+			//'Access-Control-Allow-Origin': '*',
+			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
+			//'Access-Control-Allow-Headers': '*',
+		 };
+		result.headers = headers;
+		result.body    = body;
+	}
+	catch ( err ) {
+		result.statusCode = err.statusCode || 500;
+	}
 
-   return result;
+	 return result;
 }
 
 async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-  const result : TypeHandlerResponse = {
-    statusCode: 200,
-  };
-  try {
-    const rawBody = event.body || '[]';
-    const programs : TypeDbProgramItem[] = JSON.parse( rawBody );
-    logger.log( 'debug', 'handlePOST: START: ', { programs } );
-    const newPrograms = await saveProgs( { programs } );
-    logger.log( 'debug', 'handlePOST: saveProgs: success: ', newPrograms );
-    const strPrograms = stringifyUTF16( newPrograms );
-    logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
-    const headers = {
-      'Content-Type':  CONTENT_TYPE_JSON,
-      'Content-Length': strPrograms.length,
-      //'Access-Control-Allow-Origin': '*',
-      //'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
-      //'Access-Control-Allow-Headers': '*',
-     };
-     result.headers = headers;
-     result.body    = strPrograms;
-  }
-  catch ( err ) {
-    result.statusCode = err.statusCode || 500;
-    const retMessage  = JSON.stringify( { message: err.message || '' } );
-    result.body       = retMessage;
-    result.headers = {
-      'Content-Type':   CONTENT_TYPE_JSON,
-      'Content-Length': retMessage.length,
-    };
-  }
+	const result : TypeHandlerResponse = {
+		statusCode: 200,
+	};
+	try {
+		const rawBody = event.body || '[]';
+		const programs : TypeDbProgramItem[] = JSON.parse( rawBody );
+		logger.log( 'debug', 'handlePOST: START: ', { programs } );
+		const newPrograms = await saveProgs( { programs } );
+		logger.log( 'debug', 'handlePOST: saveProgs: success: ', newPrograms );
+		const strPrograms = stringifyUTF16( newPrograms );
+		logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
+		const headers = {
+			'Content-Type':  CONTENT_TYPE_JSON,
+			'Content-Length': strPrograms.length,
+			//'Access-Control-Allow-Origin': '*',
+			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
+			//'Access-Control-Allow-Headers': '*',
+		 };
+		 result.headers = headers;
+		 result.body    = strPrograms;
+	}
+	catch ( err ) {
+		result.statusCode = err.statusCode || 500;
+		const retMessage  = JSON.stringify( { message: err.message || '' } );
+		result.body       = retMessage;
+		result.headers = {
+			'Content-Type':   CONTENT_TYPE_JSON,
+			'Content-Length': retMessage.length,
+		};
+	}
 
-  return result;
+	return result;
 }
 
 async function handlePATCH( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-  const result = {
-    statusCode: 200,
-  };
-  try {
-    const rawBody = event.body || '[]';
-    if ( rawBody.length > 0 ) {
-      const newPrograms : TypeDbProgramItem[] = JSON.parse( rawBody );
-      logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
-      await updateProgs( { programs: newPrograms } );
-    } else {
-      logger.log( 'info', 'handlePATCH: called with no programs' );
-      result.statusCode = 400;
-    }
-  }
-  catch ( err ) {
-    result.statusCode = err.statusCode || 500;
-  }
-  return result;
+	const result = {
+		statusCode: 200,
+	};
+	try {
+		const rawBody = event.body || '[]';
+		if ( rawBody.length > 0 ) {
+			const newPrograms : TypeDbProgramItem[] = JSON.parse( rawBody );
+			logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
+			await updateProgs( { programs: newPrograms } );
+		} else {
+			logger.log( 'info', 'handlePATCH: called with no programs' );
+			result.statusCode = 400;
+		}
+	}
+	catch ( err ) {
+		result.statusCode = err.statusCode || 500;
+	}
+	return result;
 }
 
 async function handleUnsupported( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-  //const headers = {
-  //  'Content-Type': 'text/plain',
-  //  'Content-Length': 0,
-  // };
-  return {
-    statusCode: 404,
-    //headers,
-  };
+	//const headers = {
+	//  'Content-Type': 'text/plain',
+	//  'Content-Length': 0,
+	// };
+	return {
+		statusCode: 404,
+		//headers,
+	};
 }
 
 export async function handler( event: APIGatewayEvent, _context: Context ): Promise<APIGatewayProxyResultV2> {
-  logger.log( 'info',  `handler:BEGIN: `, { httpMethod: event.httpMethod, path: event.path } );
-  logger.log( 'debug', `handler:programs: `, { event } );
+	logger.log( 'info',  `handler:BEGIN: `, { httpMethod: event.httpMethod, path: event.path } );
+	logger.log( 'debug', `handler:programs: `, { event } );
 
-  const METHOD_HANDLER : Record<string, Function> = {
-    'GET':     handleGET,
-    'POST':    handlePOST,
-    'PATCH':   handlePATCH,
-    'default': handleUnsupported,
-  };
+	const METHOD_HANDLER : Record<string, Function> = {
+		'GET':     handleGET,
+		'POST':    handlePOST,
+		'PATCH':   handlePATCH,
+		'default': handleUnsupported,
+	};
 
-  const method    = event.httpMethod || 'default'; // 'method' may be undefined
-  const fnHandler = METHOD_HANDLER[ method ] || METHOD_HANDLER.default;
+	const method    = event.httpMethod || 'default'; // 'method' may be undefined
+	const fnHandler = METHOD_HANDLER[ method ] || METHOD_HANDLER.default;
 
-  const result = await fnHandler( event );
+	const result = await fnHandler( event );
 
-  logger.log( 'info: handler: END ', { httpMethod: event.httpMethod, path: event.path, statusCode: result.statusCode } );
+	logger.log( 'info: handler: END ', { httpMethod: event.httpMethod, path: event.path, statusCode: result.statusCode } );
 
-  return result;
+	return result;
 }
 
 export default { handler };

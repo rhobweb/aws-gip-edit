@@ -13,30 +13,30 @@ export const PROG_FIELD_SELECTED    = 'selected';
 
 // No idea why, but TS moans if the value type is set to anything other than 'any'
 export interface TypeProgramEditInput extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  [PROG_FIELD_URI]       : string;
-  [PROG_FIELD_TITLE]     : string;
-  [PROG_FIELD_SYNOPSIS]  : string;
-  [PROG_FIELD_IMAGE_URI] : string;
+	[PROG_FIELD_URI]       : string;
+	[PROG_FIELD_TITLE]     : string;
+	[PROG_FIELD_SYNOPSIS]  : string;
+	[PROG_FIELD_IMAGE_URI] : string;
 }
 
 // No idea why, but TS moans if the value type is set to anything other than 'any'
 export interface TypeProgramEditOptions extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  [PROG_FIELD_GENRE]       : string;
-  [PROG_FIELD_DAY_OF_WEEK] : string;
-  [PROG_FIELD_QUALITY]     : string;
+	[PROG_FIELD_GENRE]       : string;
+	[PROG_FIELD_DAY_OF_WEEK] : string;
+	[PROG_FIELD_QUALITY]     : string;
 }
 
 // No idea why, but TS moans if the value type is set to anything other than 'any'
 export interface TypeProgramItem  extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
-  [PROG_FIELD_PID]         : string;
-  [PROG_FIELD_STATUS]      : string;
-  [PROG_FIELD_TITLE]       : string;
-  [PROG_FIELD_SYNOPSIS]    : string;
-  [PROG_FIELD_IMAGE_URI]   : string;
-  [PROG_FIELD_GENRE]       : string;
-  [PROG_FIELD_DAY_OF_WEEK] : string;
-  [PROG_FIELD_QUALITY]     : string;
-  [PROG_FIELD_SELECTED]    : boolean;
+	[PROG_FIELD_PID]         : string;
+	[PROG_FIELD_STATUS]      : string;
+	[PROG_FIELD_TITLE]       : string;
+	[PROG_FIELD_SYNOPSIS]    : string;
+	[PROG_FIELD_IMAGE_URI]   : string;
+	[PROG_FIELD_GENRE]       : string;
+	[PROG_FIELD_DAY_OF_WEEK] : string;
+	[PROG_FIELD_QUALITY]     : string;
+	[PROG_FIELD_SELECTED]    : boolean;
 }
 
 export type TypeProgramList = TypeProgramItem[];
@@ -44,28 +44,28 @@ export type TypeProgramList = TypeProgramItem[];
 export type TypeHandlerProgramChange = ( newPrograms: TypeProgramList ) => void;
 
 export type TypeProgramDownloadOptions = {
-  all?:        boolean,
-  current?:    boolean,
-  downloaded?: boolean
+	all?:        boolean,
+	current?:    boolean,
+	downloaded?: boolean
 };
 
 export type TypeEndpointDef = {
-  method:   string,
-  uri:      string,
-  params?:  TypeHttpParams,
-  headers?: TypeHttpHeaders,
+	method:   string,
+	uri:      string,
+	params?:  TypeHttpParams,
+	headers?: TypeHttpHeaders,
 };
 
 export type TypeEndpointOptions = {
-  method:   string,
-  headers?: TypeHttpHeaders,
-  body?:    TypeHttpParams,
-  mode?:    string,
+	method:   string,
+	headers?: TypeHttpHeaders,
+	body?:    TypeHttpParams,
+	mode?:    string,
 };
 
 export type TypeEndpoint = {
-  uri:     string,
-  options: TypeEndpointOptions,
+	uri:     string,
+	options: TypeEndpointOptions,
 };
 
 export type TypeEventChangeInput      = ChangeEvent<HTMLInputElement>;

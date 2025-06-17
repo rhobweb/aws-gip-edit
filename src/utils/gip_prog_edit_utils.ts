@@ -17,16 +17,16 @@ type TypeHtmlElementCollection = TypeHtmlElement[];
 //type TypeHtmlElementCollection = HTMLCollectionOf<Element>;
 
 type TypeProgramAttributes = {
-  title:     string,
-  episode:   string,
-  synopsis:  string,
-  image_uri: string,
+	title:     string,
+	episode:   string,
+	synopsis:  string,
+	image_uri: string,
 };
 
 type TypeElementTagNameAndClassTag = {
-  tagName:  string,
-  classTag: string | string[],
-  retProp:  string,
+	tagName:  string,
+	classTag: string | string[],
+	retProp:  string,
 };
 
 type TypeFoundElement = Record<string,TypeHtmlElement>;
@@ -38,20 +38,20 @@ type TypeFoundElement = Record<string,TypeHtmlElement>;
  */
 function convertToCamelCase( str : string ) : string
 {
-  let cookedStr = str;
+	let cookedStr = str;
 
-  if ( /\s/g.test(str) ) // Only camelcase if the string contains whitespace
-  {
-    cookedStr = str.toLowerCase()    // Lower cases the string
-      .replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space 
-      .replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters 
-      .replace( /\s+/g, ' ' )        // Shrink multiple spaces
-      .replace( / (.)/g, ( ...args ) => { return args[1].toUpperCase(); })  // Uppercases first char in each group after a space 
-      .replace( / /g, '' )           // Removes spaces 
-      .replace( /^(.)/g, ( ...args ) => { return args[1].toUpperCase(); }); // Uppercases the first character
-  }
+	if ( /\s/g.test(str) ) // Only camelcase if the string contains whitespace
+	{
+		cookedStr = str.toLowerCase()    // Lower cases the string
+			.replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space 
+			.replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters 
+			.replace( /\s+/g, ' ' )        // Shrink multiple spaces
+			.replace( / (.)/g, ( ...args ) => { return args[1].toUpperCase(); })  // Uppercases first char in each group after a space 
+			.replace( / /g, '' )           // Removes spaces 
+			.replace( /^(.)/g, ( ...args ) => { return args[1].toUpperCase(); }); // Uppercases the first character
+	}
 
-  return cookedStr;
+	return cookedStr;
 }
 
 /**
@@ -62,68 +62,68 @@ function convertToCamelCase( str : string ) : string
  */
 function getDecendentsByClassTag( elem : TypeHtmlElement, arrClassTag: string[] ) : TypeHtmlElementCollection
 {
-  const arrDecendentElemList      = [];
-  let   children : Array<Element> = [];
+	const arrDecendentElemList      = [];
+	let   children : Array<Element> = [];
 
-  if ( elem !== null ) {
-    children = Array.from( elem.childNodes ) as Array<Element>;
-  }
+	if ( elem !== null ) {
+		children = Array.from( elem.childNodes ) as Array<Element>;
+	}
 
-  const arrSearchTag = arrClassTag.map( tag => tag.toLowerCase() );
+	const arrSearchTag = arrClassTag.map( tag => tag.toLowerCase() );
 
-  for ( let i = 0; i < children.length; ++i ) {
-    const child = children[i];
-    //console.log( 'Child: ', JSON.stringify(child), typeof child );
-    try {
-      if ( ( typeof child === 'object' ) && child.getAttribute ) {
-        const childClass = child.getAttribute( 'class' );
-        //console.log( 'Child class: ', childClass, typeof childClass );
-        if ( childClass != null ) {
-          arrSearchTag.forEach( classTag => {
-            if ( childClass.toLowerCase().indexOf( classTag ) !== -1 ) {
-              arrDecendentElemList.push( child );
-            }
-          } );
-          const arrMore = getDecendentsByClassTag( child, arrSearchTag );
-          arrDecendentElemList.push( ...arrMore );
-        } else {
-          const arrMore = getDecendentsByClassTag( child, arrSearchTag );
-          arrDecendentElemList.push( ...arrMore );
-        }
-      }
-    }
-    catch ( err ) {
-      console.log( 'getDecendentsByClassTag: ', (<Error>err).message );
-    }
-  }
+	for ( let i = 0; i < children.length; ++i ) {
+		const child = children[i];
+		//console.log( 'Child: ', JSON.stringify(child), typeof child );
+		try {
+			if ( ( typeof child === 'object' ) && child.getAttribute ) {
+				const childClass = child.getAttribute( 'class' );
+				//console.log( 'Child class: ', childClass, typeof childClass );
+				if ( childClass != null ) {
+					arrSearchTag.forEach( classTag => {
+						if ( childClass.toLowerCase().indexOf( classTag ) !== -1 ) {
+							arrDecendentElemList.push( child );
+						}
+					} );
+					const arrMore = getDecendentsByClassTag( child, arrSearchTag );
+					arrDecendentElemList.push( ...arrMore );
+				} else {
+					const arrMore = getDecendentsByClassTag( child, arrSearchTag );
+					arrDecendentElemList.push( ...arrMore );
+				}
+			}
+		}
+		catch ( err ) {
+			console.log( 'getDecendentsByClassTag: ', (<Error>err).message );
+		}
+	}
 
-  return arrDecendentElemList;
+	return arrDecendentElemList;
 }
 
 function elementClassTagMatches( classNames : string, classTag : string | string[] ) : boolean {
-  let bMatch      = true; // Default to true
-  let arrClassTag = [];
+	let bMatch      = true; // Default to true
+	let arrClassTag = [];
 
-  if ( Array.isArray( classTag ) ) {
-    arrClassTag = classTag;
-  } else {
-    arrClassTag = [ classTag ];
-  }
+	if ( Array.isArray( classTag ) ) {
+		arrClassTag = classTag;
+	} else {
+		arrClassTag = [ classTag ];
+	}
 
-  arrClassTag.forEach( classTagItem => {
-    let   thisClassTag = classTagItem;
-    const matchResult  = classTagItem.match( /^!(.*)/ );
-    if ( matchResult ) {
-      thisClassTag = matchResult[ 1 ];
-      //console.log( `Matching not: ${thisClassTag}` );
-      bMatch = bMatch && ( classNames.toLowerCase().indexOf( thisClassTag.toLowerCase() ) === -1 );
-      //console.log( `Result: ${bMatch}` );
-    } else {
-      bMatch = bMatch && ( classNames.toLowerCase().indexOf( thisClassTag.toLowerCase() ) !== -1 );
-    }
-  } );
+	arrClassTag.forEach( classTagItem => {
+		let   thisClassTag = classTagItem;
+		const matchResult  = classTagItem.match( /^!(.*)/ );
+		if ( matchResult ) {
+			thisClassTag = matchResult[ 1 ];
+			//console.log( `Matching not: ${thisClassTag}` );
+			bMatch = bMatch && ( classNames.toLowerCase().indexOf( thisClassTag.toLowerCase() ) === -1 );
+			//console.log( `Result: ${bMatch}` );
+		} else {
+			bMatch = bMatch && ( classNames.toLowerCase().indexOf( thisClassTag.toLowerCase() ) !== -1 );
+		}
+	} );
 
-  return bMatch;
+	return bMatch;
 }
 
 /**
@@ -137,46 +137,46 @@ function elementClassTagMatches( classNames : string, classTag : string | string
  */
 function getDecendentsByTagNameAndClassTag( elem : TypeHtmlElement, arrTagNameAndClassTag: TypeElementTagNameAndClassTag[] ) : TypeFoundElement
 {
-  const objFoundElement : TypeFoundElement = {};
-  let   children        : Array<Element> = [];
+	const objFoundElement : TypeFoundElement = {};
+	let   children        : Array<Element> = [];
 
-  if ( elem !== null ) {
-    children = Array.from( elem.childNodes ) as Array<Element>;
-  }
+	if ( elem !== null ) {
+		children = Array.from( elem.childNodes ) as Array<Element>;
+	}
 
-  for ( let i = 0; i < children.length; ++i ) {
-    const child = children[i];
-    //console.log( 'Child: ', JSON.stringify(child), typeof child );
-    try {
-      if ( ( typeof child === 'object' ) && child.getAttribute ) {
-        const childClass = child.getAttribute( 'class' );
-        //console.log( 'Child tagName: ', `[${child.tagName}]` );
-        if ( childClass != null ) {
-          arrTagNameAndClassTag.forEach( tagNameAndClassTag => {
-            if ( ( child.tagName.toLowerCase() === tagNameAndClassTag.tagName.toLowerCase() ) && elementClassTagMatches( childClass, tagNameAndClassTag.classTag ) ) {
-              if ( ! objFoundElement[ tagNameAndClassTag.retProp ] ) {
-                objFoundElement[ tagNameAndClassTag.retProp ] = child;
-              } else {
-                console.log( `Found multiple: ${tagNameAndClassTag.retProp}` );
-              }
-            }
-          } );
-          const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
-          Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
-          Object.assign( objFoundElement, objFoundChildElements );
-        } else {
-          const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
-          Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
-          Object.assign( objFoundElement, objFoundChildElements );
-        }
-      }
-    }
-    catch ( err ) {
-      console.log( 'getDecendentsByTypeAndClassTag: ', (<Error>err).message );
-    }
-  }
+	for ( let i = 0; i < children.length; ++i ) {
+		const child = children[i];
+		//console.log( 'Child: ', JSON.stringify(child), typeof child );
+		try {
+			if ( ( typeof child === 'object' ) && child.getAttribute ) {
+				const childClass = child.getAttribute( 'class' );
+				//console.log( 'Child tagName: ', `[${child.tagName}]` );
+				if ( childClass != null ) {
+					arrTagNameAndClassTag.forEach( tagNameAndClassTag => {
+						if ( ( child.tagName.toLowerCase() === tagNameAndClassTag.tagName.toLowerCase() ) && elementClassTagMatches( childClass, tagNameAndClassTag.classTag ) ) {
+							if ( ! objFoundElement[ tagNameAndClassTag.retProp ] ) {
+								objFoundElement[ tagNameAndClassTag.retProp ] = child;
+							} else {
+								console.log( `Found multiple: ${tagNameAndClassTag.retProp}` );
+							}
+						}
+					} );
+					const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
+					Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
+					Object.assign( objFoundElement, objFoundChildElements );
+				} else {
+					const objFoundChildElements = getDecendentsByTagNameAndClassTag( child, arrTagNameAndClassTag );
+					Object.assign( objFoundChildElements, objFoundElement ); // Do not overwrite existing properties
+					Object.assign( objFoundElement, objFoundChildElements );
+				}
+			}
+		}
+		catch ( err ) {
+			console.log( 'getDecendentsByTypeAndClassTag: ', (<Error>err).message );
+		}
+	}
 
-  return objFoundElement;
+	return objFoundElement;
 }
 
 /**
@@ -185,64 +185,64 @@ function getDecendentsByTagNameAndClassTag( elem : TypeHtmlElement, arrTagNameAn
  * @return object with attributes "name" and "episode".
  */
 function getProgAttributes( linkElem: TypeHtmlElement ) {
-  console.log('Link element');
-  console.log(linkElem);
-  const arrSearchItem : TypeElementTagNameAndClassTag[] = [
-    { tagName: 'img',  classTag: 'sw-object-cover',                               retProp: 'image' },
-    { tagName: 'span', classTag: 'sw-text-primary',                               retProp: 'title' },
-    { tagName: 'p',    classTag: [ 'sw-text-long-primer', '!sw-text-secondary' ], retProp: 'primary' },
-    { tagName: 'p',    classTag: [ 'sw-text-long-primer', 'sw-text-secondary' ],  retProp: 'secondary' },
-  ];
-  const objFoundItem = getDecendentsByTagNameAndClassTag( linkElem, arrSearchItem );
+	console.log('Link element');
+	console.log(linkElem);
+	const arrSearchItem : TypeElementTagNameAndClassTag[] = [
+		{ tagName: 'img',  classTag: 'sw-object-cover',                               retProp: 'image' },
+		{ tagName: 'span', classTag: 'sw-text-primary',                               retProp: 'title' },
+		{ tagName: 'p',    classTag: [ 'sw-text-long-primer', '!sw-text-secondary' ], retProp: 'primary' },
+		{ tagName: 'p',    classTag: [ 'sw-text-long-primer', 'sw-text-secondary' ],  retProp: 'secondary' },
+	];
+	const objFoundItem = getDecendentsByTagNameAndClassTag( linkElem, arrSearchItem );
 
-  const objProgAttributes : TypeProgramAttributes = {
-    title:     '',
-    episode:   '',
-    synopsis:  '',
-    image_uri: '',
-  };
+	const objProgAttributes : TypeProgramAttributes = {
+		title:     '',
+		episode:   '',
+		synopsis:  '',
+		image_uri: '',
+	};
 
-  console.log('objFoundItem');
-  console.log(objFoundItem);
+	console.log('objFoundItem');
+	console.log(objFoundItem);
 
-  if ( objFoundItem.title ) {
-    objProgAttributes.title    = objFoundItem.title.innerHTML;
-  }
-  if ( objFoundItem.primary ) {
-    objProgAttributes.episode  = objFoundItem.primary.innerHTML;
-  }
-  if ( objFoundItem.image ) {
-    objProgAttributes.image_uri = (<HTMLEmbedElement>objFoundItem.image).src;
-  }
-  if ( objFoundItem.secondary ) {
-    objProgAttributes.synopsis  = objFoundItem.secondary.innerHTML;
-  }
-  console.log('objProgAttributes');
-  console.log(objProgAttributes);
+	if ( objFoundItem.title ) {
+		objProgAttributes.title    = objFoundItem.title.innerHTML;
+	}
+	if ( objFoundItem.primary ) {
+		objProgAttributes.episode  = objFoundItem.primary.innerHTML;
+	}
+	if ( objFoundItem.image ) {
+		objProgAttributes.image_uri = (<HTMLEmbedElement>objFoundItem.image).src;
+	}
+	if ( objFoundItem.secondary ) {
+		objProgAttributes.synopsis  = objFoundItem.secondary.innerHTML;
+	}
+	console.log('objProgAttributes');
+	console.log(objProgAttributes);
 
-  return objProgAttributes;
+	return objProgAttributes;
 }
 
 type TypeTextConversionItem = [ ( string | RegExp ), string ];
 type TypeTextConversionList = TypeTextConversionItem[];
 
 const ARR_COMMON_TEXT_CONVERSIONS : TypeTextConversionList = [
-  [ '\u{2019}', '\'' ],
-  [ '\u{0060}', '\'' ],
-  [ '&amp;',    '&'  ],
+	[ '\u{2019}', '\'' ],
+	[ '\u{0060}', '\'' ],
+	[ '&amp;',    '&'  ],
 ];
 
 export function convertText( arrConversion : TypeTextConversionList, rawText : string ) : string
 {
-  let cookedText = rawText;
-  arrConversion.forEach( ([search, replace]) => {
-    if ( typeof search === 'object' ) {
-      cookedText = cookedText.replace( search, replace );
-    } else {
-      cookedText = cookedText.replace( new RegExp( search, 'g' ), replace );
-    }
-  } );
-  return cookedText;
+	let cookedText = rawText;
+	arrConversion.forEach( ([search, replace]) => {
+		if ( typeof search === 'object' ) {
+			cookedText = cookedText.replace( search, replace );
+		} else {
+			cookedText = cookedText.replace( new RegExp( search, 'g' ), replace );
+		}
+	} );
+	return cookedText;
 }
 
 /**
@@ -253,70 +253,70 @@ export function convertText( arrConversion : TypeTextConversionList, rawText : s
  */
 export function cookTitle( rawTitle : string ) : string
 {
-  const arrConversion : TypeTextConversionList = [
-    ...ARR_COMMON_TEXT_CONVERSIONS,
-    [ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
-    [ /[\u007F-\uFFFF]/g, '-' ], // Replace all non-ASCII characters with a dash
-  ];
+	const arrConversion : TypeTextConversionList = [
+		...ARR_COMMON_TEXT_CONVERSIONS,
+		[ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
+		[ /[\u007F-\uFFFF]/g, '-' ], // Replace all non-ASCII characters with a dash
+	];
 
-  const knownTitle     = convertKnownTitle( rawTitle );
-  const convertedTitle = convertText( arrConversion, knownTitle );
+	const knownTitle     = convertKnownTitle( rawTitle );
+	const convertedTitle = convertText( arrConversion, knownTitle );
 
-  return convertedTitle;
+	return convertedTitle;
 }
 
 function cookEpisode( rawText : string ) : string[]
 {
-  let arrCookedText : string[] = [];
-  let matched;
+	let arrCookedText : string[] = [];
+	let matched;
 
-  const matchEpisodeOf = (strText: string) => {
-    let arrCookedEpisode : string[] = [];
-    let matchedEpisode;
-    if ( matchedEpisode = strText.match( /(.*?)([0-9]+)\/([0-9]+)/ ) ) {
-      arrCookedEpisode = [ matchedEpisode[1], `${matchedEpisode[2]}of${matchedEpisode[3]}` ];
-      console.log( `Cooked ${arrCookedEpisode.join(' ')}` );
-    }
-    return arrCookedEpisode;
-  };
+	const matchEpisodeOf = (strText: string) => {
+		let arrCookedEpisode : string[] = [];
+		let matchedEpisode;
+		if ( matchedEpisode = strText.match( /(.*?)([0-9]+)\/([0-9]+)/ ) ) {
+			arrCookedEpisode = [ matchedEpisode[1], `${matchedEpisode[2]}of${matchedEpisode[3]}` ];
+			console.log( `Cooked ${arrCookedEpisode.join(' ')}` );
+		}
+		return arrCookedEpisode;
+	};
 
-  //console.log( `Cooking episode` );
-  //console.log( rawText );
-  if ( matched = rawText.match( /(Series) ([0-9]+)/i ) ) {
-    arrCookedText = [ `${matched[1]}${matched[2]}` ];
-  } else if ( matched = rawText.match( /^([0-9]+)\.(.*)/ ) ) {
-    arrCookedText = [ matched[1], matched[2] ];
-  }
-  let episodeItem : string;
-  let arrEpisode;
-  if ( arrCookedText.length ) {
-    episodeItem = arrCookedText.pop() || ''; // Will never hit the default unless the previous code is changed
-  } else {
-    episodeItem = rawText;
-  }
-  arrEpisode = matchEpisodeOf( episodeItem );
+	//console.log( `Cooking episode` );
+	//console.log( rawText );
+	if ( matched = rawText.match( /(Series) ([0-9]+)/i ) ) {
+		arrCookedText = [ `${matched[1]}${matched[2]}` ];
+	} else if ( matched = rawText.match( /^([0-9]+)\.(.*)/ ) ) {
+		arrCookedText = [ matched[1], matched[2] ];
+	}
+	let episodeItem : string;
+	let arrEpisode;
+	if ( arrCookedText.length ) {
+		episodeItem = arrCookedText.pop() || ''; // Will never hit the default unless the previous code is changed
+	} else {
+		episodeItem = rawText;
+	}
+	arrEpisode = matchEpisodeOf( episodeItem );
 
-  if ( arrEpisode.length ) {
-    arrCookedText.push( ...arrEpisode );
-  } else {
-    arrCookedText.push( episodeItem );
-  }
+	if ( arrEpisode.length ) {
+		arrCookedText.push( ...arrEpisode );
+	} else {
+		arrCookedText.push( episodeItem );
+	}
 
-  return arrCookedText;
+	return arrCookedText;
 }
 
 export function cookSynopsis( rawText : string, episode: string | null = null ) {
-  const arrConversion = [
-    ...ARR_COMMON_TEXT_CONVERSIONS,
-  ];
+	const arrConversion = [
+		...ARR_COMMON_TEXT_CONVERSIONS,
+	];
 
-  const arrItem  = [ rawText ];
-  if ( episode ) {
-    arrItem.push( episode );
-  }
-  const synopsis = arrItem.join( ' ' );
+	const arrItem  = [ rawText ];
+	if ( episode ) {
+		arrItem.push( episode );
+	}
+	const synopsis = arrItem.join( ' ' );
 
-  return convertText( arrConversion, synopsis );
+	return convertText( arrConversion, synopsis );
 }
 
 //synopsis.split( '' ).forEach( c => {
@@ -328,25 +328,25 @@ export function cookSynopsis( rawText : string, episode: string | null = null ) 
 
 export function getProgDetailsFromLink( textHTML : string )
 {
-  const parser         = new DOMParser();
-  const htmlDoc        = parser.parseFromString( textHTML, "text/html" );
-  //console.log( htmlDoc );
-  const linkElemList   = htmlDoc.getElementsByTagName( 'A' );
-  const linkElem       = linkElemList[ 0 ];
-  const objAttributes  = getProgAttributes( linkElem );
-  //console.log( JSON.stringify( objAttributes, null, 2 ) );
-  const arrEpisode     = cookEpisode( objAttributes.episode );
-  const rawTitle       = [ objAttributes.title, ...arrEpisode ]
-                            .map( el => convertToCamelCase( el ) )
-                            .filter( val => ( val.length > 0 ) )
-                            .join( '-' );
-  const title         = cookTitle( rawTitle );
-  const synopsis      = cookSynopsis( objAttributes.synopsis, objAttributes.episode );
-  const image_uri     = objAttributes.image_uri;
-  const result = {
-    [PROG_FIELD_TITLE]:     title,
-    [PROG_FIELD_SYNOPSIS]:  synopsis,
-    [PROG_FIELD_IMAGE_URI]: image_uri,
-  };
-  return result;
+	const parser         = new DOMParser();
+	const htmlDoc        = parser.parseFromString( textHTML, "text/html" );
+	//console.log( htmlDoc );
+	const linkElemList   = htmlDoc.getElementsByTagName( 'A' );
+	const linkElem       = linkElemList[ 0 ];
+	const objAttributes  = getProgAttributes( linkElem );
+	//console.log( JSON.stringify( objAttributes, null, 2 ) );
+	const arrEpisode     = cookEpisode( objAttributes.episode );
+	const rawTitle       = [ objAttributes.title, ...arrEpisode ]
+														.map( el => convertToCamelCase( el ) )
+														.filter( val => ( val.length > 0 ) )
+														.join( '-' );
+	const title         = cookTitle( rawTitle );
+	const synopsis      = cookSynopsis( objAttributes.synopsis, objAttributes.episode );
+	const image_uri     = objAttributes.image_uri;
+	const result = {
+		[PROG_FIELD_TITLE]:     title,
+		[PROG_FIELD_SYNOPSIS]:  synopsis,
+		[PROG_FIELD_IMAGE_URI]: image_uri,
+	};
+	return result;
 }

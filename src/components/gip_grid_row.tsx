@@ -1,33 +1,33 @@
 import React, { ReactElement } from 'react';
 
 type TypeGipGridRowProps = {
-  fieldID?:              string,
-  paramName?:            string | null,
-  labelText:             string,
-  gipComponent:          () => ReactElement,
-  additionalClassNames?: string[],
+	fieldID?:              string,
+	paramName?:            string | null,
+	labelText:             string,
+	gipComponent:          () => ReactElement,
+	additionalClassNames?: string[],
 };
 
 type TypeLabelProps = {
-  htmlFor?: string,
+	htmlFor?: string,
 };
 
 
 export function GipGridRow( props : TypeGipGridRowProps ) : ReactElement  {
-  const { paramName = null, labelText, gipComponent, additionalClassNames = [] } = props;
-  const labelProps : TypeLabelProps = {};
-  const classNames  = [ 'col-md-11', 'gip-col', ...additionalClassNames ];
+	const { paramName = null, labelText, gipComponent, additionalClassNames = [] } = props;
+	const labelProps : TypeLabelProps = {};
+	const classNames  = [ 'col-md-11', 'gip-col', ...additionalClassNames ];
 
-  if ( paramName ) {
-    labelProps.htmlFor = paramName;
-  }
+	if ( paramName ) {
+		labelProps.htmlFor = paramName;
+	}
 
-  return (
-    <div className="row">
-      <div className="col-md-1 gip-col gip-label"><label { ...labelProps }>{ labelText }</label></div>
-      <div className={ classNames.join(" ") }>
-        { gipComponent() }
-      </div>
-    </div>
-  );
+	return (
+		<div className="row">
+			<div className="col-md-1 gip-col gip-label"><label { ...labelProps }>{ labelText }</label></div>
+			<div className={ classNames.join(" ") }>
+				{ gipComponent() }
+			</div>
+		</div>
+	);
 }

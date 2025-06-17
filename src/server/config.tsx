@@ -18,19 +18,19 @@ const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE;
 const LOCAL_APIGATEWAY_URL = 'http://localhost:8082';
 
 const config = {
-  /** Application Config */
-  app: {
-    /** Name of the app is loaded from the `manifest.json` */
-    TITLE: manifest.short_name,
-    /** Theme is also loaded from the `manifest.json` */
-    THEME_COLOR: manifest.theme_color,
-    /** URL to our public API Gateway endpoint */
-    URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APIGATEWAY_URL),
-    /** Where the bundled distribution files (`main.js`, `main.css`) are hosted */
-    DIST_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_DIST_URL),
-    /** Where the contents of the `public` folder are hosted (might be the same as `config.app.DIST_URL`) */
-    PUBLIC_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_PUBLIC_URL),
-  },
+	/** Application Config */
+	app: {
+		/** Name of the app is loaded from the `manifest.json` */
+		TITLE: manifest.short_name,
+		/** Theme is also loaded from the `manifest.json` */
+		THEME_COLOR: manifest.theme_color,
+		/** URL to our public API Gateway endpoint */
+		URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APIGATEWAY_URL),
+		/** Where the bundled distribution files (`main.js`, `main.css`) are hosted */
+		DIST_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_DIST_URL),
+		/** Where the contents of the `public` folder are hosted (might be the same as `config.app.DIST_URL`) */
+		PUBLIC_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_PUBLIC_URL),
+	},
 };
 
 export type Config = typeof config;

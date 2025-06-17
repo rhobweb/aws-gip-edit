@@ -11,7 +11,7 @@
  */
 
 import {
-  PROG_FIELD_STATUS, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_IMAGE_URI, PROG_FIELD_GENRE, PROG_FIELD_DAY_OF_WEEK, PROG_FIELD_QUALITY, PROG_FIELD_SELECTED
+	PROG_FIELD_STATUS, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_IMAGE_URI, PROG_FIELD_GENRE, PROG_FIELD_DAY_OF_WEEK, PROG_FIELD_QUALITY, PROG_FIELD_SELECTED
 } from './gip_types';
 
 type TypeRawFieldMapItem       = Record<string, ( string | null )>;
@@ -37,17 +37,17 @@ export const DB_FIELD_IMAGE_URI     = 'image_uri';
 export const DB_FIELD_POS           = 'pos';
 
 export interface TypeDbProgramItem extends Record<string, ( string | number | null )> {
-  [DB_FIELD_STATUS]        : string,
-  [DB_FIELD_GENRE]         : string,
-  [DB_FIELD_DAY_OF_WEEK]   : string | null,
-  [DB_FIELD_QUALITY]       : string,
-  [DB_FIELD_PID]           : string,
-  [DB_FIELD_TITLE]         : string,
-  [DB_FIELD_SYNOPSIS]      : string,
-  [DB_FIELD_MODIFY_TIME]   : string,
-  [DB_FIELD_DOWNLOAD_TIME] : string,
-  [DB_FIELD_IMAGE_URI]     : string,
-  [DB_FIELD_POS]           : number | null,
+	[DB_FIELD_STATUS]        : string,
+	[DB_FIELD_GENRE]         : string,
+	[DB_FIELD_DAY_OF_WEEK]   : string | null,
+	[DB_FIELD_QUALITY]       : string,
+	[DB_FIELD_PID]           : string,
+	[DB_FIELD_TITLE]         : string,
+	[DB_FIELD_SYNOPSIS]      : string,
+	[DB_FIELD_MODIFY_TIME]   : string,
+	[DB_FIELD_DOWNLOAD_TIME] : string,
+	[DB_FIELD_IMAGE_URI]     : string,
+	[DB_FIELD_POS]           : number | null,
 }
 
 // Dummy field
@@ -118,70 +118,70 @@ const DISPLAY_QUALITY_HIGH   = 'HIGH';
 const DISPLAY_QUALITY_NORMAL = 'Normal';
 
 const PROG_TO_DB_FIELD_MAP : TypeRawFieldMap = [
-  { [PROG_FIELD_STATUS]:       DB_FIELD_STATUS      },
-  { [PROG_FIELD_PID]:          DB_FIELD_PID         },
-  { [PROG_FIELD_TITLE]:        DB_FIELD_TITLE       },
-  { [PROG_FIELD_SYNOPSIS]:     DB_FIELD_SYNOPSIS    },
-  { [PROG_FIELD_IMAGE_URI]:    DB_FIELD_IMAGE_URI   },
-  { [PROG_FIELD_GENRE]:        DB_FIELD_GENRE       },
-  { [PROG_FIELD_DAY_OF_WEEK]:  DB_FIELD_DAY_OF_WEEK },
-  { [PROG_FIELD_QUALITY]:      DB_FIELD_QUALITY     },
-  { [PROG_FIELD_SELECTED]:     null                 },
+	{ [PROG_FIELD_STATUS]:       DB_FIELD_STATUS      },
+	{ [PROG_FIELD_PID]:          DB_FIELD_PID         },
+	{ [PROG_FIELD_TITLE]:        DB_FIELD_TITLE       },
+	{ [PROG_FIELD_SYNOPSIS]:     DB_FIELD_SYNOPSIS    },
+	{ [PROG_FIELD_IMAGE_URI]:    DB_FIELD_IMAGE_URI   },
+	{ [PROG_FIELD_GENRE]:        DB_FIELD_GENRE       },
+	{ [PROG_FIELD_DAY_OF_WEEK]:  DB_FIELD_DAY_OF_WEEK },
+	{ [PROG_FIELD_QUALITY]:      DB_FIELD_QUALITY     },
+	{ [PROG_FIELD_SELECTED]:     null                 },
 ];
 
 // Map program field to the header display
 const HEADER_FIELD_MAP : TypeRawFieldMap = [
-  { [DUMMY_PROG_FIELD_POS]:   DISPLAY_FIELD_POS,         },
-  { [PROG_FIELD_STATUS]:      DISPLAY_FIELD_STATUS,      },
-  { [PROG_FIELD_PID]:         DISPLAY_FIELD_PID,         },
-  { [PROG_FIELD_TITLE]:       DISPLAY_FIELD_TITLE,       },
-  { [PROG_FIELD_DAY_OF_WEEK]: DISPLAY_FIELD_DAY_OF_WEEK, },
-  { [PROG_FIELD_QUALITY]:     DISPLAY_FIELD_QUALITY,     },
-  { [PROG_FIELD_GENRE]:       DISPLAY_FIELD_GENRE,       },
-  { [PROG_FIELD_SYNOPSIS]:    DISPLAY_FIELD_SYNOPSIS,    },
-  { [PROG_FIELD_IMAGE_URI]:   DISPLAY_FIELD_IMAGE_URI,   },
-  { [VALUE_DEFAULT]:          DISPLAY_VALUE_UNKNOWN,     },
+	{ [DUMMY_PROG_FIELD_POS]:   DISPLAY_FIELD_POS,         },
+	{ [PROG_FIELD_STATUS]:      DISPLAY_FIELD_STATUS,      },
+	{ [PROG_FIELD_PID]:         DISPLAY_FIELD_PID,         },
+	{ [PROG_FIELD_TITLE]:       DISPLAY_FIELD_TITLE,       },
+	{ [PROG_FIELD_DAY_OF_WEEK]: DISPLAY_FIELD_DAY_OF_WEEK, },
+	{ [PROG_FIELD_QUALITY]:     DISPLAY_FIELD_QUALITY,     },
+	{ [PROG_FIELD_GENRE]:       DISPLAY_FIELD_GENRE,       },
+	{ [PROG_FIELD_SYNOPSIS]:    DISPLAY_FIELD_SYNOPSIS,    },
+	{ [PROG_FIELD_IMAGE_URI]:   DISPLAY_FIELD_IMAGE_URI,   },
+	{ [VALUE_DEFAULT]:          DISPLAY_VALUE_UNKNOWN,     },
 ];
 
 const STATUS_FIELD_MAP : TypeRawFieldMap = [
-  { [VALUE_STATUS_PENDING]: DISPLAY_STATUS_PENDING, },
-  { [VALUE_STATUS_ERROR]:   DISPLAY_STATUS_ERROR,   },
-  { [VALUE_STATUS_SUCCESS]: DISPLAY_STATUS_SUCCESS, },
-  { [VALUE_STATUS_ALREADY]: DISPLAY_STATUS_ALREADY, },
-  { [VALUE_DEFAULT]:        DISPLAY_STATUS_PENDING, },
+	{ [VALUE_STATUS_PENDING]: DISPLAY_STATUS_PENDING, },
+	{ [VALUE_STATUS_ERROR]:   DISPLAY_STATUS_ERROR,   },
+	{ [VALUE_STATUS_SUCCESS]: DISPLAY_STATUS_SUCCESS, },
+	{ [VALUE_STATUS_ALREADY]: DISPLAY_STATUS_ALREADY, },
+	{ [VALUE_DEFAULT]:        DISPLAY_STATUS_PENDING, },
 ];
 
 const GENRE_DISPLAY_FIELD_MAP : TypeRawFieldMap = [
-  { [VALUE_GENRE_BOOKS_AND_SPOKEN]: DISPLAY_GENRE_BOOKS,  },
-  { [VALUE_GENRE_COMEDY]:           DISPLAY_GENRE_COMEDY, },
-  { [VALUE_DEFAULT]:                DISPLAY_GENRE_COMEDY, },
+	{ [VALUE_GENRE_BOOKS_AND_SPOKEN]: DISPLAY_GENRE_BOOKS,  },
+	{ [VALUE_GENRE_COMEDY]:           DISPLAY_GENRE_COMEDY, },
+	{ [VALUE_DEFAULT]:                DISPLAY_GENRE_COMEDY, },
 ];
 
 const DAY_OF_WEEK_FIELD_MAP : TypeRawFieldMap = [
-  { [VALUE_DAY_ANY]: DISPLAY_DAY_ANY, },
-  { [VALUE_DAY_MON]: DISPLAY_DAY_MON, },
-  { [VALUE_DAY_TUE]: DISPLAY_DAY_TUE, },
-  { [VALUE_DAY_WED]: DISPLAY_DAY_WED, },
-  { [VALUE_DAY_THU]: DISPLAY_DAY_THU, },
-  { [VALUE_DAY_FRI]: DISPLAY_DAY_FRI, },
-  { [VALUE_DAY_SAT]: DISPLAY_DAY_SAT, },
-  { [VALUE_DAY_SUN]: DISPLAY_DAY_SUN, },
-  { [VALUE_DEFAULT]: DISPLAY_DAY_ANY, },
+	{ [VALUE_DAY_ANY]: DISPLAY_DAY_ANY, },
+	{ [VALUE_DAY_MON]: DISPLAY_DAY_MON, },
+	{ [VALUE_DAY_TUE]: DISPLAY_DAY_TUE, },
+	{ [VALUE_DAY_WED]: DISPLAY_DAY_WED, },
+	{ [VALUE_DAY_THU]: DISPLAY_DAY_THU, },
+	{ [VALUE_DAY_FRI]: DISPLAY_DAY_FRI, },
+	{ [VALUE_DAY_SAT]: DISPLAY_DAY_SAT, },
+	{ [VALUE_DAY_SUN]: DISPLAY_DAY_SUN, },
+	{ [VALUE_DEFAULT]: DISPLAY_DAY_ANY, },
 ];
 
 const QUALITY_FIELD_MAP : TypeRawFieldMap = [
-  { [VALUE_QUALITY_NORMAL]: DISPLAY_QUALITY_NORMAL, },
-  { [VALUE_QUALITY_HIGH]:   DISPLAY_QUALITY_HIGH,   },
-  { [VALUE_DEFAULT]:        DISPLAY_QUALITY_NORMAL, },
+	{ [VALUE_QUALITY_NORMAL]: DISPLAY_QUALITY_NORMAL, },
+	{ [VALUE_QUALITY_HIGH]:   DISPLAY_QUALITY_HIGH,   },
+	{ [VALUE_DEFAULT]:        DISPLAY_QUALITY_NORMAL, },
 ];
 
 const RAW_FIELD_MAP_COLLECTION : TypeRawFieldMapCollection = {
-  [PROG_FIELD_STATUS]:      STATUS_FIELD_MAP,
-  [PROG_FIELD_GENRE]:       GENRE_DISPLAY_FIELD_MAP,
-  [PROG_FIELD_DAY_OF_WEEK]: DAY_OF_WEEK_FIELD_MAP,
-  [PROG_FIELD_QUALITY]:     QUALITY_FIELD_MAP,
-  [DUMMY_HEADER_FIELD]:     HEADER_FIELD_MAP,
-  [DUMMY_FIELD_DB]:         PROG_TO_DB_FIELD_MAP,
+	[PROG_FIELD_STATUS]:      STATUS_FIELD_MAP,
+	[PROG_FIELD_GENRE]:       GENRE_DISPLAY_FIELD_MAP,
+	[PROG_FIELD_DAY_OF_WEEK]: DAY_OF_WEEK_FIELD_MAP,
+	[PROG_FIELD_QUALITY]:     QUALITY_FIELD_MAP,
+	[DUMMY_HEADER_FIELD]:     HEADER_FIELD_MAP,
+	[DUMMY_FIELD_DB]:         PROG_TO_DB_FIELD_MAP,
 };
 
 /**
@@ -189,16 +189,16 @@ const RAW_FIELD_MAP_COLLECTION : TypeRawFieldMapCollection = {
  * @returns reverse field map.
  */
 function genReverseFieldMap( rawFieldMap : TypeRawFieldMap ) : TypeFieldMap {
-  const cookedReverseFieldMap : TypeFieldMap = {};
+	const cookedReverseFieldMap : TypeFieldMap = {};
 
-  rawFieldMap.forEach( el => {
-    const [ value, mappedValue ] = Object.entries( el )[ 0 ];
-    if ( ( mappedValue !== null ) && ( value !== VALUE_DEFAULT ) ) {
-      cookedReverseFieldMap[ mappedValue ] = value;
-    }
-  } );
+	rawFieldMap.forEach( el => {
+		const [ value, mappedValue ] = Object.entries( el )[ 0 ];
+		if ( ( mappedValue !== null ) && ( value !== VALUE_DEFAULT ) ) {
+			cookedReverseFieldMap[ mappedValue ] = value;
+		}
+	} );
 
-  return cookedReverseFieldMap;
+	return cookedReverseFieldMap;
 }
 
 /**
@@ -206,14 +206,14 @@ function genReverseFieldMap( rawFieldMap : TypeRawFieldMap ) : TypeFieldMap {
  * @returns regular field map.
  */
 function genFieldMap( rawFieldMap: TypeRawFieldMap ) : TypeFieldMap {
-  const cookedFieldMap : TypeFieldMap = {};
+	const cookedFieldMap : TypeFieldMap = {};
 
-  rawFieldMap.forEach( el => {
-    const [ value, mappedValue ] = Object.entries( el )[ 0 ];
-    cookedFieldMap[ value ] = mappedValue;
-  } );
+	rawFieldMap.forEach( el => {
+		const [ value, mappedValue ] = Object.entries( el )[ 0 ];
+		cookedFieldMap[ value ] = mappedValue;
+	} );
 
-  return cookedFieldMap;
+	return cookedFieldMap;
 }
 
 /**
@@ -226,33 +226,33 @@ function genFieldMap( rawFieldMap: TypeRawFieldMap ) : TypeFieldMap {
  * @returns object with the same properties as the input object but the values are objects that map a field name to another name.
  */
 function genReverseFieldMapCollection( rawFieldMapCollection: TypeRawFieldMapCollection ) : TypeFieldMapCollection {
-  const reverseFieldMapCollection : TypeFieldMapCollection = {};
+	const reverseFieldMapCollection : TypeFieldMapCollection = {};
 
-  Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
-    reverseFieldMapCollection[ field ] = genReverseFieldMap( rawFieldMap );
-  } );
+	Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
+		reverseFieldMapCollection[ field ] = genReverseFieldMap( rawFieldMap );
+	} );
 
-  return reverseFieldMapCollection;
+	return reverseFieldMapCollection;
 }
 
 function genFieldMapCollection( rawFieldMapCollection : TypeRawFieldMapCollection ) : TypeFieldMapCollection {
-  const fieldMapCollection : TypeFieldMapCollection = {};
+	const fieldMapCollection : TypeFieldMapCollection = {};
 
-  Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
-    fieldMapCollection[ field ] = genFieldMap( rawFieldMap );
-  } );
+	Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
+		fieldMapCollection[ field ] = genFieldMap( rawFieldMap );
+	} );
 
-  return fieldMapCollection;
+	return fieldMapCollection;
 }
 
 function genFieldOrderCollection( rawFieldMapCollection : TypeRawFieldMapCollection ) : TypeFieldOrderCollection {
-  const cookedFieldOrderCollection : TypeFieldOrderCollection = {};
+	const cookedFieldOrderCollection : TypeFieldOrderCollection = {};
 
-  Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
-    cookedFieldOrderCollection[ field ] = rawFieldMap.filter( el => Object.keys(el)[0] !== VALUE_DEFAULT ).map( el => Object.keys(el)[0] );
-  } );
+	Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
+		cookedFieldOrderCollection[ field ] = rawFieldMap.filter( el => Object.keys(el)[0] !== VALUE_DEFAULT ).map( el => Object.keys(el)[0] );
+	} );
 
-  return cookedFieldOrderCollection;
+	return cookedFieldOrderCollection;
 }
 
 /**
@@ -261,16 +261,16 @@ function genFieldOrderCollection( rawFieldMapCollection : TypeRawFieldMapCollect
  * @returns object with properties being the field name and value being the display default value
  */
 function genDefaultFieldValue( fieldMapCollection : TypeFieldMapCollection, reverseFieldMapCollection : TypeFieldMapCollection ) : TypeDefaultValueFieldMap {
-  const mapDefaultFieldValue : TypeDefaultValueFieldMap = {};
+	const mapDefaultFieldValue : TypeDefaultValueFieldMap = {};
 
-  Object.entries( fieldMapCollection ).forEach( ( [ fieldName, fieldMap ] ) => {
-    const defaultValue = fieldMap[ VALUE_DEFAULT ];
-    if ( ( defaultValue !== undefined ) && ( defaultValue !== null ) ) {
-      mapDefaultFieldValue[ fieldName ] = reverseFieldMapCollection[ fieldName ][ defaultValue ] as string; // Default values must be non-null
-    }
-  } );
+	Object.entries( fieldMapCollection ).forEach( ( [ fieldName, fieldMap ] ) => {
+		const defaultValue = fieldMap[ VALUE_DEFAULT ];
+		if ( ( defaultValue !== undefined ) && ( defaultValue !== null ) ) {
+			mapDefaultFieldValue[ fieldName ] = reverseFieldMapCollection[ fieldName ][ defaultValue ] as string; // Default values must be non-null
+		}
+	} );
 
-  return mapDefaultFieldValue;
+	return mapDefaultFieldValue;
 }
 
 export const REVERSE_FIELD_MAP_COLLECTION = genReverseFieldMapCollection( RAW_FIELD_MAP_COLLECTION );

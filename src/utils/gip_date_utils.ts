@@ -8,8 +8,8 @@ const DEFAULT_DAYS_THRESHOLD = 2;
  * @returns the associated day index 0 = Sun, 6 = Sat, -1 = invalid.
  */
 function dayOfWeekToIndex( d : string ) {
-  const iDay = ARR_DAY_OF_WEEK.indexOf( d );
-  return iDay;
+	const iDay = ARR_DAY_OF_WEEK.indexOf( d );
+	return iDay;
 }
 
 /**
@@ -19,15 +19,15 @@ function dayOfWeekToIndex( d : string ) {
  * @returns capitalised three character day of week, e.g., 'Mon';
  */
 export function getCurrentDayOfWeek( { iOffset = 0, dt } : { iOffset?: number, dt?: Date } = {} ) {
-  if ( ! dt ) {
-    dt = new Date();
-  }
+	if ( ! dt ) {
+		dt = new Date();
+	}
 
-  iOffset = ( ( iOffset % NUM_DAYS_IN_WEEK ) + NUM_DAYS_IN_WEEK ) % NUM_DAYS_IN_WEEK;
+	iOffset = ( ( iOffset % NUM_DAYS_IN_WEEK ) + NUM_DAYS_IN_WEEK ) % NUM_DAYS_IN_WEEK;
 
-  const iDay = ( dt.getDay() + iOffset ) % NUM_DAYS_IN_WEEK;
+	const iDay = ( dt.getDay() + iOffset ) % NUM_DAYS_IN_WEEK;
 
-  return ARR_DAY_OF_WEEK[ iDay ];
+	return ARR_DAY_OF_WEEK[ iDay ];
 }
 
 /**
@@ -36,14 +36,14 @@ export function getCurrentDayOfWeek( { iOffset = 0, dt } : { iOffset?: number, d
  * @returns the number of days until the next d2 after d1, zero if the days are the same.
  */
 function dayOfWeekDiff( d1 : string, d2 : string ) {
-  const iVal1 = dayOfWeekToIndex( d1 );
-  let   iVal2 = dayOfWeekToIndex( d2 );
+	const iVal1 = dayOfWeekToIndex( d1 );
+	let   iVal2 = dayOfWeekToIndex( d2 );
 
-  if ( iVal1 > iVal2 ) {
-    iVal2 += NUM_DAYS_IN_WEEK;
-  }
+	if ( iVal1 > iVal2 ) {
+		iVal2 += NUM_DAYS_IN_WEEK;
+	}
 
-  return iVal2 - iVal1;
+	return iVal2 - iVal1;
 }
 
 /**
@@ -54,11 +54,11 @@ function dayOfWeekDiff( d1 : string, d2 : string ) {
  * @returns true if checkDay is within the specified number of days after currDay, false otherwise.
  */
 export function isDayOfWeekAvailable( { checkDay, currDay, numDaysThreshold = DEFAULT_DAYS_THRESHOLD } : { checkDay: string, currDay?: string, numDaysThreshold?: number } ) {
-  if ( currDay === undefined ) {
-    currDay = getCurrentDayOfWeek();
-  }
-  const daysDiff   = dayOfWeekDiff( checkDay, currDay );
-  const bAvailable = ( daysDiff <= numDaysThreshold );
+	if ( currDay === undefined ) {
+		currDay = getCurrentDayOfWeek();
+	}
+	const daysDiff   = dayOfWeekDiff( checkDay, currDay );
+	const bAvailable = ( daysDiff <= numDaysThreshold );
 
-  return bAvailable;
+	return bAvailable;
 }

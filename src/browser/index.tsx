@@ -20,16 +20,16 @@ delete (window as any).__CONFIG__;
 
 /** Components added here will _only_ be loaded in the web browser, never for server-side rendering */
 const render = () => {
-  const container = (document.getElementById('root') as Element);
-  hydrateRoot(
-    container,
-    <>
-      {/* The configuration is the outmost component. This allows us to read the configuration even in the theme */}
-      <ConfigContext.Provider value={config}>
-        <App />
-      </ConfigContext.Provider>
-    </>
-  );
+	const container = (document.getElementById('root') as Element);
+	hydrateRoot(
+		container,
+		<>
+			{/* The configuration is the outmost component. This allows us to read the configuration even in the theme */}
+			<ConfigContext.Provider value={config}>
+				<App />
+			</ConfigContext.Provider>
+		</>
+	);
 };
 
 render();

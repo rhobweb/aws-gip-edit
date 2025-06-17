@@ -13,9 +13,9 @@ type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>
 export type TypeRawQueryParams       = Partial<{ [key: string]: TypeRawQueryParamValue }>
 
 type TypeProcessEndpointDefArgs = {
-  endpointDef: TypeEndpointDef,
-  params?:     TypeRawHttpParams,
-  headers?:    TypeHttpHeaders,
+	endpointDef: TypeEndpointDef,
+	params?:     TypeRawHttpParams,
+	headers?:    TypeHttpHeaders,
 };
 type TypeProcessEndpointDefRet = TypeEndpoint;
 
@@ -27,17 +27,17 @@ type TypeProcessEndpointDefRet = TypeEndpoint;
  * @returns 
  */
 export function processEndpointDef( { endpointDef, params = {}, headers = {} } : TypeProcessEndpointDefArgs ) : TypeProcessEndpointDefRet {
-  const method                                       = endpointDef.method.toUpperCase();
-  const { uri: strippedURI, params: cookedParams }   = privDefs.genParams( { endpointDef, params } );
-  const { uri: cookedURI,   params: recookedParams } = privDefs.genURI( { uri: strippedURI, method, params: cookedParams } );
-  const { headers: cookedHeaders, body }             = privDefs.genContent( { endpointDef, headers, params: recookedParams } );
-  const options : TypeEndpointOptions                = { method, headers: cookedHeaders };
+	const method                                       = endpointDef.method.toUpperCase();
+	const { uri: strippedURI, params: cookedParams }   = privDefs.genParams( { endpointDef, params } );
+	const { uri: cookedURI,   params: recookedParams } = privDefs.genURI( { uri: strippedURI, method, params: cookedParams } );
+	const { headers: cookedHeaders, body }             = privDefs.genContent( { endpointDef, headers, params: recookedParams } );
+	const options : TypeEndpointOptions                = { method, headers: cookedHeaders };
 
-  if ( body ) {
-    options.body = body;
-  }
+	if ( body ) {
+		options.body = body;
+	}
 
-  return { uri: cookedURI, options };
+	return { uri: cookedURI, options };
 }
 
 //fnHeaders: ( len ) => ( {
@@ -71,19 +71,19 @@ export function processEndpointDef( { endpointDef, params = {}, headers = {} } :
 //}
 
 export async function extractStringFromStream( stream : ReadableStream<Uint8Array> ) : Promise<string> {
-  let arrChunk   = [];
-  let reader     = stream.getReader();
-  let bDone      = false;
-  while ( ! bDone ) {
-    const { done, value } = await reader.read();
-    if ( ! done ) {
-      arrChunk.push( value );
-    } else {
-      bDone = true;
-    }
-  }
-  const str = Buffer.concat( arrChunk ).toString();
-  return str;
+	let arrChunk   = [];
+	let reader     = stream.getReader();
+	let bDone      = false;
+	while ( ! bDone ) {
+		const { done, value } = await reader.read();
+		if ( ! done ) {
+			arrChunk.push( value );
+		} else {
+			bDone = true;
+		}
+	}
+	const str = Buffer.concat( arrChunk ).toString();
+	return str;
 //  return new Promise( ( resolve, reject ) => {
 //    stream.setEncoding('utf8');
 //    stream.on( 'data', chunk => {
@@ -99,34 +99,34 @@ export async function extractStringFromStream( stream : ReadableStream<Uint8Arra
 }
 
 export async function extractJsonResponse( response : Response ) {
-  let body = [];
-  try {
-    const strBody = await response.json();
-    logger.info( `extractJsonResponse: `, { strBody } );
-    body = strBody;
-    //body = JSON.parse( strBody );
-    //logger.info( `JSON response extracted: `, body );
-  }
-  catch ( err ) {
-    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message } ) );
-  }
+	let body = [];
+	try {
+		const strBody = await response.json();
+		logger.info( `extractJsonResponse: `, { strBody } );
+		body = strBody;
+		//body = JSON.parse( strBody );
+		//logger.info( `JSON response extracted: `, body );
+	}
+	catch ( err ) {
+		logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message } ) );
+	}
 
-  return body;
+	return body;
 }
 
 export async function extractJsonResponseStream( response : Response ) {
-  let body = [];
-  try {
-    const strBody = await response.text();
-    logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
-    body = JSON.parse( strBody );
-    //logger.info( `JSON response extracted: `, body );
-  }
-  catch ( err ) {
-    logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: err.message } ) );
-  }
+	let body = [];
+	try {
+		const strBody = await response.text();
+		logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
+		body = JSON.parse( strBody );
+		//logger.info( `JSON response extracted: `, body );
+	}
+	catch ( err ) {
+		logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: err.message } ) );
+	}
 
-  return body;
+	return body;
 }
 
 /**
@@ -135,29 +135,29 @@ export async function extractJsonResponseStream( response : Response ) {
  */
 export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQueryParams
 {
-  const mapQueryParamVal = ( rawValue : TypeRawQueryParamScalarValue ) => { 
-    let cookedValue : TypeCookedQueryParamValue = rawValue || null;
-    if ( ( rawValue === null ) || ( rawValue === undefined ) ) { // Need to check for null so that TS doesn't moan about the subsequent if statements
-      cookedValue = null;
-    } else if ( rawValue.match( /false/i ) ) {
-      cookedValue = false;
-    } else if ( rawValue.match( /true/i ) || ( rawValue === '' ) ) {
-      cookedValue = true;
-    }
-    return cookedValue;
-  };
+	const mapQueryParamVal = ( rawValue : TypeRawQueryParamScalarValue ) => { 
+		let cookedValue : TypeCookedQueryParamValue = rawValue || null;
+		if ( ( rawValue === null ) || ( rawValue === undefined ) ) { // Need to check for null so that TS doesn't moan about the subsequent if statements
+			cookedValue = null;
+		} else if ( rawValue.match( /false/i ) ) {
+			cookedValue = false;
+		} else if ( rawValue.match( /true/i ) || ( rawValue === '' ) ) {
+			cookedValue = true;
+		}
+		return cookedValue;
+	};
 
-  const cookedParams : TypeCookedQueryParams = {};
+	const cookedParams : TypeCookedQueryParams = {};
 
-  Object.entries( rawParams ).forEach( ( [ param, value ] ) => {
-    if ( value && Array.isArray( value ) ) {
-      cookedParams[ param ] = value.map( el => mapQueryParamVal( el ) );
-    } else {
-      cookedParams[ param ] = mapQueryParamVal( value );
-    }
-  } );
+	Object.entries( rawParams ).forEach( ( [ param, value ] ) => {
+		if ( value && Array.isArray( value ) ) {
+			cookedParams[ param ] = value.map( el => mapQueryParamVal( el ) );
+		} else {
+			cookedParams[ param ] = mapQueryParamVal( value );
+		}
+	} );
 
-  return cookedParams;
+	return cookedParams;
 }
 
 /**
@@ -165,18 +165,18 @@ export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQ
  * @returns object in UTF-16 format, with all characters 0x7F and above replaced with escaped character codes
  */
 export function stringifyUTF16( rawObject: object ) : string {
-  const rawString    = JSON.stringify( rawObject );
-  const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
-  return cookedString;
+	const rawString    = JSON.stringify( rawObject );
+	const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
+	return cookedString;
 }
 
 export function stripQueryParams( rawURI : string ) : string {
-  const decodedURI = decodeURIComponent( rawURI );
-  const cookedURI  = decodedURI.replace( /\?.*/, '' );
-  return cookedURI;
+	const decodedURI = decodeURIComponent( rawURI );
+	const cookedURI  = decodedURI.replace( /\?.*/, '' );
+	return cookedURI;
 }
 
 export function genURI( { uri, queryParams } : { uri : string, queryParams: Record<string,string> } ) : string {
-  const cookedURI = `${uri}?${queryString.stringify( queryParams )}`;
-  return cookedURI;
+	const cookedURI = `${uri}?${queryString.stringify( queryParams )}`;
+	return cookedURI;
 }

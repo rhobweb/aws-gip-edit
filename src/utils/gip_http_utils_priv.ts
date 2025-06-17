@@ -32,39 +32,39 @@ const HEADER_CONTENT_TYPE_JSON       = 'application/json; charset=UTF-8';
  */
 export function genParams( { endpointDef, params } : TypeGenParamsArgs ) : TypeGenParamsRet
 {
-  const { uri, params: endpointParams } = endpointDef;
-  let   cookedURI    = uri;
-  let   cookedParams : Nullable<TypeHttpParams> = null;
+	const { uri, params: endpointParams } = endpointDef;
+	let   cookedURI    = uri;
+	let   cookedParams : Nullable<TypeHttpParams> = null;
 
-  if ( ( params !== undefined ) && ( endpointParams !== undefined ) ) {
-    if ( typeof params !== typeof endpointParams ) {
-      throw new Error( 'Type mismatch between fixed params and variable params' );
-    } else if ( typeof params === 'string' ) {
-      throw new Error( 'Invalid to specify both fixed string params and variable string params' );
-    }
-    cookedParams = {};
-    Object.assign( cookedParams, endpointParams, params );
-  } else {
-    cookedParams = params || endpointParams || {};
-  }
+	if ( ( params !== undefined ) && ( endpointParams !== undefined ) ) {
+		if ( typeof params !== typeof endpointParams ) {
+			throw new Error( 'Type mismatch between fixed params and variable params' );
+		} else if ( typeof params === 'string' ) {
+			throw new Error( 'Invalid to specify both fixed string params and variable string params' );
+		}
+		cookedParams = {};
+		Object.assign( cookedParams, endpointParams, params );
+	} else {
+		cookedParams = params || endpointParams || {};
+	}
 
-  const objURI = new Url( endpointDef.uri );
-  if ( objURI.query ) {
-    const strQueryParams = objURI.query;
-    const queryParams    = queryString.parse( strQueryParams ); // queryParams shall be an empty object
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
-    objURI.query         = '';
-    cookedURI            = objURI.toString();
-    if ( typeof cookedParams !== 'string' ) {
-      Object.assign( cookedParams, queryParams );
-    } else {
-      logger( 'error', 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
-      throw new Error( 'Type mismatch between endpoint params and query params' );
-    }
-  }
+	const objURI = new Url( endpointDef.uri );
+	if ( objURI.query ) {
+		const strQueryParams = objURI.query;
+		const queryParams    = queryString.parse( strQueryParams ); // queryParams shall be an empty object
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
+		objURI.query         = '';
+		cookedURI            = objURI.toString();
+		if ( typeof cookedParams !== 'string' ) {
+			Object.assign( cookedParams, queryParams );
+		} else {
+			logger( 'error', 'Type mismatch between endpoint params and query params', { cookedParams, queryParams } );
+			throw new Error( 'Type mismatch between endpoint params and query params' );
+		}
+	}
 
-  return { uri: cookedURI, params: cookedParams };
+	return { uri: cookedURI, params: cookedParams };
 }
 
 /**
@@ -78,25 +78,25 @@ export function genParams( { endpointDef, params } : TypeGenParamsArgs ) : TypeG
  */
 export function genURI( { uri, method, params = null } : TypeGenURIArgs ) : TypeGenURIRet
 {
-  let cookedURI    = uri;
-  let cookedParams = params;
+	let cookedURI    = uri;
+	let cookedParams = params;
 
-  if ( method === METHOD_GET ) {
-    const objURI         = new Url( uri );
-    let   newQueryParams = null;
-    if ( params ) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      newQueryParams = queryString.stringify( params as Record<string,any> );
-      cookedParams   = null;
-    }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
-    objURI.query = newQueryParams;
+	if ( method === METHOD_GET ) {
+		const objURI         = new Url( uri );
+		let   newQueryParams = null;
+		if ( params ) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			newQueryParams = queryString.stringify( params as Record<string,any> );
+			cookedParams   = null;
+		}
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore 'query' is typed as a read-only property. May be able to fix this another way, but this will do fine
+		objURI.query = newQueryParams;
 
-    cookedURI = objURI.toString();
-  }
+		cookedURI = objURI.toString();
+	}
 
-  return { uri: cookedURI, params: cookedParams };
+	return { uri: cookedURI, params: cookedParams };
 }
 
 /**
@@ -106,13 +106,13 @@ export function genURI( { uri, method, params = null } : TypeGenURIArgs ) : Type
  * @returns true if the case insensitive headerProp is found in the headers and is not the empty string, false otherwise.
  */
 export function containsHeader( { headers, headerProp } : { headers: TypeHttpHeaders, headerProp: string } ) {
-  const lcSearch = headerProp.toLowerCase();
-  let   bFound   = false;
-  if ( Object.keys( headers ).filter( h => (h.toLowerCase() === lcSearch) ).length > 0 ) {
-    bFound = true;
-  }
+	const lcSearch = headerProp.toLowerCase();
+	let   bFound   = false;
+	if ( Object.keys( headers ).filter( h => (h.toLowerCase() === lcSearch) ).length > 0 ) {
+		bFound = true;
+	}
 
-  return bFound;
+	return bFound;
 }
 
 /**
@@ -126,20 +126,20 @@ export function containsHeader( { headers, headerProp } : { headers: TypeHttpHea
  */
 export function genContent( { endpointDef, headers = {}, params = null } : { endpointDef: TypeEndpointDef, headers?: TypeHttpHeaders, params?: Nullable<TypeHttpParams> } ) : TypeGetContentRet
 {
-  const { method, headers: endpointHeaders = {} } = endpointDef;
-  const cookedHeaders : TypeHttpHeaders           = {};
-  let   cookedParams = params;
+	const { method, headers: endpointHeaders = {} } = endpointDef;
+	const cookedHeaders : TypeHttpHeaders           = {};
+	let   cookedParams = params;
 
-  if ( method !== METHOD_GET ) {
-    if ( ! ( containsHeader( { headers, headerProp: HEADER_PROP_CONTENT_TYPE } ) || containsHeader( { headers: endpointHeaders, headerProp: HEADER_PROP_CONTENT_TYPE } ) ) ) {
-      const contentType = ( ( typeof params === 'string' ) ? HEADER_CONTENT_TYPE_PLAIN_TEXT : HEADER_CONTENT_TYPE_JSON );
-      cookedHeaders[ HEADER_PROP_CONTENT_TYPE ] = contentType;
-    }
-    if ( ( params !== null ) && ( typeof params !== 'string' ) ) {
-      cookedParams = JSON.stringify( params );
-    }
-  }
-  Object.assign( cookedHeaders, headers, endpointHeaders );
+	if ( method !== METHOD_GET ) {
+		if ( ! ( containsHeader( { headers, headerProp: HEADER_PROP_CONTENT_TYPE } ) || containsHeader( { headers: endpointHeaders, headerProp: HEADER_PROP_CONTENT_TYPE } ) ) ) {
+			const contentType = ( ( typeof params === 'string' ) ? HEADER_CONTENT_TYPE_PLAIN_TEXT : HEADER_CONTENT_TYPE_JSON );
+			cookedHeaders[ HEADER_PROP_CONTENT_TYPE ] = contentType;
+		}
+		if ( ( params !== null ) && ( typeof params !== 'string' ) ) {
+			cookedParams = JSON.stringify( params );
+		}
+	}
+	Object.assign( cookedHeaders, headers, endpointHeaders );
 
-  return { headers: cookedHeaders, body: cookedParams };
+	return { headers: cookedHeaders, body: cookedParams };
 }

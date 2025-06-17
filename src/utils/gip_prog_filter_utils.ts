@@ -12,13 +12,13 @@ const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
  * @returns true if the specified day of the week is active, false otherwise.
  */
 function isDayActive( { current, day_of_week } : { current: boolean, day_of_week: Nullable<string> } ) {
-  let bActive = true; // If no day_of_week is specified then all days are active.
-  if ( day_of_week ) {
-    const iOffset = ( current ? 0 : - 1 ); // If ignoring the current day use -1 to get yesterday
-    const currDay = getCurrentDayOfWeek( { iOffset } );
-    bActive       = isDayOfWeekAvailable( { checkDay: day_of_week, currDay } );
-  }
-  return bActive;
+	let bActive = true; // If no day_of_week is specified then all days are active.
+	if ( day_of_week ) {
+		const iOffset = ( current ? 0 : - 1 ); // If ignoring the current day use -1 to get yesterday
+		const currDay = getCurrentDayOfWeek( { iOffset } );
+		bActive       = isDayOfWeekAvailable( { checkDay: day_of_week, currDay } );
+	}
+	return bActive;
 }
 
 /**
@@ -31,23 +31,23 @@ function isDayActive( { current, day_of_week } : { current: boolean, day_of_week
  * @returns filtered array of DB Program Items.
  */
 export function filterPrograms( { programs, params } : { programs: TypeDbProgramItem[], params: TypeProgramDownloadOptions } ) {
-  let cookedPrograms;
+	let cookedPrograms;
 
-  if ( params.all  ) {
-    cookedPrograms = programs;
-  } else {
-    const { current = false, downloaded = false } = params;
-    cookedPrograms = programs.filter( prog => {
-      let ret = true;
-      if ( ARR_STATUS_DOWNLOADED.indexOf( prog[ PROG_FIELD_STATUS ] ) >= 0 ) {
-        if ( ! downloaded ) {
-          ret = false;
-        }
-      } else if ( ! isDayActive( { current, day_of_week: prog[ PROG_FIELD_DAY_OF_WEEK ] } ) ) {
-        ret = false;
-      }
-      return ret;
-    } );
-  }
-  return cookedPrograms;
+	if ( params.all  ) {
+		cookedPrograms = programs;
+	} else {
+		const { current = false, downloaded = false } = params;
+		cookedPrograms = programs.filter( prog => {
+			let ret = true;
+			if ( ARR_STATUS_DOWNLOADED.indexOf( prog[ PROG_FIELD_STATUS ] ) >= 0 ) {
+				if ( ! downloaded ) {
+					ret = false;
+				}
+			} else if ( ! isDayActive( { current, day_of_week: prog[ PROG_FIELD_DAY_OF_WEEK ] } ) ) {
+				ret = false;
+			}
+			return ret;
+		} );
+	}
+	return cookedPrograms;
 }

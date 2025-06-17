@@ -3,7 +3,7 @@ type Nullable<T> = T | null;
 
 type TypeRef = MutableRefObject<HTMLInputElement>;
 interface TypeRefs extends Record<string,TypeRef> {
-  [key:string]: TypeRef
+	[key:string]: TypeRef
 }
 
 type TypeEventKeyboardAny     = KeyboardEvent<HTMLElement>;

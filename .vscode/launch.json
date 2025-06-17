@@ -30,7 +30,7 @@
       "name": "Unit Tests",
       "program": "${workspaceFolder}/node_modules/ts-mocha/bin/ts-mocha",
       //"runtimeExecutable": "ts-mocha",
-      "runtimeVersion": "22.14.0",
+      //"runtimeVersion": "22.14.0",
       "env": {
         "NODE_ENV":        "test-unit",
         "TS_NODE_PROJECT": "./tsconfig-unittest.json",
@@ -65,7 +65,7 @@
       "name": "Unit Test Coverage",
       "program": "${workspaceFolder}/node_modules/nyc/bin/nyc",
       //"runtimeExecutable": "ts-mocha",
-      "runtimeVersion": "22.14.0",
+      //"runtimeVersion": "22.14.0",
       "env": {
         "NODE_ENV":        "test-unit",
         "TS_NODE_PROJECT": "./tsconfig-unittest.json",
