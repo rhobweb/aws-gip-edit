@@ -1,6 +1,6 @@
 {
   "name": "aws-gip-edit",
-  "version": "1.3.6",
+  "version": "1.4.0",
   "private": true,
   "scripts": {
     "start": "cross-env IS_OFFLINE=true concurrently --kill-others \"npm run start:devserver\" \"npm run start:offline\"",
