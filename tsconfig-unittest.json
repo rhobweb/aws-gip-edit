@@ -1,17 +1,29 @@
 {
-  "compilerOptions": {
-    "outDir": "test-out",
-    "target": "es6",
-    "sourceMap": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-  },
-  "files": [
-    "src/global.d.ts",
-    "src/utils/gip_date_utils.ts",
-  ]
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"outDir": "test-out",
+		"allowJs": true,
+		"types": [
+			"jest",
+			"node",
+			"@types/react",
+			"@types/react-dom",
+			"@types/react-helmet",
+			"@types/js-cookie",
+			//"@types/mini-css-extract-plugin",
+			"@types/webpack-env"
+		],
+	},
+	"paths": [],
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"handler.ts",
+		"test/**/*.ts",
+		"test/**/*.tsx",
+	],
+	"exclude": [
+		"**/z-*.ts",
+		"**/z-*.tsx",
+	]
 }

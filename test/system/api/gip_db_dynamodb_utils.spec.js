@@ -45,7 +45,7 @@ async function test_loadProgs01() {
   catch ( err ) {
     console.log( `test01: error: ${err.message}` );
   }
-  expect( actualResult ).to.deep.equal( expectedResult );
+  expect( actualResult ).toEqual( expectedResult );
   console.log( "test_loadProgs01: OK" );
 }
 
@@ -64,7 +64,7 @@ async function test_saveProgs01() {
   catch ( err ) {
     console.log( `test01: error: ${err.message}` );
   }
-  expect( actualResult ).to.deep.equal( expectedResult );
+  expect( actualResult ).toEqual( expectedResult );
   console.log( "test_saveProgs01: OK" );
 }
 

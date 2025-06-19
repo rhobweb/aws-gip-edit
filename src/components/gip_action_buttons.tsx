@@ -1,24 +1,28 @@
 import React, { ReactElement } from 'react';
-import { FIELD_DEFAULT_VALUES, VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS } from '../utils/gip_prog_fields';
-import { GipGridRow }          from './gip_grid_row';
+import { FIELD_DEFAULT_VALUES, VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS } from '../utils/gip_prog_fields.js';
+import { GipGridRow }          from './gip_grid_row.js';
 import {
-	PROG_FIELD_STATUS, PROG_FIELD_SELECTED, PROG_FIELD_DAY_OF_WEEK,
-	TypeProgramItem, TypeHandlerProgramChange,
-} from '../utils/gip_types';
+	PROG_FIELD_STATUS,
+	PROG_FIELD_SELECTED,
+	PROG_FIELD_DAY_OF_WEEK,
+	Type_ProgramItem,
+	Type_ProgramItemField,
+	Type_HandlerProgramChange,
+} from '../utils/gip_types.js';
 
-type TypeProgramList = TypeProgramItem[];
+type Type_ProgramList = Type_ProgramItem[];
 
-type TypeActionButtonsProps = {
-	programs:        TypeProgramList,
-	onProgramChange: TypeHandlerProgramChange,
+interface Type_ActionButtonsProps {
+	programs:        Type_ProgramList,
+	onProgramChange: Type_HandlerProgramChange,
 	programsSaved:   () => void,
-	savePrograms:    ( params: TypeProgramList ) => Promise<TypeProgramList>,
-};
+	savePrograms:    ( params: Type_ProgramList ) => Promise<Type_ProgramList>,
+}
 
-function ActionButtons( props : TypeActionButtonsProps ) : ReactElement {
+function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 	const { programs, onProgramChange, programsSaved, savePrograms } = props;
 
-	const resetErrors = () => {
+	const resetErrors = () : void => {
 		//console.log( "resetErrors: ", programs );
 		programs.forEach( prog => {
 			if ( prog[PROG_FIELD_STATUS] === VALUE_STATUS_ERROR ) {
@@ -28,10 +32,10 @@ function ActionButtons( props : TypeActionButtonsProps ) : ReactElement {
 		onProgramChange( programs );
 	};
 
-	const selectOK = () => {
+	const selectOK = () : void => {
 		if ( programs.length > 0 ) {
 			const newPrograms = programs.map( prog => {
-				const program = JSON.parse( JSON.stringify( prog ) );
+				const program = JSON.parse( JSON.stringify( prog ) ) as Type_ProgramItem;
 				if ( program[PROG_FIELD_STATUS] === VALUE_STATUS_SUCCESS ) {
 					program[PROG_FIELD_SELECTED] = true;
 				} else {
@@ -45,7 +49,7 @@ function ActionButtons( props : TypeActionButtonsProps ) : ReactElement {
 		}
 	};
 
-	const deleteSelected = () => {
+	const deleteSelected = () : void => {
 		const selectedPrograms = programs.filter( prog => prog[PROG_FIELD_SELECTED] );
 		if ( selectedPrograms.length > 0 ) {
 			if ( window.confirm( 'Delete selected programs?' ) ) {
@@ -57,41 +61,47 @@ function ActionButtons( props : TypeActionButtonsProps ) : ReactElement {
 		}
 	};
 
-	const resetField = ( fieldName : string ) => {
+	const resetField = ( fieldName : Type_ProgramItemField ) : void => {
 		const defaultValue = FIELD_DEFAULT_VALUES[ fieldName ];
-		programs.forEach( prog => {
+		for ( const prog of programs ) {
 			if ( prog[ fieldName ] !== defaultValue ) {
 				prog[ fieldName ] = defaultValue;
 			}
-		} );
+		}
 		onProgramChange( programs );
 	};
 
-	const saveProgs = async () => {
-		const newPrograms = await savePrograms( programs );
-		onProgramChange( newPrograms );
-		programsSaved();
+	const saveProgs = () : void => {
+		savePrograms( programs )
+			.then( newPrograms => {
+				onProgramChange( newPrograms );
+				programsSaved();
+			})
+			.catch( ( err : unknown ) => {
+				console.error( 'saveProgs: error: ', err );
+				window.alert( 'Error saving programs: ' + ( err as Error ).message );
+			});
 	};
 
 	return (
 		<>
-		<input type="button" className="gip-action-button" name="resetErrors"    value="Reset Errors"    onClick={ () => resetErrors() }/>
-		<input type="button" className="gip-action-button" name="clearDays"      value="Clear Days"      onClick={ () => resetField( PROG_FIELD_DAY_OF_WEEK ) }/>
-		<input type="button" className="gip-action-button" name="selectOK"       value="Select OK"       onClick={ () => selectOK() }/>
-		<input type="button" className="gip-action-button" name="deleteSelected" value="Delete Selected" onClick={ () => deleteSelected() }/>
-		<input type="button" className="gip-action-button" name="saveProgs"      value="Save"            onClick={ saveProgs }/>
+			<input type="button" className="gip-action-button" name="resetErrors"    value="Reset Errors"    onClick={ () => { resetErrors(); } }/>
+			<input type="button" className="gip-action-button" name="clearDays"      value="Clear Days"      onClick={ () => { resetField( PROG_FIELD_DAY_OF_WEEK ); } }/>
+			<input type="button" className="gip-action-button" name="selectOK"       value="Select OK"       onClick={ () => { selectOK(); } }/>
+			<input type="button" className="gip-action-button" name="deleteSelected" value="Delete Selected" onClick={ () => { deleteSelected(); } }/>
+			<input type="button" className="gip-action-button" name="saveProgs"      value="Save"            onClick={ () => { saveProgs(); } }/>
 		</>
-	); 
+	);
 }
 
-type TypeGipActionButtonsProps = {
-	programs:        TypeProgramList,
-	onProgramChange: TypeHandlerProgramChange,
-	savePrograms:    ( programs : TypeProgramList ) => Promise<TypeProgramList>,
+interface Type_GipActionButtonsProps {
+	programs:        Type_ProgramList,
+	onProgramChange: Type_HandlerProgramChange,
+	savePrograms:    ( programs : Type_ProgramList ) => Promise<Type_ProgramList>,
 	programsSaved:   () => void,
-};
+}
 
-export function GipActionButtons( props : TypeGipActionButtonsProps ) {
+export function GipActionButtons( props : Type_GipActionButtonsProps ) : ReactElement {
 	const labelText            = 'Actions';
 	const fieldID              = 'action-buttons';
 	const additionalClassNames = [ 'gip-col-buttons' ];

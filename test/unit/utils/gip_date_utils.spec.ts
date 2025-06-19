@@ -1,38 +1,50 @@
 /**
  * DESCRIPTION:
- * Unit Tests for gip_date_utils.ts.
+ * Unit Tests for utils/gip_date_utils.ts.
  */
-import sinon, { SinonSandbox } from 'sinon';
-import { expect }              from 'chai';
+const REL_SRC_PATH     = '../../../src/utils/';
+const MODULE_NAME      = 'gip_date_utils.ts';
+const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
-const REL_SRC_PATH = '../../../src/utils/';
-const MODULE_NAME  = 'gip_date_utils.ts';
-const TEST_MODULE  = REL_SRC_PATH + MODULE_NAME;
+import type {
+	Type_DayOfWeek,
+	Type_dayOfWeekToIndex_args,
+	Type_dayOfWeekToIndex_ret,
+	Type_getCurrentDayOfWeek_args,
+	Type_getCurrentDayOfWeek_ret,
+	Type_dayOfWeekDiff_ret,
+	Type_isDayOfWeekAvailable_args,
+	Type_isDayOfWeekAvailable_ret,
+} from '../../../src/utils/gip_date_utils';
 
-let sandbox : SinonSandbox;
-
-type TypeTestModule = {
-	getCurrentDayOfWeek:  Function,
-	isDayOfWeekAvailable: Function,
+interface Type_TestModulePrivateDefs {
+	dayOfWeekToIndex: (args: Type_dayOfWeekToIndex_args)       => Type_dayOfWeekToIndex_ret,
+	dayOfWeekDiff:    (d1: Type_DayOfWeek, d2: Type_DayOfWeek) => Type_dayOfWeekDiff_ret,
 };
 
-async function createTestModule() : Promise<TypeTestModule> {
-	const testModule = ( await import( TEST_MODULE ) ).default;
-	return testModule;
-}
+interface Type_TestModule {
+	privateDefs:          Type_TestModulePrivateDefs,
+	getCurrentDayOfWeek:  (args?: Type_getCurrentDayOfWeek_args)  => Type_getCurrentDayOfWeek_ret,
+	isDayOfWeekAvailable: (args?: Type_isDayOfWeekAvailable_args) => Type_isDayOfWeekAvailable_ret,
+};
 
 const ARR_DAY_OF_WEEK     = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 const CURRENT_DAY_OF_WEEK = ARR_DAY_OF_WEEK[ (new Date()).getDay() ];
 
-function commonBeforeEach() {
-	sandbox = sinon.createSandbox();
+import * as TEST_MODULE from '../../../src/utils/gip_date_utils';
+const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+
+function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
-function commonAfterEach() {
-	sandbox.restore();
+function commonAfterEach() : void {
+	jest.restoreAllMocks();
+	jest.resetModules();
 }
 
 describe(MODULE_NAME + ':module can be loaded', () => {
+	let testModuleObj : Type_TestModule;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -42,94 +54,207 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 		commonAfterEach();
 	});
 
-	it ('module initialises OK', async () => {
-		await createTestModule();
+	test('module initialises OK', async () => {
+		await jest.isolateModulesAsync(async () => { // Load another instance of the module. This allows configuring a different environment
+			testModuleObj = await import( TEST_MODULE_PATH ) as Type_TestModule;
+		});
+		expect( testModuleObj ).toBeDefined();
+	});
+});
+
+describe(MODULE_NAME + ':dayOfWeekToIndex', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let actualResult   : Type_dayOfWeekToIndex_ret;
+	let expectedResult : Type_dayOfWeekToIndex_ret;
+	let testArgs       : Type_dayOfWeekToIndex_args;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule.privateDefs;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Sun', () => {
+		testArgs       = 'Sun';
+		expectedResult = 0;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Mon', () => {
+		testArgs       = 'Mon';
+		expectedResult = 1;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Tue', () => {
+		testArgs       = 'Tue';
+		expectedResult = 2;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Wed', () => {
+		testArgs       = 'Wed';
+		expectedResult = 3;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Thu', () => {
+		testArgs       = 'Thu';
+		expectedResult = 4;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Fri', () => {
+		testArgs       = 'Fri';
+		expectedResult = 5;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Sat', () => {
+		testArgs       = 'Sat';
+		expectedResult = 6;
+		actualResult   = testModuleObj.dayOfWeekToIndex( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });
 
 describe(MODULE_NAME + ':getCurrentDayOfWeek', () => {
-	let testModule : TypeTestModule;
-	let actualResult;
-	let expectedResult;
-	let testArgs;
+	let testModuleObj  : Type_TestModule;
+	let actualResult   : Type_getCurrentDayOfWeek_ret;
+	let expectedResult : Type_getCurrentDayOfWeek_ret;
+	let testArgs       : Type_getCurrentDayOfWeek_args;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule = await createTestModule();
+		testModuleObj = testModule;
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'Default to today', () => {
+	test( 'Default to today', () => {
 		expectedResult = CURRENT_DAY_OF_WEEK;
-		actualResult   = testModule.getCurrentDayOfWeek();
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.getCurrentDayOfWeek();
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Date specified', () => {
+	test( 'Date specified', () => {
 		expectedResult = 'Wed';
 		testArgs       = { dt: new Date( '2022-04-06' ) };
-		actualResult   = testModule.getCurrentDayOfWeek( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.getCurrentDayOfWeek( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Date and positive offset specified', () => {
+	test( 'Date and positive offset specified', () => {
 		expectedResult = 'Tue';
 		testArgs       = { dt: new Date( '2022-04-06' ), iOffset: 6 };
-		actualResult   = testModule.getCurrentDayOfWeek( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.getCurrentDayOfWeek( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Date and negative offset specified', () => {
+	test( 'Date and negative offset specified', () => {
 		expectedResult = 'Thu';
-		testArgs       = { dt: new Date( '2022-04-06' ), iOffset: -20 };
-		actualResult   = testModule.getCurrentDayOfWeek( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		testArgs       = { dt: new Date( '2022-04-06' ), iOffset: -20 }; // 2022-04-06 is a 'Wed', -20 is equivalent to +1
+		actualResult   = testModuleObj.getCurrentDayOfWeek( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':dayOfWeekDiff', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let actualResult   : Type_dayOfWeekDiff_ret;
+	let expectedResult : Type_dayOfWeekDiff_ret;
+	let testArgs       : [Type_DayOfWeek, Type_DayOfWeek];
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule.privateDefs;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Sun => Sun', () => {
+		testArgs       = [ 'Sun', 'Sun' ];
+		expectedResult = 0;
+		actualResult   = testModuleObj.dayOfWeekDiff( ...testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Sun => Mon', () => {
+		testArgs       = [ 'Sun', 'Mon' ];
+		expectedResult = 1;
+		actualResult   = testModuleObj.dayOfWeekDiff( ...testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Sat => Fri', () => {
+		testArgs       = [ 'Sat', 'Fri' ];
+		expectedResult = 6;
+		actualResult   = testModuleObj.dayOfWeekDiff( ...testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Tue => Sat', () => {
+		testArgs       = [ 'Tue', 'Sat' ];
+		expectedResult = 4;
+		actualResult   = testModuleObj.dayOfWeekDiff( ...testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });
 
 describe(MODULE_NAME + ':isDayOfWeekAvailable', () => {
-	let testModule : TypeTestModule;
-	let actualResult;
-	let expectedResult;
-	let testArgs;
+	let testModuleObj  : Type_TestModule;
+	;
+	let actualResult   : Type_isDayOfWeekAvailable_ret;
+	let expectedResult : Type_isDayOfWeekAvailable_ret;
+	let testArgs       : Type_isDayOfWeekAvailable_args;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule = await createTestModule();
+		testModuleObj = testModule;
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'Default to today', () => {
+	test( 'Default to today', () => {
 		testArgs       = { checkDay: CURRENT_DAY_OF_WEEK };
 		expectedResult = true;
-		actualResult   = testModule.isDayOfWeekAvailable( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.isDayOfWeekAvailable( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Within default threshold', () => {
+	test( 'Within default threshold', () => {
 		testArgs       = { checkDay: 'Fri', currDay: 'Sun' };
 		expectedResult = true;
-		actualResult   = testModule.isDayOfWeekAvailable( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.isDayOfWeekAvailable( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Outside default threshold', () => {
+	test( 'Outside default threshold', () => {
 		testArgs       = { checkDay: 'Fri', currDay: 'Mon' };
 		expectedResult = false;
-		actualResult   = testModule.isDayOfWeekAvailable( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.isDayOfWeekAvailable( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Within custom threshold', () => {
+	test( 'Within custom threshold', () => {
 		testArgs       = { checkDay: 'Fri', currDay: 'Mon', numDaysThreshold: 3 };
 		expectedResult = true;
-		actualResult   = testModule.isDayOfWeekAvailable( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.isDayOfWeekAvailable( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });

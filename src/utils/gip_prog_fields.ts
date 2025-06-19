@@ -2,7 +2,7 @@
  * Field map:     This is an object that maps a property name to another name.
  * Raw field map: This is an array that contains both field mapping and ordering information.
  * Collection:    An object containing multiple (raw) field maps.
- * 
+ *
  * Raw field map is an array of:
  *   - objects containing a single property:
  *     - field name -> maps to another name.
@@ -11,14 +11,22 @@
  */
 
 import {
-	PROG_FIELD_STATUS, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_IMAGE_URI, PROG_FIELD_GENRE, PROG_FIELD_DAY_OF_WEEK, PROG_FIELD_QUALITY, PROG_FIELD_SELECTED
+	PROG_FIELD_STATUS,
+	PROG_FIELD_PID,
+	PROG_FIELD_TITLE,
+	PROG_FIELD_SYNOPSIS,
+	PROG_FIELD_IMAGE_URI,
+	PROG_FIELD_GENRE,
+	PROG_FIELD_DAY_OF_WEEK,
+	PROG_FIELD_QUALITY,
+	PROG_FIELD_SELECTED
 } from './gip_types';
 
 type TypeRawFieldMapItem       = Record<string, ( string | null )>;
 type TypeRawFieldMap           = TypeRawFieldMapItem[];
-export type TypeFieldMap       = Record<string, ( string | null )>;
+export type Type_FieldMap       = Record<string, ( string | null )>;
 type TypeRawFieldMapCollection = Record<string, TypeRawFieldMap>;
-type TypeFieldMapCollection    = Record<string, TypeFieldMap>;
+type Type_FieldMapCollection    = Record<string, Type_FieldMap>;
 type TypeDefaultValueFieldMap  = Record<string, string>;
 export type TypeFieldOrder     = string[];
 type TypeFieldOrderCollection  = Record<string, TypeFieldOrder>;
@@ -36,7 +44,7 @@ export const DB_FIELD_DOWNLOAD_TIME = 'download_time';
 export const DB_FIELD_IMAGE_URI     = 'image_uri';
 export const DB_FIELD_POS           = 'pos';
 
-export interface TypeDbProgramItem extends Record<string, ( string | number | null )> {
+export interface Type_DbProgramItem extends Record<string, ( string | number | null )> {
 	[DB_FIELD_STATUS]        : string,
 	[DB_FIELD_GENRE]         : string,
 	[DB_FIELD_DAY_OF_WEEK]   : string | null,
@@ -44,10 +52,19 @@ export interface TypeDbProgramItem extends Record<string, ( string | number | nu
 	[DB_FIELD_PID]           : string,
 	[DB_FIELD_TITLE]         : string,
 	[DB_FIELD_SYNOPSIS]      : string,
-	[DB_FIELD_MODIFY_TIME]   : string,
+	[DB_FIELD_MODIFY_TIME]   : string | null,
 	[DB_FIELD_DOWNLOAD_TIME] : string,
 	[DB_FIELD_IMAGE_URI]     : string,
 	[DB_FIELD_POS]           : number | null,
+}
+
+type Type_DbFullProgramItem_unwanted = typeof DB_FIELD_DOWNLOAD_TIME;
+export interface Type_DbFullProgramItem extends Omit<Type_DbProgramItem,Type_DbFullProgramItem_unwanted> {
+	[DB_FIELD_MODIFY_TIME]   : string,
+	[DB_FIELD_POS]           : number,
+}
+type Type_DbFullProgramHistoryItem_unwanted = typeof DB_FIELD_DOWNLOAD_TIME | typeof DB_FIELD_POS;
+export interface Type_DbFullProgramHistoryItem extends Omit<Type_DbProgramItem,Type_DbFullProgramHistoryItem_unwanted> { // eslint-disable-line @typescript-eslint/no-empty-object-type
 }
 
 // Dummy field
@@ -185,11 +202,11 @@ const RAW_FIELD_MAP_COLLECTION : TypeRawFieldMapCollection = {
 };
 
 /**
- * @param {TypeFieldMap} rawFieldMap - see comment at head of file.
+ * @param {Type_FieldMap} rawFieldMap - see comment at head of file.
  * @returns reverse field map.
  */
-function genReverseFieldMap( rawFieldMap : TypeRawFieldMap ) : TypeFieldMap {
-	const cookedReverseFieldMap : TypeFieldMap = {};
+function genReverseFieldMap( rawFieldMap : TypeRawFieldMap ) : Type_FieldMap {
+	const cookedReverseFieldMap : Type_FieldMap = {};
 
 	rawFieldMap.forEach( el => {
 		const [ value, mappedValue ] = Object.entries( el )[ 0 ];
@@ -205,8 +222,8 @@ function genReverseFieldMap( rawFieldMap : TypeRawFieldMap ) : TypeFieldMap {
  * @param {Array} rawFieldMap - see comment at head of file.
  * @returns regular field map.
  */
-function genFieldMap( rawFieldMap: TypeRawFieldMap ) : TypeFieldMap {
-	const cookedFieldMap : TypeFieldMap = {};
+function genFieldMap( rawFieldMap: TypeRawFieldMap ) : Type_FieldMap {
+	const cookedFieldMap : Type_FieldMap = {};
 
 	rawFieldMap.forEach( el => {
 		const [ value, mappedValue ] = Object.entries( el )[ 0 ];
@@ -217,7 +234,7 @@ function genFieldMap( rawFieldMap: TypeRawFieldMap ) : TypeFieldMap {
 }
 
 /**
- * 
+ *
  * @param {Object} rawFieldMap - object containing field mapping and order information;
  *                                       - the properties are field names;
  *                                       - the values ar an array of objects with:
@@ -225,8 +242,8 @@ function genFieldMap( rawFieldMap: TypeRawFieldMap ) : TypeFieldMap {
  *                                          - the value which is the value to map it to.
  * @returns object with the same properties as the input object but the values are objects that map a field name to another name.
  */
-function genReverseFieldMapCollection( rawFieldMapCollection: TypeRawFieldMapCollection ) : TypeFieldMapCollection {
-	const reverseFieldMapCollection : TypeFieldMapCollection = {};
+function genReverseFieldMapCollection( rawFieldMapCollection: TypeRawFieldMapCollection ) : Type_FieldMapCollection {
+	const reverseFieldMapCollection : Type_FieldMapCollection = {};
 
 	Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
 		reverseFieldMapCollection[ field ] = genReverseFieldMap( rawFieldMap );
@@ -235,8 +252,8 @@ function genReverseFieldMapCollection( rawFieldMapCollection: TypeRawFieldMapCol
 	return reverseFieldMapCollection;
 }
 
-function genFieldMapCollection( rawFieldMapCollection : TypeRawFieldMapCollection ) : TypeFieldMapCollection {
-	const fieldMapCollection : TypeFieldMapCollection = {};
+function genFieldMapCollection( rawFieldMapCollection : TypeRawFieldMapCollection ) : Type_FieldMapCollection {
+	const fieldMapCollection : Type_FieldMapCollection = {};
 
 	Object.entries( rawFieldMapCollection ).forEach( ( [ field, rawFieldMap ] ) => {
 		fieldMapCollection[ field ] = genFieldMap( rawFieldMap );
@@ -256,18 +273,17 @@ function genFieldOrderCollection( rawFieldMapCollection : TypeRawFieldMapCollect
 }
 
 /**
- * @param {Object} fieldMapCollection 
- * @param {Object} reverseFieldMapCollection 
+ * @param {Object} fieldMapCollection
+ * @param {Object} reverseFieldMapCollection
  * @returns object with properties being the field name and value being the display default value
  */
-function genDefaultFieldValue( fieldMapCollection : TypeFieldMapCollection, reverseFieldMapCollection : TypeFieldMapCollection ) : TypeDefaultValueFieldMap {
+function genDefaultFieldValue( fieldMapCollection : Type_FieldMapCollection, reverseFieldMapCollection : Type_FieldMapCollection ) : TypeDefaultValueFieldMap {
 	const mapDefaultFieldValue : TypeDefaultValueFieldMap = {};
 
 	Object.entries( fieldMapCollection ).forEach( ( [ fieldName, fieldMap ] ) => {
-		const defaultValue = fieldMap[ VALUE_DEFAULT ];
-		if ( ( defaultValue !== undefined ) && ( defaultValue !== null ) ) {
-			mapDefaultFieldValue[ fieldName ] = reverseFieldMapCollection[ fieldName ][ defaultValue ] as string; // Default values must be non-null
-		}
+		const defaultValue = fieldMap[ VALUE_DEFAULT ]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		// Default values must be non-null
+		mapDefaultFieldValue[ fieldName ] = reverseFieldMapCollection[ fieldName ][ defaultValue ]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 	} );
 
 	return mapDefaultFieldValue;

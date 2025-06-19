@@ -1,37 +1,81 @@
+/**
+ * File:        utils/gip_http_utils.ts
+ * Description: Utilities for processing HTTP data
+ */
 import logger        from '@rhobweb/console-logger';
 import queryString   from 'query-string';
 import * as privDefs from './gip_http_utils_priv';
 
-import { TypeEndpointDef, TypeEndpoint, TypeEndpointOptions } from './gip_types';
+import type {
+	Falsy,
+	Type_EndpointDef,
+	Type_Endpoint,
+	Type_EndpointOptions,
+	Type_HttpHeaders,
+	Type_RawHttpParams,
+} from './gip_types.ts';
 
-type TypeRawQueryParamScalarValue    = string | null | undefined;
-type TypeRawQueryParamValue          = TypeRawQueryParamScalarValue | string[];
-type TypeCookedQueryParamScalarValue = string | boolean | null;
-type TypeCookedQueryParamValue       = TypeCookedQueryParamScalarValue | (TypeCookedQueryParamScalarValue)[];
-type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>;
+type Type_RawQueryParamScalarValue    = string | null | undefined;
+type Type_RawQueryParamValue          = Type_RawQueryParamScalarValue | string[];
+type Type_CookedQueryParamScalarValue = string | boolean | null;
+type Type_CookedQueryParamValue       = Type_CookedQueryParamScalarValue | Type_CookedQueryParamScalarValue[];
+export type Type_CookedQueryParams    = Record<string, Type_CookedQueryParamValue>;
 
-export type TypeRawQueryParams       = Partial<{ [key: string]: TypeRawQueryParamValue }>
+export type Type_RawQueryParams       = Partial<Record<string, Type_RawQueryParamValue>>;
 
-type TypeProcessEndpointDefArgs = {
-	endpointDef: TypeEndpointDef,
-	params?:     TypeRawHttpParams,
-	headers?:    TypeHttpHeaders,
-};
-type TypeProcessEndpointDefRet = TypeEndpoint;
+export interface Type_processEndpointDef_args {
+	endpointDef: Type_EndpointDef,
+	params?:     Type_RawHttpParams,
+	headers?:    Type_HttpHeaders,
+}
+export type Type_processEndpointDef_ret = Type_Endpoint;
+
+//export type Type_extractStringFromStream_args = ReadableStream<Uint8Array>;
+//export type Type_extractStringFromStream_ret  = Promise<string>;
+
+export type Type_extractJsonResponse_args = Response; // fetch API response
+export type Type_extractJsonResponse_ret  = Promise<object>;
+
+export type Type_extractJsonResponseStream_args = Response; // fetch API response
+export type Type_extractJsonResponseStream_ret  = Promise<Record<string,unknown>[]>;
+
+export type Type_parseQueryParams_args          = Falsy<Type_RawQueryParams>;
+export type Type_parseQueryParams_ret           = Type_CookedQueryParams;
+
+export type Type_stringifyUTF16_args            = object;
+export type Type_stringifyUTF16_ret             = string;
+
+export interface Type_genURI_args { uri : string, queryParams: Record<string,string> };
+export type Type_genURI_ret = string;
+
+export type Type_stripQueryParams_args = string;
+export type Type_stripQueryParams_ret  = string;
+
+export class HttpError extends Error {
+	statusCode : number | undefined;
+
+	constructor ( { statusCode, message } : { statusCode?: number, message: string }) {
+		super( message );
+		( this as HttpError ).statusCode = statusCode;
+		return this;
+	}
+}
 
 /**
  * @param object with properties:
  *         - endpointDef: object with properties: method, headers, uri, params;
  *         - headers:     object with properties being the header name and values the header value;
  *         - params:      either an object, a string or null.
- * @returns 
+ * @returns object with properties:
+ *           - uri;
+ *           - options.
  */
-export function processEndpointDef( { endpointDef, params = {}, headers = {} } : TypeProcessEndpointDefArgs ) : TypeProcessEndpointDefRet {
+export function processEndpointDef( { endpointDef, params = {}, headers = {} } : Type_processEndpointDef_args ) : Type_processEndpointDef_ret {
 	const method                                       = endpointDef.method.toUpperCase();
 	const { uri: strippedURI, params: cookedParams }   = privDefs.genParams( { endpointDef, params } );
 	const { uri: cookedURI,   params: recookedParams } = privDefs.genURI( { uri: strippedURI, method, params: cookedParams } );
 	const { headers: cookedHeaders, body }             = privDefs.genContent( { endpointDef, headers, params: recookedParams } );
-	const options : TypeEndpointOptions                = { method, headers: cookedHeaders };
+	const options                                      = { method, headers: cookedHeaders } as Type_EndpointOptions;
 
 	if ( body ) {
 		options.body = body;
@@ -53,8 +97,8 @@ export function processEndpointDef( { endpointDef, params = {}, headers = {} } :
 //}
 
 /**
- * @param rawObject 
- * @returns 
+ * @param rawObject
+ * @returns
  */
 //export async function extractJsonResponse( response : { json: () => object, type: string } ) {
 //  let body : object = [];
@@ -70,92 +114,96 @@ export function processEndpointDef( { endpointDef, params = {}, headers = {} } :
 //  return body;
 //}
 
-export async function extractStringFromStream( stream : ReadableStream<Uint8Array> ) : Promise<string> {
-	let arrChunk   = [];
-	let reader     = stream.getReader();
-	let bDone      = false;
-	while ( ! bDone ) {
-		const { done, value } = await reader.read();
-		if ( ! done ) {
-			arrChunk.push( value );
-		} else {
-			bDone = true;
-		}
-	}
-	const str = Buffer.concat( arrChunk ).toString();
-	return str;
-//  return new Promise( ( resolve, reject ) => {
-//    stream.setEncoding('utf8');
-//    stream.on( 'data', chunk => {
-//      str += chunk;
-//    })
-//    stream.on('end', () {
-//      resolve( str );
-//    });
-//    stream.on('error', () {
-//      reject( new Error('Stream error') );
-//    });
-//  } );
-}
+//export async function extractStringFromStream( stream : Type_extractStringFromStream_args ) : Type_extractStringFromStream_ret {
+//	const arrChunk = [];
+//	const reader   = stream.getReader();
+//
+//	let bDone = false;
+//
+//	while ( ! bDone ) {
+//		const { done, value } = await reader.read();
+//		if ( ! done ) {
+//			arrChunk.push( value );
+//		} else {
+//			bDone = true;
+//		}
+//	}
+//	const str = Buffer.concat( arrChunk ).toString();
+//	return str;
+//
+////  return new Promise( ( resolve, reject ) => {
+////    stream.setEncoding('utf8');
+////    stream.on( 'data', chunk => {
+////      str += chunk;
+////    })
+////    stream.on('end', () {
+////      resolve( str );
+////    });
+////    stream.on('error', () {
+////      reject( new Error('Stream error') );
+////    });
+////  } );
+//}
 
-export async function extractJsonResponse( response : Response ) {
-	let body = [];
+export async function extractJsonResponse( response : Type_extractJsonResponse_args ) : Type_extractJsonResponse_ret {
+	let body : object = [];
 	try {
-		const strBody = await response.json();
-		logger.info( `extractJsonResponse: `, { strBody } );
-		body = strBody;
+		body = await response.json() as object;
+		logger.info( `extractJsonResponse: `, { body } );
 		//body = JSON.parse( strBody );
 		//logger.info( `JSON response extracted: `, body );
 	}
 	catch ( err ) {
-		logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message } ) );
+		logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: ( err as Error ).message } ) );
 	}
 
 	return body;
 }
 
-export async function extractJsonResponseStream( response : Response ) {
-	let body = [];
+export async function extractJsonResponseStream( response : Type_extractJsonResponseStream_args ) : Type_extractJsonResponse_ret {
+	let body : Awaited<Type_extractJsonResponse_ret> = [];
 	try {
 		const strBody = await response.text();
 		logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
-		body = JSON.parse( strBody );
+		body = JSON.parse( strBody ) as typeof body;
 		//logger.info( `JSON response extracted: `, body );
 	}
 	catch ( err ) {
-		logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: err.message } ) );
+		logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: (err as Error).message } ) );
 	}
 
 	return body;
 }
 
 /**
- * @param {TypeRawQueryParams} rawParams : object with properties being the query parameter names and values being the values; note that a value may be an array.
+ * @param {Type_RawQueryParams} rawParams : object with properties being the query parameter names and values being the values; note that a value may be an array.
  * @returns the query parameter object with undefined values set to null and case insenstive 'false' or 'true' set to the boolean equivalent.
  */
-export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQueryParams
+export function parseQueryParams( rawParams : Type_parseQueryParams_args ) : Type_parseQueryParams_ret
 {
-	const mapQueryParamVal = ( rawValue : TypeRawQueryParamScalarValue ) => { 
-		let cookedValue : TypeCookedQueryParamValue = rawValue || null;
+	const mapQueryParamVal = ( rawValue : Type_RawQueryParamScalarValue ) : Type_CookedQueryParamValue => {
+		let cookedValue : Type_CookedQueryParamValue = rawValue ?? null;
 		if ( ( rawValue === null ) || ( rawValue === undefined ) ) { // Need to check for null so that TS doesn't moan about the subsequent if statements
 			cookedValue = null;
-		} else if ( rawValue.match( /false/i ) ) {
+		} else if ( /false/i.exec(rawValue) ) {
 			cookedValue = false;
-		} else if ( rawValue.match( /true/i ) || ( rawValue === '' ) ) {
+		} else if ( (/true/i.exec(rawValue)) || ( rawValue === '' ) ) {
 			cookedValue = true;
 		}
 		return cookedValue;
 	};
 
-	const cookedParams : TypeCookedQueryParams = {};
+	const cookedParams : Type_CookedQueryParams = {};
 
-	Object.entries( rawParams ).forEach( ( [ param, value ] ) => {
-		if ( value && Array.isArray( value ) ) {
-			cookedParams[ param ] = value.map( el => mapQueryParamVal( el ) );
-		} else {
-			cookedParams[ param ] = mapQueryParamVal( value );
-		}
-	} );
+	if ( rawParams ) {
+		Object.entries( rawParams ).forEach( ( [ param, value ] ) => {
+			if ( value && Array.isArray( value ) ) {
+				cookedParams[ param ] = value.map( el => mapQueryParamVal( el ) ) as Type_CookedQueryParamScalarValue[];
+			} else {
+				cookedParams[ param ] = mapQueryParamVal( value );
+			}
+		} );
+	}
 
 	return cookedParams;
 }
@@ -164,19 +212,39 @@ export function parseQueryParams( rawParams : TypeRawQueryParams ) : TypeCookedQ
  * @param rawObject : an object
  * @returns object in UTF-16 format, with all characters 0x7F and above replaced with escaped character codes
  */
-export function stringifyUTF16( rawObject: object ) : string {
+export function stringifyUTF16( rawObject: Type_stringifyUTF16_args ) : Type_stringifyUTF16_ret {
 	const rawString    = JSON.stringify( rawObject );
 	const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
 	return cookedString;
 }
 
-export function stripQueryParams( rawURI : string ) : string {
+/**
+ * @param rawURI : a URI string, possibly with query parametrs.
+ * @returns the URI string without the query parameters, e.g.,
+ *            http://mydom/mypath?myqp=val1 => http://mydom/mypath
+ */
+export function stripQueryParams( rawURI : Type_stripQueryParams_args ) : Type_stripQueryParams_ret {
 	const decodedURI = decodeURIComponent( rawURI );
 	const cookedURI  = decodedURI.replace( /\?.*/, '' );
 	return cookedURI;
 }
 
-export function genURI( { uri, queryParams } : { uri : string, queryParams: Record<string,string> } ) : string {
+/**
+ * @param object: with properties:
+ *           - uri:         the URI without any query parameters or trailing query, e.g., http://mydom/mypath
+ *           - queryParams: an object containing the query parameters, e.g., { qp1: 'val1', doit: 'yes' }
+ * @returns the URI with an appended query string, e.g., http://mydom/mypath?qp1=val1&doit=yes
+ */
+export function genURI( { uri, queryParams } : Type_genURI_args ) : Type_genURI_ret {
 	const cookedURI = `${uri}?${queryString.stringify( queryParams )}`;
 	return cookedURI;
 }
+
+const privateDefs = {};
+
+if ( process.env.NODE_ENV === 'test-unit' ) {
+	Object.assign( privateDefs, {
+	} );
+}
+
+export { privateDefs };

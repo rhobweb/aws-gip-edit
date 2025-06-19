@@ -2,54 +2,58 @@
  * DESCRIPTION:
  * Unit Tests for gip_http_utils_priv.ts.
  */
+const REL_SRC_PATH     = '../../../src/utils/';
+const MODULE_NAME      = 'gip_http_utils_priv';
+const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/ban-ts-comment    */
-/* eslint-disable @typescript-eslint/no-explicit-any   */
+import type {
+	Nullable,
+	Type_EndpointDef,
+	Type_HttpHeaders,
+	Type_HttpParams,
+	Type_RawHttpParams,
+} from '../../../src/utils/gip_types.ts';
 
-import sinon, { SinonSandbox, SinonStub } from 'sinon';
-import { expect }                         from 'chai';
-//import rewiremock                         from '../rewiremock.es6';
+import type {
+	Type_genParams_args,
+	Type_genParams_ret,
+	Type_genURI_args,
+	Type_genURI_ret,
+	Type_containsHeader_args,
+	Type_containsHeader_ret,
+	Type_genContent_args,
+	Type_genContent_ret,
+} from '../../../src/utils/gip_http_utils_priv.ts';
 
-const REL_SRC_PATH = '../../../src/utils/';
-const MODULE_NAME  = 'gip_http_utils_priv.ts';
-const TEST_MODULE  = REL_SRC_PATH + MODULE_NAME;
 
-let sandbox : SinonSandbox;
-
-import { TypeEndpointDef } from '../../../src/utils/gip_types';
-
-type TypeGenParamsArgs      = { endpointDef: TypeEndpointDef, params?: TypeHttpParams };
-type TypeGenParamsRet       = { uri: string, params: TypeHttpParams };
-//type TypeGetContentRet    = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
-type TypeGenURIArgs         = { uri: string, method: string, params?: TypeHttpParams };
-type TypeGenURIRet          = { uri: string, params: Nullable<TypeHttpParams> };
-type TypeContainsHeaderArgs = { headers: TypeHttpHeaders, headerProp: string };
-type TypeContainsHeaderRet  = boolean;
-type TypeGenContentArgs     = { endpointDef: TypeEndpointDef, headers: TypeHttpHeaders, params: TypeHttpParams };
-type TypeGenContentRet      = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
-
-type TypeTestModule = {
-	genParams:      ( params: TypeGenParamsArgs )      => TypeGenParamsRet,
-	genURI:         ( params: TypeGenURIArgs )         => TypeGenURIRet,
-	containsHeader: ( params: TypeContainsHeaderArgs ) => TypeContainsHeaderRet,
-	genContent:     ( params: TypeGenContentArgs )     => TypeGenContentRet,
+interface Type_TestModule {
+	genParams:      ( params: Type_genParams_args )      => Type_genParams_ret,
+	genURI:         ( params: Type_genURI_args )         => Type_genURI_ret,
+	containsHeader: ( params: Type_containsHeader_args ) => Type_containsHeader_ret,
+	genContent:     ( params: Type_genContent_args )     => Type_genContent_ret,
 };
 
-async function createTestModule() : Promise<TypeTestModule> {
-	const testModule = await import( TEST_MODULE );
-	return testModule;
+import * as TEST_MODULE from '../../../src/utils/gip_http_utils_priv';
+const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
-function commonBeforeEach() {
-	sandbox = sinon.createSandbox();
+function commonAfterEach() : void {
+	jest.restoreAllMocks();
+	jest.resetModules();
 }
 
-function commonAfterEach() {
-	sandbox.restore();
+function fail( err : Error | string ) : void {
+	if ( typeof err === 'string' ) {
+		throw new Error( err );
+	} else {
+		throw err;
+	}
 }
 
 describe(MODULE_NAME + ':module can be loaded', () => {
+	let testModuleObj : Type_TestModule;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -59,27 +63,30 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 		commonAfterEach();
 	});
 
-	it ('module initialises OK', async () => {
-		await createTestModule();
+	test('module initialises OK', async () => {
+		await jest.isolateModulesAsync(async () => { // Load another instance of the module. This allows configuring a different environment
+			testModuleObj = await import( TEST_MODULE_PATH ) as Type_TestModule;
+		});
+		expect( testModuleObj ).toBeDefined();
 	});
 });
 
 describe(MODULE_NAME + ':genParams', () => {
-	let   testModule            : TypeTestModule;
-	let   testArgs              : TypeGenParamsArgs;
-	let   testEndpointDef       : TypeEndpointDef;
-	let   testURI               : string;
-	let   testQueryParams       : string;
-	let   testEndpointDefParams : TypeHttpParams;
-	let   testParams            : TypeHttpParams;
-	let   actualResult          : TypeGenParamsRet;
-	let   actualErr             : Error;
-	let   expectedResult        : object;
-	let   expectedErrMessage;
+	let testModuleObj         : Type_TestModule;
+	let testArgs              : Type_genParams_args;
+	let testEndpointDef       : Type_EndpointDef;
+	let testURI               : string;
+	let testQueryParams       : string;
+	let testEndpointDefParams : Type_HttpParams;
+	let testParams            : Type_HttpParams;
+	let actualResult          : Type_genParams_ret;
+	let actualErr             : Error;
+	let expectedResult        : object;
+	let expectedErrMessage;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule            = await createTestModule();
+		testModuleObj         = testModule;
 		testURI               = 'https://mydom/mypath';
 		testQueryParams       = 'qparam1=qval1&qparam2';
 		testEndpointDefParams = { 'epd_param1': 'epdvalue1' };
@@ -96,133 +103,147 @@ describe(MODULE_NAME + ':genParams', () => {
 		commonAfterEach();
 	});
 
-	it ( 'No parameters in endpoint def or passed in', () => {
+	test( 'No parameters in endpoint def or passed in', () => {
 		delete testEndpointDef.params;
 		testArgs       = { endpointDef: testEndpointDef };
 		expectedResult = { uri: testURI, params: {} };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'No parameters in endpoint def, parameters passed in', () => {
+	test( 'No parameters in endpoint def, parameters passed in', () => {
 		delete testEndpointDef.params;
-		expectedResult = { uri: testURI, params: JSON.parse( JSON.stringify(testParams) ) };
+		expectedResult = { uri: testURI, params: JSON.parse( JSON.stringify(testParams) ) as object };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Parameters in endpoint def, no parameters passed in', () => {
+	test( 'Parameters in endpoint def, no parameters passed in', () => {
 		delete testArgs.params;
-		expectedResult = { uri: testURI, params: JSON.parse( JSON.stringify(testEndpointDefParams) ) };
+		expectedResult = { uri: testURI, params: JSON.parse( JSON.stringify(testEndpointDefParams) ) as object };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Object parameters in endpoint def, object parameters passed in', () => {
-		expectedResult = { uri: testURI, params: Object.assign( {}, JSON.parse( JSON.stringify(testEndpointDefParams) ), JSON.parse( JSON.stringify(testParams) ) ) };
+	test( 'Object parameters in endpoint def, object parameters passed in', () => {
+		expectedResult = { uri: testURI, params: Object.assign( {}, JSON.parse( JSON.stringify(testEndpointDefParams) ), JSON.parse( JSON.stringify(testParams) ) ) as object };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Error Endpoint def string params, object parameters passed in', () => {
+	test( 'Error Endpoint def string params, object parameters passed in', () => {
 		testEndpointDef.params = 'any old string';
 		expectedErrMessage     = 'Type mismatch between fixed params and variable params';
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			actualErr = <Error>err;
+			actualErr = err as Error;
 		}
-		expect( actualErr.message ).to.equal( expectedErrMessage );
+		expect( actualErr.message ).toEqual( expectedErrMessage );
 	});
 
-	it ( 'Error Endpoint def string params, string parameters passed in', () => {
+	test( 'Error Endpoint def string params, string parameters passed in', () => {
 		testEndpointDef.params = 'any old string';
-		testArgs.params        = 'some other string';
+		testArgs.params        = 'some other string' as unknown as Type_RawHttpParams; // A string is invalid, so force the assignment to test the error
 		expectedErrMessage     = 'Invalid to specify both fixed string params and variable string params';
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			actualErr = <Error>err;
+			actualErr = err as Error;
 		}
-		expect( actualErr.message ).to.equal( expectedErrMessage );
+		expect( actualErr.message ).toEqual( expectedErrMessage );
 	});
 
-	it ( 'Query parameters in URI', () => {
+	test( 'Query parameters in URI', () => {
 		delete testArgs.params;
 		delete testEndpointDef.params;
 		testEndpointDef.uri = `${testURI}?${testQueryParams}`;
 		expectedResult      = { uri: testURI, params: { qparam1: 'qval1', qparam2: null } };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Query parameters in URI, endpoint def params', () => {
+	test( 'Query parameters in URI, endpoint def params', () => {
 		delete testArgs.params;
 		testEndpointDef.uri = `${testURI}?${testQueryParams}`;
 		expectedResult      = { uri: testURI, params: { qparam1: 'qval1', qparam2: null, epd_param1: 'epdvalue1' } };
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			sinon.assert.fail( `Test should not fail: ${(<Error>err).message}` );
+			fail( `Test should not fail: ${(err as Error).message}` );
 		}
-		expect( actualResult ).to.deep.equal( expectedResult );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Error Endpoint def string params, query parameters in URI', () => {
+	test( 'Error Endpoint def string params, query parameters in URI', () => {
 		delete testArgs.params;
 		testEndpointDef.params = 'any old string';
 		testEndpointDef.uri    = `${testURI}?${testQueryParams}`;
 		expectedErrMessage     = 'Type mismatch between endpoint params and query params';
 		try {
-			actualResult = testModule.genParams( testArgs );
+			actualResult = testModuleObj.genParams( testArgs );
 		}
 		catch ( err ) {
-			actualErr = <Error>err;
+			actualErr = err as Error;
 		}
-		expect( actualErr.message ).to.equal( expectedErrMessage );
+		expect( actualErr.message ).toEqual( expectedErrMessage );
+	});
+
+	test( 'Empty query parameter in URI', () => {
+		delete testArgs.params;
+		testQueryParams = 'qnovalue=';
+		testEndpointDef.uri = `${testURI}?${testQueryParams}`;
+		expectedResult      = { uri: testURI, params: { qnovalue: null, epd_param1: 'epdvalue1' } };
+		try {
+			actualResult = testModuleObj.genParams( testArgs );
+		}
+		catch ( err ) {
+			fail( `Test should not fail: ${(err as Error).message}` );
+		}
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });
 
 describe(MODULE_NAME + ':genURI', () => {
-	let   testModule      : TypeTestModule;
-	let   testArgs        : TypeGenURIArgs;
-	let   testURI         : string;
-	let   testQueryParams : string;
-	let   testParams      : TypeRawHttpParams;
-	let   actualResult    : TypeGenURIRet;
-	let   expectedResult  : object;
+	let testModuleObj   : Type_TestModule;
+	let testArgs        : Type_genURI_args;
+	let testURI         : string;
+	let testQueryParams : string;
+	let testParams      : Type_RawHttpParams;
+	let actualResult    : Type_genURI_ret;
+	let expectedResult  : object;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule      = await createTestModule();
+		testModuleObj   = testModule;
 		testURI         = 'https://mydom/mypath';
 		testQueryParams = 'qparam1=qval1';
 		testParams      = { param1: 'value1' };
@@ -241,44 +262,44 @@ describe(MODULE_NAME + ':genURI', () => {
 		commonAfterEach();
 	});
 
-	it ( 'Not GET', () => {
+	test( 'Not GET', () => {
 		testArgs.uri    = testURI;
 		testArgs.method = 'POST';
 		expectedResult  = { uri: testURI, params: testParams };
-		actualResult = testModule.genURI( testArgs );
-		( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult    = testModuleObj.genURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'GET with params', () => {
+	test( 'GET with params', () => {
 		testArgs.uri = `${testURI}?${testQueryParams}`;
-		actualResult = testModule.genURI( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'GET no params', () => {
+	test( 'GET no params', () => {
 		testArgs.uri = `${testURI}?${testQueryParams}`;
 		expectedResult = {
 			uri:    testURI,
 			params: null,
 		};
 		delete testArgs.params;
-		actualResult = testModule.genURI( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });
 
 describe(MODULE_NAME + ':containsHeader', () => {
-	let   testModule:     TypeTestModule;
-	let   testArgs:       TypeContainsHeaderArgs;
-	let   testHeaders:    Record<string,string>;
-	let   testHeaderProp: string = '';
-	let   actualResult:   TypeContainsHeaderRet;
-	let   expectedResult: TypeContainsHeaderRet;
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : Type_containsHeader_args;
+	let testHeaders    : Record<string,string>;
+	let actualResult   : Type_containsHeader_ret;
+	let expectedResult : Type_containsHeader_ret;
 
-	beforeEach( async () => {
+	const testHeaderProp = '';
+
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule  = await createTestModule();
+		testModuleObj = testModule;
 		testHeaders = {
 			hEaDeR1: 'header1 val',
 			HeadeR2: 'header2 val',
@@ -293,34 +314,34 @@ describe(MODULE_NAME + ':containsHeader', () => {
 		commonAfterEach();
 	});
 
-	it ( 'Not found', () => {
+	test( 'Not found', () => {
 		testArgs.headerProp = 'header3';
 		expectedResult      = false;
-		actualResult        = testModule.containsHeader( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult        = testModuleObj.containsHeader( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Found', () => {
+	test( 'Found', () => {
 		testArgs.headerProp = 'heAdEr2';
 		expectedResult      = true;
-		actualResult        = testModule.containsHeader( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult        = testModuleObj.containsHeader( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 });
 
 describe(MODULE_NAME + ':genContent', () => {
-	let testModule      : TypeTestModule;
-	let testArgs        : TypeGenContentArgs;
-	let testParams      : TypeHttpParams;
-	let testEndpointDef : TypeEndpointDef;
-	let testHeaders     : TypeHttpHeaders;
-	let actualResult    : TypeGenContentRet;
-	let expectedResult  : TypeGenContentRet;
+	let testModuleObj   : Type_TestModule;
+	let testArgs        : Type_genContent_args;
+	let testParams      : Type_HttpParams;
+	let testEndpointDef : Type_EndpointDef;
+	let testHeaders     : Type_HttpHeaders;
+	let actualResult    : Type_genContent_ret;
+	let expectedResult  : Type_genContent_ret;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule = await createTestModule();
-		testHeaders     = {
+		testModuleObj = testModule;
+		testHeaders   = {
 			pheader1: 'pheader1 val',
 		};
 		testEndpointDef = {
@@ -340,65 +361,60 @@ describe(MODULE_NAME + ':genContent', () => {
 		commonAfterEach();
 	});
 
-	it ( 'GET', () => {
+	test( 'GET', () => {
 		testEndpointDef.method = 'GET';
 		expectedResult      = {
 			headers: { pheader1: 'pheader1 val', epheader1: 'epheader1 val', },
-			body:    JSON.parse(JSON.stringify(testParams)),
+			body:    JSON.parse(JSON.stringify(testParams)) as Nullable<Type_HttpParams>,
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Content-Type in supplied header', () => {
+	test( 'Content-Type in supplied header', () => {
 		testHeaders[ 'Content-Type' ] = 'provided content type';
 		expectedResult      = {
 			headers: { pheader1: 'pheader1 val', epheader1: 'epheader1 val', 'Content-Type': 'provided content type' },
 			body:    JSON.stringify( testParams ),
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Content-Type in endpoint def header', () => {
-		// @ts-ignore
+	test( 'Content-Type in endpoint def header', () => {
+		testEndpointDef.headers = testEndpointDef.headers ?? {};
 		testEndpointDef.headers[ 'Content-Type' ] = 'endpoint content type';
-		// @ts-ignore
 		delete testArgs.headers;
 		expectedResult       = {
 			headers: { epheader1: 'epheader1 val', 'Content-Type': 'endpoint content type' },
 			body:    JSON.stringify( testParams ),
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 
-	it ( 'No Content-Type present, params already stringified', () => {
-		// @ts-ignore
+	test( 'No Content-Type present, params already stringified', () => {
 		delete testArgs.headers;
 		testArgs.params = 'already stringified';
 		expectedResult       = {
 			headers: { epheader1: 'epheader1 val', 'Content-Type': 'text/plain; charset=UTF-8' },
 			body:    testArgs.params,
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
-	it ( 'No Content-Type present, params object', () => {
-		// @ts-ignore
+	test( 'No Content-Type present, params object', () => {
 		delete testArgs.headers;
 		expectedResult       = {
 			headers: { epheader1: 'epheader1 val', 'Content-Type': 'application/json; charset=UTF-8' },
 			body:    JSON.stringify( testArgs.params ),
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 
-	it ( 'No endpoint headers, no additonal params or headers', () => {
-		// @ts-ignore
+	test( 'No endpoint headers, no additonal params or headers', () => {
 		delete testArgs.params;
-		// @ts-ignore
 		delete testArgs.headers;
 		delete testEndpointDef.headers;
 		//containsHeaderExpectedParamsArr[0].headers = {};
@@ -408,7 +424,7 @@ describe(MODULE_NAME + ':genContent', () => {
 			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
 			body:    null,
 		};
-		actualResult = testModule.genContent( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.genContent( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 } );

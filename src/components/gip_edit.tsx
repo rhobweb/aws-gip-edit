@@ -1,41 +1,62 @@
 //import React from 'react';
 
-import React, { useState, useEffect, useRef, ForwardedRef } from 'react';
+import type {
+	Type_EventKeyboardAny,
+	Type_EventDragAny,
+	//Type_EventTouchAny,
+	Type_Refs,
+} from '../browser_event.ts';
+import type {
+	Type_EndpointDef,
+	Type_ProgramItem,
+	Type_ProgramList,
+	Type_ProgramEditInput,
+	Type_ProgramEditOptions,
+	Type_RawHttpParams,
+} from '../utils/gip_types.ts';
+import React, { useState, useEffect, useRef }               from 'react';
 import { Helmet }                                           from 'react-helmet';
-import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils';
+import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils.js';
 import {
-	PROG_FIELD_URI, PROG_FIELD_PID, PROG_FIELD_TITLE, PROG_FIELD_SYNOPSIS, PROG_FIELD_SELECTED, PROG_FIELD_IMAGE_URI,
-	TypeEndpointDef, TypeProgramItem, TypeProgramList, TypeProgramEditInput, TypeProgramEditOptions
-} from '../utils/gip_types';
-import { TypeDbProgramItem }       from '../utils/gip_prog_fields';
-import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
-import { GipProgramEntry }         from './gip_program_entry';
-import { GipProgramTable }         from './gip_program_table';
-import { GipActionButtons }        from './gip_action_buttons';
-import GipProgramEditInput         from '../utils/gip_program_edit_input';
-import GipProgramEditOptions       from '../utils/gip_program_edit_options';
-import GipProgramItem              from '../utils/gip_program_item';
-import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
+	PROG_FIELD_URI,
+	PROG_FIELD_PID,
+	PROG_FIELD_TITLE,
+	PROG_FIELD_SYNOPSIS,
+	PROG_FIELD_SELECTED,
+	PROG_FIELD_IMAGE_URI,
+} from '../utils/gip_types.js';
+import { Type_DbProgramItem }      from '../utils/gip_prog_fields.js';
+import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils.js';
+import { GipProgramEntry }         from './gip_program_entry.js';
+import { GipProgramTable }         from './gip_program_table.js';
+import { GipActionButtons }        from './gip_action_buttons.js';
+import GipProgramEditInput         from '../utils/gip_program_edit_input.js';
+import GipProgramEditOptions       from '../utils/gip_program_edit_options.js';
+import GipProgramItem              from '../utils/gip_program_item.js';
+import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils.js';
 import logger                      from '@rhobweb/console-logger';
-import ourPackage                  from '../../package.json';
+import ourPackage                  from '../../package.json'; // with { type: "json" };
 
-type TypeGipEditState = {
-	programEditInput:   TypeProgramEditInput,
-	programEditOptions: TypeProgramEditOptions,
-	programs:           TypeProgramItem[],
+interface TypeGipEditState {
+	programEditInput:   Type_ProgramEditInput,
+	programEditOptions: Type_ProgramEditOptions,
+	programs:           Type_ProgramItem[],
+}
+
+interface Type_BodyMessageError {
+	message: string,
+};
+interface Type_ErrorWithBody extends Error {
+	body: ( Record<string,unknown>[] | Type_BodyMessageError ),
 };
 
-interface TypeErrorWithBody extends Error {
-	body?: Record<string,any>
-};
-
-const ENDPOINT_LOAD : TypeEndpointDef = {
+const ENDPOINT_LOAD : Type_EndpointDef = {
 	method: 'GET',
 	uri:    '/gip_edit/api/programs',
 	params: { all: true },
 };
 
-const ENDPOINT_SAVE : TypeEndpointDef = {
+const ENDPOINT_SAVE : Type_EndpointDef = {
 	method: 'POST',
 	uri:    '/gip_edit/api/programs',
 };
@@ -45,50 +66,64 @@ const DOC_TITLE = `GIP Program Edit v${ourPackage.version}`;
 //function beforeUnload( event ) {
 //  event.preventDefault();
 //  // Chrome requires returnValue to be set
-//  logger.log( "Before Unload" );
+//  logger.log( 'Before Unload' );
 //  event.returnValue = '';
 //}
 
-function processProgramForSaving( prog : TypeProgramItem ) : TypeDbProgramItem {
-	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) );
+type Type_ErrorBody = Record<string,unknown>[] | Type_BodyMessageError;
+class ErrorWithBody extends Error {
+	body: Type_ErrorBody;
+	constructor( message: string, body: Type_ErrorBody = [] ) {
+		super( message );
+		this.name = 'ErrorWithBody';
+		this.body = body;
+	}
+}
+
+function processProgramForSaving( prog : Type_ProgramItem ) : Type_DbProgramItem {
+	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) ) as Type_ProgramItem;
 	cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
-	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( cookedProgram[ PROG_FIELD_SYNOPSIS ] );
+	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( { rawText: cookedProgram[ PROG_FIELD_SYNOPSIS ] } );
 	return progToDb( cookedProgram );
 }
 
-async function loadPrograms() : Promise<TypeProgramItem[]> {
+async function loadPrograms() : Promise<Type_ProgramItem[]> {
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_LOAD } );
 	logger.log( 'info', `loadPrograms: URI: `, uri );
 	const response         = await fetch( uri, options as RequestInit );
-	const rawPrograms      = await extractJsonResponse( response ) as TypeDbProgramItem[];
+	const rawPrograms      = await extractJsonResponse( response ) as Type_DbProgramItem[];
 	const programs         = dbToProgArray( rawPrograms );
 	logger.log( 'info', `loadPrograms: Programs: `, programs );
 	return programs;
 }
 
-async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgramItem[]> {
-	let   newPrograms = null;
+async function savePrograms( programs : Type_ProgramItem[] ) : Promise<Type_ProgramItem[]> {
+	let   newPrograms = [] as Type_ProgramItem[];
 	const dbPrograms  = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
-	const params      = dbPrograms as TypeRawHttpParams; // Force casting to match the processEndpointDef function
+	const params      = dbPrograms as Type_RawHttpParams; // Force casting to match the processEndpointDef function
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
 	logger.log( 'verbose', 'savePrograms: Programs: ', JSON.stringify( { uri, options, params } ) );
 	try {
 		const response      = await fetch( uri, options as RequestInit );
 		if ( response.ok ) {
 			logger.log( 'verbose', 'savePrograms: OK', );
-			const newDbPrograms = (await extractJsonResponseStream( response ) || [] ) as TypeDbProgramItem[];
+			const newDbPrograms = await extractJsonResponseStream( response ) as Type_DbProgramItem[];
 			newPrograms         = dbToProgArray( newDbPrograms );
 		} else {
 			const body    = await extractJsonResponseStream( response );
-			const errSave : TypeErrorWithBody = new Error( 'savePrograms error: ' + JSON.stringify( { status: response.status, statusText: response.statusText } ) );
-			errSave.body = body;
+			const errSave = new ErrorWithBody( 'savePrograms error: ' + JSON.stringify( { status: response.status, statusText: response.statusText } ), body as Type_BodyMessageError ); // TODO: tidy up types for body
 			throw errSave;
 		}
 	}
 	catch ( err ) {
-		logger.log( 'error', 'savePrograms: FAILED', { err } );
+		logger.log( 'error', 'savePrograms: FAILED', { err: err as Type_ErrorWithBody } );
 		newPrograms = programs; // Default to return the request programs so they are not lost
-		const alertMessage = `saveFailed! ${err?.body?.message}`;
+		const body = ( err as Type_ErrorWithBody ).body;
+		let errMessage = ( err as Error ).message;
+		if ( 'message' in body ) {
+			errMessage = ( 'message' in body ) ? body.message : JSON.stringify( body );
+		}
+		const alertMessage = `saveFailed! ` + errMessage;
 		window.alert( alertMessage );
 	}
 
@@ -97,8 +132,8 @@ async function savePrograms( programs : TypeProgramItem[] ) : Promise<TypeProgra
 	return newPrograms;
 }
 
-function processProgram( { programEditInput, programEditOptions, programs } : TypeGipEditState ) : TypeProgramList | null {
-	let newProgramList : TypeProgramList = [];
+function processProgram( { programEditInput, programEditOptions, programs } : TypeGipEditState ) : Type_ProgramList | null {
+	let newProgramList : Type_ProgramList = [];
 	const newOrUpdatedProgram = new GipProgramItem( { inputItem: programEditInput, inputOptions: programEditOptions } );
 
 	const newOrUpdatedPid = newOrUpdatedProgram[ PROG_FIELD_PID ];
@@ -106,7 +141,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 	if ( newOrUpdatedPid.length && newOrUpdatedProgram[ PROG_FIELD_TITLE ].length ) {
 
 		newProgramList = [];
-		newProgramList = JSON.parse( JSON.stringify( programs ) );
+		newProgramList = JSON.parse( JSON.stringify( programs ) ) as Type_ProgramList;
 
 		logger.log( 'verbose', `processProgram: `, { newOrUpdatedPid } );
 
@@ -117,7 +152,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 		if ( existingProgram ) {
 			Object.assign( existingProgram, newOrUpdatedProgram );
 		} else {
-			newProgramList.push( newOrUpdatedProgram );
+			newProgramList.push( newOrUpdatedProgram as Type_ProgramItem );
 		}
 	} else {
 		alert( 'Incomplete program info' );
@@ -126,16 +161,17 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 	return ( newProgramList.length > 0 ? newProgramList : null );
 }
 
-function processDrop( event : DragEvent ) {
+type Type_processDrop_ret = { programEditInput : GipProgramEditInput } | null ;
+function processDrop( event : Type_EventDragAny ) : Type_processDrop_ret {
 	let result = null;
 
 	logger.log( 'debug', 'processDrop', event.dataTransfer );
 
-	if ( event.dataTransfer ) {
+	if ( event.dataTransfer ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 		const textHTML = event.dataTransfer.getData( 'text/html' );
 
-		logger.log( 'debug', "processDrop: ", textHTML );
-	
+		logger.log( 'debug', 'processDrop: ', textHTML );
+
 		if ( textHTML.length > 0 )
 		{
 			const programURL       = event.dataTransfer.getData( 'text/plain' );
@@ -145,11 +181,11 @@ function processDrop( event : DragEvent ) {
 			programEditInput[ PROG_FIELD_TITLE ]     = programDetails[ PROG_FIELD_TITLE ];
 			programEditInput[ PROG_FIELD_SYNOPSIS ]  = programDetails[ PROG_FIELD_SYNOPSIS ];
 			programEditInput[ PROG_FIELD_IMAGE_URI ] = programDetails[ PROG_FIELD_IMAGE_URI ];
-	
+
 			result = {
 				programEditInput,
 			};
-	
+
 			logger.log( 'debug', 'processDrop: ', { result } );
 		}
 	}
@@ -157,88 +193,89 @@ function processDrop( event : DragEvent ) {
 	return result;
 }
 
-function GipEdit() {
+function GipEdit() : React.JSX.Element {
 
 	const [ programEditInput,   setProgramEditInput ]   = useState( new GipProgramEditInput() );
 	const [ programEditOptions, setProgramEditOptions ] = useState( new GipProgramEditOptions() );
-	const [ programs,           setPrograms ]           = useState( [] as TypeProgramList );
+	const [ programs,           setPrograms ]           = useState( [] as Type_ProgramList );
 
-	const refs : TypeRefs = {
+	const refs : Type_Refs = {
 		[PROG_FIELD_URI]:   useRef(null),
 		[PROG_FIELD_TITLE]: useRef(null),
 	};
 
-	function setFocus( inputFieldName : string ) {
+	// TODO: Try to fix types
+	function setFocus( inputFieldName : string ) : void {
 		logger.log( 'debug', 'setFocus: Requested: ', inputFieldName );
 		// Focus the text input using the raw DOM API
-		if ( refs[ inputFieldName ]?.current ) {
+		if ( refs[ inputFieldName ]?.current ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 			// logger.log( "setFocus: Performing" );
 			refs[ inputFieldName ].current.focus();
 		}
 	}
-	
-	function setInitialFocus() {
+
+	function setInitialFocus() : void{
 		//logger.log( 'debug', 'setInitialFocus' );
 		setFocus( PROG_FIELD_URI );
 	}
-	
-	const clearProgramInput = () => {
+
+	const clearProgramInput = () : void => {
 		const newProgramEditInput = new GipProgramEditInput();
 		setProgramEditInput( newProgramEditInput );
 	};
 
-	const onInputChange = ( { paramName, newValue } : { paramName: string, newValue: string } ) => {
+	const onInputChange = ( { paramName, newValue } : { paramName: string, newValue: string } ) : void => {
 		// logger.log( 'debug', 'onInputChange: ', { paramName, newValue } );
 		const newProgramEditInput = new GipProgramEditInput();
 		newProgramEditInput.assign( programEditInput );
 		newProgramEditInput.setField( paramName, newValue );
 		setProgramEditInput( newProgramEditInput );
-	}
+	};
 
-	const setInputFieldsFromProgram = ( program : TypeProgramItem ) => {
+	const setInputFieldsFromProgram = ( program : Type_ProgramItem ) : void => {
 		const newProgramEditInput   = new GipProgramEditInput();
 		const newProgramEditOptions = new GipProgramEditOptions();
 		newProgramEditInput.assignFromProgram( program );
 		newProgramEditOptions.assignFromProgram( program );
 		setProgramEditInput( newProgramEditInput );
 		setProgramEditOptions( newProgramEditOptions );
-	}
+	};
 
-	const setInputToSelected = ( programs : TypeProgramList ) => {
+	const setInputToSelected = ( programs : Type_ProgramList ) : void => {
 		const arrSelected = programs.filter( prog => prog[ PROG_FIELD_SELECTED ] );
 		if ( arrSelected.length === 1 ) {
 			setInputFieldsFromProgram( arrSelected[ 0 ] );
 		} else {
 			clearProgramInput();
 		}
-	}
+	};
 
-	const clearSelected = () => {
+	const clearSelected = () : void => {
 		const newPrograms = programs.map( prog => { prog[ PROG_FIELD_SELECTED ] = false; return prog; } );
 		setPrograms( newPrograms );
-	}
+	};
 
-	const onOptionChange = ( newProgramEditOptions : TypeProgramEditOptions ) => {
+	const onOptionChange = ( newProgramEditOptions : Type_ProgramEditOptions ) : void => {
 		logger.log( 'debug', 'Program Options Changed ' );
 		const objNewProgramOptions = new GipProgramEditOptions( newProgramEditOptions );
 		setProgramEditOptions( objNewProgramOptions );
-	}
+	};
 
-	const onProgramChange = ( newPrograms: TypeProgramList ) => {
+	const onProgramChange = ( newPrograms: Type_ProgramList ) : void => {
 		logger.log( 'debug', 'Programs Changed ', newPrograms );
 		setPrograms( newPrograms );
 		setInputToSelected( newPrograms );
-	}    
+	};
 
-	const handleEscapeKey = ( event : TypeEventKeyboardAny ) => {
+	const handleEscapeKey = ( event : Type_EventKeyboardAny ) : void => {
 		if ( event.key === 'Escape' ) {
 			clearProgramInput();
 			setInitialFocus();
 			clearSelected();
 		}
-	}
+	};
 
-	const onKeyDown = ( event: TypeEventKeyboardAny ) => {
+	const onKeyDown = ( event: Type_EventKeyboardAny ) : void => {
 		logger.log( 'silly', 'onKeyDown' );
 		if ( event.key === 'Enter' ) {
 			const newPrograms = processProgram( { programEditInput, programEditOptions, programs } );
@@ -250,18 +287,18 @@ function GipEdit() {
 		} else {
 			handleEscapeKey( event );
 		}
-	}
+	};
 
-	const onProgramTableKeyDown = ( event : TypeEventKeyboardAny ) => {
+	const onProgramTableKeyDown = ( event : Type_EventKeyboardAny ) : void => {
 		handleEscapeKey( event );
-	}
+	};
 
-	const onDragOver = ( event: TypeEventDragAny ) => {
+	const onDragOver = ( event: Type_EventDragAny ) : void => {
 		event.preventDefault();
 		event.stopPropagation();
-	}
+	};
 
-	const onDrop = ( event : TypeEventDragAny ) => {
+	const onDrop = ( event : Type_EventDragAny ) : void => {
 		logger.log( 'debug', 'onDrop' );
 		event.preventDefault();
 		event.stopPropagation();
@@ -272,18 +309,18 @@ function GipEdit() {
 			clearSelected();
 			setFocus( PROG_FIELD_TITLE );
 		}
-	}
+	};
 
 	/*
-	const onTouchEnd = ( event : TypeEventTouchAny ) => {
+	const onTouchEnd = ( event : Type_EventTouchAny ) => {
 		logger.log( 'debug', 'onTouchEnd', { event: Object.keys( event ) } );
 		//event.stopPropagation();
 	}
-	const onTouchEndCapture= ( event : TypeEventTouchAny ) => {
+	const onTouchEndCapture= ( event : Type_EventTouchAny ) => {
 		logger.log( 'debug', 'onTouchEndCapture' );
 		//event.stopPropagation();
 	}
-	const onTouchCancelCapture=  ( event : TypeEventTouchAny ) => {
+	const onTouchCancelCapture=  ( event : Type_EventTouchAny ) => {
 		logger.log( 'debug', 'onTouchCancelCapture' );
 		//event.stopPropagation();
 	}
@@ -294,14 +331,18 @@ function GipEdit() {
 
 	// eslint moans about the empty dependencies array, but if it isn't present useEffect gets called on every load!
 	useEffect( () => {
+		console.log( 'gip_edit: Use Effect' );
+		//logger.log( 'debug', 'gip_edit: Use Effect' );
 		document.title = DOC_TITLE;
-		logger.log( 'silly', 'Use Effect' );
 		loadPrograms()
-		.then( newPrograms => {
-			setPrograms( newPrograms );
-			setInitialFocus();
-		} );
-	}, [] ); // eslint-disable-line react-hooks/exhaustive-deps
+			.then( newPrograms => {
+				setPrograms( newPrograms );
+				setInitialFocus();
+			} )
+			.catch( ( err : unknown ) => {
+				console.error( 'loadPrograms: FAILED', { err } );
+			});
+	}, [] );
 
 	return (
 		<div className="app">
@@ -309,28 +350,28 @@ function GipEdit() {
 				<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossOrigin="anonymous"/>
 			</Helmet>
 			<div className="container-fluid gip-grid"
-				onDragOver={ event => onDragOver( event ) }
-				onDrop={ event => onDrop( event ) }
+				onDragOver={ event => { onDragOver( event ); } }
+				onDrop={ event => { onDrop( event ); } }
 			>
 				<GipProgramEntry
 					programEditInput={ programEditInput }
 					programEditOptions={ programEditOptions }
-					onInputChange={ ( { paramName, newValue } ) => onInputChange( { paramName, newValue } ) }
-					onOptionChange={ newOptions => onOptionChange( newOptions ) }
-					onKeyDown={ event => onKeyDown( event ) }
+					onInputChange={ ( { paramName, newValue } : { paramName: string, newValue: string } ) => { onInputChange( { paramName, newValue } ); } }
+					onOptionChange={ ( newOptions : Type_ProgramEditOptions ) => { onOptionChange( newOptions ); } }
+					onKeyDown={ ( event : Type_EventKeyboardAny ) => { onKeyDown( event ); } }
 					//refCallback={ inputFieldName => setRef( inputFieldName ) }
-					ref={ refs as ForwardedRef<HTMLInputElement> } // Expects 'ref' to be a simple reference, even though it can handle objects
+					ref={ refs as unknown as React.ForwardedRef<HTMLInputElement> } // Expects 'ref' to be a simple reference, even though it can handle objects
 				/>
 				<GipActionButtons
 					programs={ programs }
-					onProgramChange={ ( newPrograms ) => onProgramChange( newPrograms ) }
+					onProgramChange={ ( newPrograms ) => { onProgramChange( newPrograms ); } }
 					savePrograms={ savePrograms }
-					programsSaved={ () => setInitialFocus() }
+					programsSaved={ () => { setInitialFocus(); } }
 				/>
 				<GipProgramTable
 					programs={ programs }
-					onProgramChange={ newPrograms => onProgramChange( newPrograms ) }
-					onKeyDown={ event => onProgramTableKeyDown( event ) }
+					onProgramChange={ newPrograms => { onProgramChange( newPrograms ); } }
+					onKeyDown={ event => { onProgramTableKeyDown( event ); } }
 				/>
 			</div>
 		</div>

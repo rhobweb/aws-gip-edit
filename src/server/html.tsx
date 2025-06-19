@@ -1,5 +1,5 @@
-import { Config } from './config';
-import { Stats }  from './types'
+import type { Config } from './config.js';
+import type { Stats }  from './types.js';
 
 /**
  * This HTML file acts as a template that we insert all our generated
@@ -35,6 +35,6 @@ const html = ({
 			<div id="root">${content}</div>
 			${stats.scripts.map(filename => `<script src="${config.app.DIST_URL}/${filename}" crossorigin></script>`).join('\n')}
 		</body>
-	</html>`
+	</html>`;
 
-export default html
+export default html;
