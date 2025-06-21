@@ -121,6 +121,7 @@ function convertToInt( val : string | undefined ) : number {
 }
 
 function programToRecord( { program, programPos } : { program: TypeDbProgramItem, programPos: Number } ) : TYPE_DB_RECORD {
+	logger.log( 'debug',  'programToRecord: BEGIN: ', { program, programPos } );
 
 	const cookedRecord = JSON.parse( JSON.stringify( program ) );
 
@@ -145,6 +146,8 @@ function programToRecord( { program, programPos } : { program: TypeDbProgramItem
 	Object.entries( cookedRecord ).forEach( ( [ field, value ] : [ string, string ] ) => {
 		saveRecord[ field ] = genAttributeValue( { field, value } );
 	} );
+
+	logger.log( 'debug',  'programToRecord: END: ', { record: saveRecord } );
 
 	return saveRecord;
 }

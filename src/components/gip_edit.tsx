@@ -52,7 +52,7 @@ const DOC_TITLE = `GIP Program Edit v${ourPackage.version}`;
 function processProgramForSaving( prog : TypeProgramItem ) : TypeDbProgramItem {
 	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) );
 	cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
-	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( cookedProgram[ PROG_FIELD_SYNOPSIS ] );
+	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( { rawText: cookedProgram[ PROG_FIELD_SYNOPSIS ] } );
 	return progToDb( cookedProgram );
 }
 
