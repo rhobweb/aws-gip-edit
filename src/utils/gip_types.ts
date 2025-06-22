@@ -1,5 +1,12 @@
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
 
+export type Nullable<T> = T | null;
+export type Falsy<T>    = T | null | undefined;
+
+export type Type_HttpHeaders   = Record<string, string>;
+export type Type_RawHttpParams = Record<string, string | string[] | boolean>;
+export type Type_HttpParams    = Type_RawHttpParams | string;
+
 export const PROG_FIELD_URI         = 'uri';
 export const PROG_FIELD_PID         = 'pid';
 export const PROG_FIELD_STATUS      = 'status';
@@ -12,7 +19,7 @@ export const PROG_FIELD_QUALITY     = 'quality';
 export const PROG_FIELD_SELECTED    = 'selected';
 
 // No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface TypeProgramEditInput extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditInput extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	[PROG_FIELD_URI]       : string;
 	[PROG_FIELD_TITLE]     : string;
 	[PROG_FIELD_SYNOPSIS]  : string;
@@ -20,14 +27,15 @@ export interface TypeProgramEditInput extends Record<string,any> { // eslint-dis
 }
 
 // No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface TypeProgramEditOptions extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditOptions extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	[PROG_FIELD_GENRE]       : string;
 	[PROG_FIELD_DAY_OF_WEEK] : string;
 	[PROG_FIELD_QUALITY]     : string;
 }
 
-// No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface TypeProgramItem  extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+
+export interface Type_ProgramItem extends Record<string, string | boolean | number | null> {
+	[PROG_FIELD_URI]         : string;
 	[PROG_FIELD_PID]         : string;
 	[PROG_FIELD_STATUS]      : string;
 	[PROG_FIELD_TITLE]       : string;
@@ -39,48 +47,62 @@ export interface TypeProgramItem  extends Record<string,any> { // eslint-disable
 	[PROG_FIELD_SELECTED]    : boolean;
 }
 
-export type TypeProgramList = TypeProgramItem[];
+export type Type_ProgramItemField = keyof Type_ProgramItem;
 
-export type TypeHandlerProgramChange = ( newPrograms: TypeProgramList ) => void;
+//export type Type_ProgramItemField =
+//  typeof PROG_FIELD_PID         |
+//  typeof PROG_FIELD_STATUS      |
+//  typeof PROG_FIELD_TITLE       |
+//  typeof PROG_FIELD_SYNOPSIS    |
+//  typeof PROG_FIELD_IMAGE_URI   |
+//  typeof PROG_FIELD_GENRE       |
+//  typeof PROG_FIELD_DAY_OF_WEEK |
+//  typeof PROG_FIELD_QUALITY     |
+//  typeof PROG_FIELD_SELECTED    |
+//  typeof PROG_FIELD_URI;
 
-export type TypeProgramDownloadOptions = {
+export type Type_ProgramList = Type_ProgramItem[];
+
+export type Type_HandlerProgramChange = ( newPrograms: Type_ProgramList ) => void;
+
+export interface Type_ProgramDownloadOptions {
 	all?:        boolean,
 	current?:    boolean,
 	downloaded?: boolean
-};
+}
 
-export type TypeEndpointDef = {
+export interface Type_EndpointDef {
 	method:   string,
 	uri:      string,
-	params?:  TypeHttpParams,
-	headers?: TypeHttpHeaders,
-};
+	params?:  Type_HttpParams,
+	headers?: Type_HttpHeaders,
+}
 
-export type TypeEndpointOptions = {
+export interface Type_EndpointOptions {
 	method:   string,
-	headers?: TypeHttpHeaders,
-	body?:    TypeHttpParams,
+	headers?: Type_HttpHeaders,
+	body?:    Type_HttpParams,
 	mode?:    string,
-};
+}
 
-export type TypeEndpoint = {
+export interface Type_Endpoint {
 	uri:     string,
-	options: TypeEndpointOptions,
-};
+	options: Type_EndpointOptions,
+}
 
-export type TypeEventChangeInput      = ChangeEvent<HTMLInputElement>;
-//export type TypeEventKeyboardAny      = KeyboardEvent<any>;
-export type TypeEventMouse            = MouseEvent<HTMLInputElement>;
-export type TypeEventChangeSelect     = ChangeEvent<HTMLSelectElement>;
+export type Type_EventChangeInput      = ChangeEvent<HTMLInputElement>;
+//export type Type_EventKeyboardAny      = KeyboardEvent<any>;
+export type Type_EventMouse            = MouseEvent<HTMLInputElement>;
+export type Type_EventChangeSelect     = ChangeEvent<HTMLSelectElement>;
 
-export type TypeEventKeyboardInput    = KeyboardEvent<HTMLInputElement>;
-export type TypeEventKeyboardSelect   = KeyboardEvent<HTMLSelectElement>;
-export type TypeEventKeyboardTextArea = KeyboardEvent<HTMLTextAreaElement>;
-export type TypeEventKeyboardImage    = KeyboardEvent<HTMLImageElement>;
+export type Type_EventKeyboardInput    = KeyboardEvent<HTMLInputElement>;
+export type Type_EventKeyboardSelect   = KeyboardEvent<HTMLSelectElement>;
+export type Type_EventKeyboardTextArea = KeyboardEvent<HTMLTextAreaElement>;
+export type Type_EventKeyboardImage    = KeyboardEvent<HTMLImageElement>;
 
-export type TypeEventHandlerInputChange  = (event: TypeEventChangeInput)    => void;
-export type TypeEventHandlerMouse        = (event: TypeEventMouse)          => void;
-export type TypeEventHandlerSelectChange = (event: TypeEventChangeSelect)   => void;
-export type TypeEventHandlerSelectKey    = (event: TypeEventKeyboardSelect) => void;
+export type Type_EventHandlerInputChange  = (event: Type_EventChangeInput)    => void;
+export type Type_EventHandlerMouse        = (event: Type_EventMouse)          => void;
+export type Type_EventHandlerSelectChange = (event: Type_EventChangeSelect)   => void;
+export type Type_EventHandlerSelectKey    = (event: Type_EventKeyboardSelect) => void;
 
-//export type TypeHandlerProgramChange     = ( programs: { newPrograms: TypeProgramItem[] } ) => void;
+//export type Type_HandlerProgramChange     = ( programs: { newPrograms: Type_ProgramItem[] } ) => void;

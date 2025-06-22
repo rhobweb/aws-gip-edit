@@ -16,3 +16,5 @@ test-out
 .DS_Store
 .nyc_output
 coverage
+output
+

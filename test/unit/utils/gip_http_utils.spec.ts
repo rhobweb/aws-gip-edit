@@ -3,90 +3,60 @@
  * Unit Tests for gip_http_utils.ts.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/ban-ts-comment    */
-/* eslint-disable @typescript-eslint/no-explicit-any   */
+const REL_SRC_PATH     = '../../../src/utils/';
+const MODULE_NAME      = 'gip_http_utils';
+const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
-import sinon, { SinonSandbox, SinonStub } from 'sinon';
-import { expect }                         from 'chai';
-import { rewiremock, AnyModuleMock }      from '../rewiremock.es6';
+const TEST_URI = 'http://localhost';
 
-const REL_SRC_PATH = '../../../src/utils/';
-const MODULE_NAME  = 'gip_http_utils.ts';
-const TEST_MODULE  = REL_SRC_PATH + MODULE_NAME;
-const TEST_PRIV_MODULE = REL_SRC_PATH + 'gip_http_utils_priv.ts';
+import type {
+	Nullable,
+	Type_EndpointDef,
+	Type_EndpointOptions,
+	Type_HttpParams,
+	Type_HttpHeaders,
+} from '../../../src/utils/gip_types.ts';
 
-let sandbox : SinonSandbox;
+import type {
+	Type_processEndpointDef_args,
+	Type_processEndpointDef_ret,
+	Type_extractJsonResponse_args,
+	Type_extractJsonResponse_ret,
+	Type_extractJsonResponseStream_args,
+	Type_extractJsonResponseStream_ret,
+	Type_parseQueryParams_args,
+	Type_parseQueryParams_ret,
+	Type_stringifyUTF16_args,
+	Type_stringifyUTF16_ret,
+	Type_stripQueryParams_args,
+	Type_stripQueryParams_ret,
+	Type_genURI_args,
+	Type_genURI_ret,
+} from '../../../src/utils/gip_http_utils';
 
-import { TypeEndpointDef, TypeEndpoint, TypeEndpointOptions } from '../../../src/utils/gip_types';
+import { HttpError } from '../../../src/utils/gip_http_utils';
 
-type TypeFnGenParams     = ( { endpointDef, params } : TypeGenParamsParams ) => TypeGenParamsRet
-type TypeGenParamsRet    = { uri: string, params: TypeHttpParams };
-type TypeGenParamsParams = { endpointDef: TypeEndpointDef, params?: TypeHttpParams };
-//type TypeGetContentRet = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
-type TypeGenURIParams    = { uri: string, method: string, params?: TypeHttpParams };
-type TypeGenURIRet       = { uri: string, params: Nullable<TypeHttpParams> };
-type TypeFnGenURI        = ( { uri, params } : TypeGenURIParams ) => TypeGenURIRet
-
-type TypeContainsHeaderParams = { headers: TypeHttpHeaders, headerProp: string };
-type TypeFnContainsHeader     = ( { headers, headerProp } : TypeContainsHeaderParams ) => boolean;
-
-type TypeGenContentParams = { endpointDef: TypeEndpointDef, headers: TypeHttpHeaders, params: TypeHttpParams };
-type TypeGenContentRet    = { headers: TypeHttpHeaders, body: Nullable<TypeHttpParams> };
-type TypeFnGenContent     = ( { endpointDef, headers, params } : TypeGenContentParams ) => TypeGenContentRet;
-
-type TypeProcessEndpointDefArgs = {
-	endpointDef: TypeEndpointDef, params?: TypeRawHttpParams, headers?: TypeHttpHeaders,
-};
-type TypeProcessEndpointDefRet = TypeEndpoint;
-
-type TypeRawQueryParamScalarValue    = string | null | undefined;
-type TypeRawQueryParamValue          = TypeRawQueryParamScalarValue | string[];
-type TypeRawQueryParams              = Partial<{ [key: string]: TypeRawQueryParamValue }>
-type TypeCookedQueryParamScalarValue = string | boolean | null;
-type TypeCookedQueryParamValue       = TypeCookedQueryParamScalarValue | (TypeCookedQueryParamScalarValue)[];
-type TypeCookedQueryParams           = Record<string, TypeCookedQueryParamValue>;
-type TypeParseQueryParamsParams      = TypeRawQueryParams;
-type TypeParseQueryParamsRet         = TypeCookedQueryParams;
-
-
-
-type TypeTestModule = {
-	processEndpointDef:      ( args: TypeProcessEndpointDefArgs ) => TypeProcessEndpointDefRet,
-	extractStringFromStream: () => {},
-	stripQueryParams:        ( uri: string ) => string | null,
-	genURI:                  ( { uri, queryParams } : { uri: string, queryParams: Record<string,string> } ) => string,
+interface Type_TestModule {
+	processEndpointDef:        ( args: Type_processEndpointDef_args )        => Type_processEndpointDef_ret,
+	extractJsonResponse:       ( args: Type_extractJsonResponse_args )       => Type_extractJsonResponse_ret,
+	extractJsonResponseStream: ( args: Type_extractJsonResponseStream_args ) => Type_extractJsonResponseStream_ret,
+	parseQueryParams:          ( args: Type_parseQueryParams_args )          => Type_parseQueryParams_ret,
+	stringifyUTF16:            ( args: Type_stringifyUTF16_args )            => Type_stringifyUTF16_ret,
+	stripQueryParams:          ( args: Type_stripQueryParams_args )          => Type_stripQueryParams_ret,
+	genURI:                    ( args: Type_genURI_args )                    => Type_genURI_ret,
 };
 
-type TypeTestPrivModule = {
-	genParams?:      Function,
-	genURI?:         Function,
-	containsHeader?: Function,
-	genContent?:     Function,
-};
+import * as TEST_MODULE from '../../../src/utils/gip_http_utils';
+const testModule = TEST_MODULE as unknown as Type_TestModule;
 
-async function createTestModule( stubs: Nullable<any> = null ) : Promise<TypeTestModule> {
-	if ( stubs ) {
-		const testPrivModule = await rewiremock( TEST_PRIV_MODULE ).by( stubs ) as unknown;
-		rewiremock.enable();
-		const testModule = await import( TEST_MODULE );
-		//rewiremock.disable();
-		return testModule;
-	} else {
-		const testModule = await import( TEST_MODULE );
-		return testModule;
-	}
+function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
-function commonBeforeEach() {
-	sandbox = sinon.createSandbox();
-}
-
-function commonAfterEach() {
-	sandbox.restore();
+function commonAfterEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
 describe(MODULE_NAME + ':module can be loaded', () => {
+	let testModuleObj : Type_TestModule;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -96,49 +66,60 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 		commonAfterEach();
 	});
 
-	it ('module initialises OK', async () => {
-		await createTestModule();
+	test('module initialises OK', async () => {
+		await jest.isolateModulesAsync(async () => { // Load another instance of the module. This allows configuring a different environment
+			testModuleObj = await import( TEST_MODULE_PATH ) as Type_TestModule;
+		});
+		expect( testModuleObj ).toBeDefined();
 	});
 });
 
-/*
-describe(MODULE_NAME + ':processEndpointDef', () => {
-	let   testModule               : TypeTestModule;
-	let   testStubs                : TypeTestPrivModule;
-	let   testArgs                 : TypeProcessEndpointDefArgs;
-	let   testExpectedOptions      : TypeEndpointOptions;
-	let   testMethod               : string;
-	let   testEndpointDef          : TypeEndpointDef;
-	let   testParams               : TypeHttpParams;
-	let   testHeaders              : TypeHttpHeaders;
-	let   actualResult             : TypeProcessEndpointDefRet;
-	let   expectedResult           : TypeProcessEndpointDefRet;
-	let   genParamsStub            : SinonStub;
-	let   genParamsRet             : TypeGenParamsRet;
-	let   genParamsExpectedParams  : TypeGenParamsParams;
-	let   genParamsExpectedArgs    : [ SinonStub, TypeGenParamsParams ];
-	let   genURIStub               : SinonStub;
-	let   genURIRet                : TypeGenURIRet;
-	let   genURIExpectedArgs       : [ SinonStub, TypeGenURIParams ];
-	let   genContentStub           : SinonStub;
-	let   genContentRet            : TypeGenContentRet;
-	let   genContentExpectedParams : TypeGenContentParams;
-	let   genContentExpectedArgs   : [ SinonStub, TypeGenContentParams ];
+describe(MODULE_NAME + ':HttpError', () => {
+	const statusCode = 418;
+	let errMessage = 'An error message';
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testStubs = {
-			genParams:  () => {},
-			genURI:     () => {},
-			genContent: () => {},
-		};
-		testModule  = await createTestModule( testStubs );
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Status code', () => {
+		const err = new HttpError( { statusCode, message: errMessage } );
+		expect( err.message ).toEqual( errMessage );
+		expect( err.statusCode! ).toEqual( statusCode ); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+	});
+
+	test( 'No status code', () => {
+		errMessage = 'Status code is undefined';
+		const err = new HttpError( { message: errMessage } );
+		expect( err.message ).toEqual( errMessage );
+		expect( err.statusCode ).toBeUndefined();
+	});
+} );
+
+describe(MODULE_NAME + ':processEndpointDef', () => {
+	let testModuleObj       : Type_TestModule;
+	let testArgs            : Type_processEndpointDef_args;
+	let testExpectedOptions : Type_EndpointOptions;
+	let testEndpointDef     : Type_EndpointDef;
+	let testMethod          : string;
+	let testParams          : Type_HttpParams;
+	let testHeaders         : Type_HttpHeaders;
+	let actualResult        : Type_processEndpointDef_ret;
+	let expectedResult      : Type_processEndpointDef_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
 		testHeaders = {
 			pheader1: 'pheader1 val',
 		};
 		testMethod = 'pOSt';
 		testEndpointDef = {
-			uri:     'ignored',
+			uri:     'test-uri',
 			method:  testMethod,
 			headers: { epheader1: 'epheader1 val' },
 		};
@@ -148,109 +129,170 @@ describe(MODULE_NAME + ':processEndpointDef', () => {
 			headers:     testHeaders,
 			params:      testParams,
 		};
-		genParamsStub = sandbox.stub( testStubs, 'genParams' ).callsFake( () : object => {
-			return genParamsRet;
-		} );
-		genParamsRet            = { uri: 'genParamsRet URI', params: { p1: 'genParamsRet params' } };
-		genParamsExpectedParams = { endpointDef: testEndpointDef, params: testParams };
-		genParamsExpectedArgs   = [ genParamsStub, genParamsExpectedParams ];
-		genURIStub              = sandbox.stub( testStubs, 'genURI' ).callsFake( () => {
-			return genURIRet;
-		} );
-		genURIExpectedArgs = [ genURIStub, { ...genParamsRet, method: testMethod.toUpperCase() } ];
-		genURIRet          = { uri: 'genURIRet URI', params: { p1: 'genURIRet params' } };
-		genContentStub     = sandbox.stub( testStubs, 'genContent' ).callsFake( () => {
-			return genContentRet;
-		} );
-		genContentExpectedParams = { endpointDef: testEndpointDef, headers: testHeaders, params: <TypeHttpParams>(genURIRet.params) };
-		genContentExpectedArgs   = [ genContentStub, genContentExpectedParams ];
-		genContentRet            = { headers: { h1: 'genContent headers' }, body: 'genContent body' };
-		testExpectedOptions      = { method: testMethod.toUpperCase(), headers: genContentRet.headers, body: <TypeHttpParams>(genContentRet.body) };
+		testExpectedOptions = {
+			method:  testMethod.toUpperCase(),
+			headers: Object.assign( {}, testEndpointDef.headers, { 'Content-Type': 'application/json; charset=UTF-8' } ),
+			body:    JSON.stringify( testParams ),
+		};
+		expectedResult = {
+			uri:     testEndpointDef.uri,
+			options: testExpectedOptions,
+		};
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'No body', () => {
-		genContentRet.body = null;
-		delete testExpectedOptions.body;
-		expectedResult     = {
-			uri:     genURIRet.uri,
-			options: testExpectedOptions,
-		};
-		actualResult = testModule.processEndpointDef( testArgs );
-		sinon.assert.calledWithExactly.apply( null, genParamsExpectedArgs );
-		//sinon.assert.calledWithExactly.apply( null, genURIExpectedArgs );
-		//sinon.assert.calledWithExactly.apply( null, genContentExpectedArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+	test( 'POST - no body', () => {
+		delete testArgs.params;
+		testExpectedOptions.body = '{}';
+		Object.assign( testExpectedOptions.headers ??= {}, testHeaders );
+		actualResult = testModuleObj.processEndpointDef( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'Body', () => {
-		expectedResult      = {
-			uri:     genURIRet.uri,
-			options: testExpectedOptions,
-		};
-		actualResult = testFn( testArgs );
-		sinon.assert.calledWithExactly.apply( null, genParamsExpectedArgs );
-		sinon.assert.calledWithExactly.apply( null, genURIExpectedArgs );
-		sinon.assert.calledWithExactly.apply( null, genContentExpectedArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+	test( 'POST - body', () => {
+		Object.assign( testExpectedOptions.headers ??= {}, testHeaders );
+		actualResult = testModuleObj.processEndpointDef( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'No parameters or headers', () => {
+	test( 'POST - No parameters or headers', () => {
 		delete testArgs.params;
 		delete testArgs.headers;
-		genParamsExpectedParams.params   = {};
-		genContentExpectedParams.headers = {};
-		expectedResult      = {
-			uri:     genURIRet.uri,
-			options: testExpectedOptions,
-		};
-		actualResult = testFn( testArgs );
-		sinon.assert.calledWithExactly.apply( null, genParamsExpectedArgs );
-		sinon.assert.calledWithExactly.apply( null, genURIExpectedArgs );
-		sinon.assert.calledWithExactly.apply( null, genContentExpectedArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+		testExpectedOptions.body = '{}';
+		actualResult = testModuleObj.processEndpointDef( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'GET - with no parameters', () => {
+		testEndpointDef.method = 'GeT';
+		delete testArgs.params;
+		expectedResult.uri = new URL(testEndpointDef.uri, TEST_URI).href;
+		testExpectedOptions.method = 'GET';
+		delete testExpectedOptions.body;
+		Object.assign( testExpectedOptions.headers ??= {}, testHeaders );
+		actualResult = testModuleObj.processEndpointDef( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'GET - with no additional headers', () => {
+		testEndpointDef.method = 'GeT';
+		delete testArgs.headers;
+		expectedResult.uri = (new URL(testEndpointDef.uri, TEST_URI).href) + '?param1=test%20param1';
+		testExpectedOptions.method = 'GET';
+		delete testExpectedOptions.body;
+		actualResult = testModuleObj.processEndpointDef( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 } );
-*/
-/*
 
 describe(MODULE_NAME + ':extractJsonResponse', () => {
-	let testModule     : TypeRewiredModule;
-	let testResponse   : { json: () => object };
-	let testJSON       : object;
-	let actualResult   : object;
-	let expectedResult : object;
+	let testModuleObj   : Type_TestModule;
+	let testArgs        : MockArgs;
+	let testError       : Nullable<Error>;
+	let actualResult    : Awaited<Type_extractJsonResponse_ret>;
+	let expectedResult  : Awaited<Type_extractJsonResponse_ret>;
+	let testJsonArgs    : object;
+
+	// Don't need a full fetch API Response object for this test, so just mock a class with the required properties
+	class MockArgs {
+		async json() : Promise<object> { // eslint-disable-line @typescript-eslint/require-await
+			if ( ! testError ) {
+				return testJsonArgs;
+			} else {
+				throw testError;
+			}
+		}
+	}
 
 	beforeEach( () => {
 		commonBeforeEach();
-		( { testModule } = createTestModuleAndGetProps() );
-		testJSON     = { p1: 'val1' };
-		testResponse = { json: () => testJSON };
+		testModuleObj = testModule;
+		testJsonArgs  = { p1: 'val1' };
+		testError     = new Error( 'test error' );
+		testArgs      = new MockArgs();
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'OK', async () => {
-		expectedResult = testJSON;
-		actualResult = await testModule.extractJsonResponse( testResponse );
-		expect( actualResult ).to.deep.equal( expectedResult );
+	test( 'OK', async () => {
+		testError      = null;
+		expectedResult = { ...testJsonArgs };
+		// Don't need a full fetch API Response object for this test, so just cast the cut down object to the expected type
+		actualResult = await testModuleObj.extractJsonResponse( testArgs as Type_extractJsonResponse_args );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Error', async () => {
+		expectedResult = [];
+		// Don't need a full fetch API Response object for this test, so just cast the cut down object to the expected type
+		actualResult = await testModuleObj.extractJsonResponse( testArgs as Type_extractJsonResponse_args );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+} );
+
+describe(MODULE_NAME + ':extractJsonResponseStream', () => {
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : MockArgs;
+	let testError      : Nullable<Error>;
+	let actualResult   : Awaited<Type_extractJsonResponse_ret>;
+	let expectedResult : Awaited<Type_extractJsonResponse_ret>;
+	let testJson       : Record<string,unknown>;
+	let testTextArgs   : string;
+
+	// Don't need a full fetch API Response object for this test, so just mock a class with the required properties
+	class MockArgs {
+		async text() : Promise<string> { // eslint-disable-line @typescript-eslint/require-await
+			if ( ! testError ) {
+				return testTextArgs;
+			} else {
+				throw testError;
+			}
+		}
+	}
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
+		testJson      = { p1: 'val1' };
+		testTextArgs  = JSON.stringify( testJson );
+		testError     = new Error( 'test error' );
+		testArgs      = new MockArgs();
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'OK', async () => {
+		testError      = null;
+		expectedResult = testJson;
+		// Don't need a full fetch API Response object for this test, so just cast the cut down object to the expected type
+		actualResult = await testModuleObj.extractJsonResponseStream( testArgs as Type_extractJsonResponseStream_args );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Error', async () => {
+		expectedResult = [];
+		// Don't need a full fetch API Response object for this test, so just cast the cut down object to the expected type
+		actualResult = await testModuleObj.extractJsonResponseStream( testArgs as Type_extractJsonResponseStream_args );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 } );
 
 describe(MODULE_NAME + ':parseQueryParams', () => {
-	let testModule     : TypeRewiredModule;
-	let testArgs       : TypeParseQueryParamsParams;
-	let actualResult   : TypeParseQueryParamsRet;
-	let expectedResult : TypeParseQueryParamsRet;
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : Type_parseQueryParams_args;
+	let actualResult   : Type_parseQueryParams_ret;
+	let expectedResult : Type_parseQueryParams_ret;
 
 	beforeEach( () => {
 		commonBeforeEach();
-		( { testModule } = createTestModuleAndGetProps() );
+		testModuleObj = testModule;
 		testArgs = {
 			p_undef: undefined,
 			p_true:  'TrUe',
@@ -271,28 +313,36 @@ describe(MODULE_NAME + ':parseQueryParams', () => {
 		commonAfterEach();
 	});
 
-	it ( 'OK', () => {
-		actualResult = testModule.parseQueryParams( testArgs );
-		expect( actualResult ).to.deep.equal( expectedResult );
+	test( 'OK', () => {
+		actualResult = testModuleObj.parseQueryParams( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 
-	it ( 'No parameters', () => {
+	test( 'Undefined args', () => {
+		testArgs       = undefined;
 		expectedResult = {};
-		actualResult = testModule.parseQueryParams();
-		expect( actualResult ).to.deep.equal( expectedResult );
+		actualResult = testModuleObj.parseQueryParams( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	} );
+
+	test( 'Null args', () => {
+		testArgs       = null;
+		expectedResult = {};
+		actualResult = testModule.parseQueryParams( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 } );
 
 describe(MODULE_NAME + ':stringifyUTF16', () => {
-	let testModule     : TypeRewiredModule;
-	let testArgs       : object;
-	let actualResult   : string;
-	let expectedResult : string;
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : Type_stringifyUTF16_args;
+	let actualResult   : Type_stringifyUTF16_ret;
+	let expectedResult : Type_stringifyUTF16_ret;
 
 	beforeEach( () => {
 		commonBeforeEach();
-		( { testModule } = createTestModuleAndGetProps() );
-		testArgs         = {
+		testModuleObj = testModule;
+		testArgs = {
 			p1: "DwithCircle\u0221",
 			p2: "Left half circle black \u25D6.",
 		};
@@ -303,65 +353,64 @@ describe(MODULE_NAME + ':stringifyUTF16', () => {
 		commonAfterEach();
 	});
 
-	it ( 'OK', () => {
-		actualResult = testModule.stringifyUTF16( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+	test( 'OK', () => {
+		actualResult = testModuleObj.stringifyUTF16( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	} );
 } );
-*/
 
 describe(MODULE_NAME + ':stripQueryParams', () => {
-	let testModule     : TypeTestModule;
-	let testArgs       : string;
-	let actualResult   : string | null;
-	let expectedResult : string;
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : Type_stripQueryParams_args;
+	let actualResult   : Type_stripQueryParams_ret;
+	let expectedResult : Type_stripQueryParams_ret;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule = await createTestModule();
+		testModuleObj = testModule;
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'OK, URI not encoded', () => {
-		testArgs = 'https://mydom.com/mypath?q1=fred&q2';
+	test( 'OK, URI not encoded', () => {
+		testArgs       = 'https://mydom.com/mypath?q1=fred&q2';
 		expectedResult = 'https://mydom.com/mypath';
-		actualResult   = testModule.stripQueryParams( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.stripQueryParams( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	it ( 'OK, URI encoded', () => {
+	test( 'OK, URI encoded', () => {
 		testArgs       = 'https%3A%2F%2Fmydom.com%2Fmypath%3Fq1%3Dfred%26q2';
 		expectedResult = 'https://mydom.com/mypath';
-		actualResult   = testModule.stripQueryParams( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.stripQueryParams( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 } );
 
 describe(MODULE_NAME + ':genURI', () => {
-	let testModule     : TypeTestModule;
-	let testArgs       : { uri: string, queryParams: Record<string,string> };
-	let actualResult   : string | null;
-	let expectedResult : string;
+	let testModuleObj  : Type_TestModule;
+	let testArgs       : Type_genURI_args;
+	let actualResult   : Type_genURI_ret;
+	let expectedResult : Type_genURI_ret;
 
-	beforeEach( async () => {
+	beforeEach( () => {
 		commonBeforeEach();
-		testModule = await createTestModule();
+		testModuleObj = testModule;
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	it ( 'OK', () => {
+	test( 'OK', () => {
 		testArgs = {
 			uri:         'https://mydom.com/mypath',
 			queryParams: { q1: 'fred', q2: '' },
 		};
 		expectedResult = 'https://mydom.com/mypath?q1=fred&q2=';
-		actualResult   = testModule.genURI( testArgs );
-		expect( actualResult ).to.equal( expectedResult );
+		actualResult   = testModuleObj.genURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
 	});
 } );

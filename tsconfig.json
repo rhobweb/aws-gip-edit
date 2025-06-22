@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "es6",
+    "target": "ESNext",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
-    "lib": [ "dom" ],
+    "lib": [ "DOM" ],
     "module": "NodeNext",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "NodeNext",
     "noImplicitAny": true,
     "skipLibCheck": true,
     "sourceMap": true,
@@ -15,5 +15,11 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "esModuleInterop": true,
-  }
+    "isolatedModules": true,
+  },
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"handler.ts",
+	],
 }

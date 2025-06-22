@@ -1,7 +1,12 @@
-import { TypeProgramDownloadOptions }                                    from './gip_types';
-import { TypeDbProgramItem, VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
-import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }                     from './gip_types';
-import { getCurrentDayOfWeek, isDayOfWeekAvailable  }                    from './gip_date_utils';
+import type {
+	Type_ProgramDownloadOptions,
+	Nullable,
+} from './gip_types.ts';
+import type { Type_DbProgramItem }                    from './gip_prog_fields';
+
+import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
+import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
+import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils';
 
 const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
 
@@ -11,7 +16,7 @@ const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
  *         - day_of_week: either null or the capitalised three character day of the week to check, e.g., 'Mon'.
  * @returns true if the specified day of the week is active, false otherwise.
  */
-function isDayActive( { current, day_of_week } : { current: boolean, day_of_week: Nullable<string> } ) {
+function isDayActive( { current, day_of_week } : { current: boolean, day_of_week: Nullable<string> } ) : boolean{
 	let bActive = true; // If no day_of_week is specified then all days are active.
 	if ( day_of_week ) {
 		const iOffset = ( current ? 0 : - 1 ); // If ignoring the current day use -1 to get yesterday
@@ -30,8 +35,13 @@ function isDayActive( { current, day_of_week } : { current: boolean, day_of_week
  *                      - downloaded: if true include programs that have already been downloaded.
  * @returns filtered array of DB Program Items.
  */
-export function filterPrograms( { programs, params } : { programs: TypeDbProgramItem[], params: TypeProgramDownloadOptions } ) {
-	let cookedPrograms;
+interface Type_filterPrograms_args {
+	programs: Type_DbProgramItem[],
+	params:   Type_ProgramDownloadOptions,
+};
+type Type_filterPrograms_ret = Type_DbProgramItem[];
+export function filterPrograms( { programs, params } : Type_filterPrograms_args ) : Type_filterPrograms_ret {
+	let cookedPrograms : Type_filterPrograms_ret;
 
 	if ( params.all  ) {
 		cookedPrograms = programs;
@@ -39,7 +49,7 @@ export function filterPrograms( { programs, params } : { programs: TypeDbProgram
 		const { current = false, downloaded = false } = params;
 		cookedPrograms = programs.filter( prog => {
 			let ret = true;
-			if ( ARR_STATUS_DOWNLOADED.indexOf( prog[ PROG_FIELD_STATUS ] ) >= 0 ) {
+			if ( ARR_STATUS_DOWNLOADED.includes( prog[ PROG_FIELD_STATUS ] ) ) {
 				if ( ! downloaded ) {
 					ret = false;
 				}

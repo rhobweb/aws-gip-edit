@@ -1,22 +1,34 @@
 
-import { loadProgs, saveProgs, updateProgs }                 from '../utils/gip_db_dynamodb_utils';
-import { Context, APIGatewayEvent, APIGatewayProxyResultV2 } from "aws-lambda";
-import logger                                                from '@rhobweb/console-logger';
+import {
+	loadPrograms,
+	savePrograms,
+	updatePrograms,
+} from '../utils/gip_db_dynamodb_utils';
+//import { Context, APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayEvent } from 'aws-lambda';
+import logger from '@rhobweb/console-logger';
 
 //import {
 //  DB_FIELD_STATUS, DB_FIELD_GENRE, DB_FIELD_DAY_OF_WEEK, DB_FIELD_QUALITY, DB_FIELD_SYNOPSIS,
 //  VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS
 //}
 //from '../../utils/gip_prog_fields';
-import { filterPrograms }                                       from '../utils/gip_prog_filter_utils';
-import { parseQueryParams, stringifyUTF16, TypeRawQueryParams } from '../utils/gip_http_utils';
-import { TypeDbProgramItem, DB_FIELD_POS }                      from '../utils/gip_prog_fields';
+import { filterPrograms } from '../utils/gip_prog_filter_utils';
+import {
+	HttpError,
+	parseQueryParams,
+	stringifyUTF16,
+} from '../utils/gip_http_utils';
+import type { Type_RawQueryParams } from '../utils/gip_http_utils.ts';
+import type { Type_DbProgramItem }  from '../utils/gip_prog_fields.ts';
 
-type TypeHandlerResponse = {
-	statusCode: Number,
-	headers?:   Record<string,any>,
+interface Type_HandlerResponse {
+	statusCode: number,
+	headers?:   Record<string,unknown>,
 	body?:      string,
 };
+
+type Type_APIGatewayEventHandler = ( event: APIGatewayEvent ) => Promise<Type_HandlerResponse>;
 
 const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
 
@@ -25,23 +37,23 @@ const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
  *                  - query : the query parameters:
  *                            - current:    return current day items;
  *                            - downloaded: include already downloaded programs.
- * @returns 
+ * @returns TODO
  */
-async function handleGET( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-	const result : TypeHandlerResponse = {
+async function handleGET( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
+	const result : Type_HandlerResponse = {
 		statusCode: 200,
 	};
 	try {
-		const rawQueryParams = event.queryStringParameters || {};
-		const params         = parseQueryParams( rawQueryParams as TypeRawQueryParams );
+		const rawQueryParams = event.queryStringParameters || {}; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+		const params         = parseQueryParams( rawQueryParams as Type_RawQueryParams );
 		logger.log( 'debug', 'handleGET: START: ', { params } );
-		const programs       = await loadProgs();
+		const programs       = await loadPrograms();
 		logger.log( 'debug', 'handleGET: filterPrograms: START' );
 		const cookedPrograms = filterPrograms( { programs, params } );
 		logger.log( 'debug', 'handleGET: filterPrograms: success: ', cookedPrograms );
 		const body           = stringifyUTF16( cookedPrograms );
 		logger.log( 'debug', 'handleGET: stringifyUTF16: success: ', body );
-	
+
 		//console.log( 'handleGET: ', { result: cookedPrograms } );
 		const headers        = {
 			'Content-Type':   CONTENT_TYPE_JSON,
@@ -49,28 +61,28 @@ async function handleGET( event: APIGatewayEvent ) : Promise<TypeHandlerResponse
 			//'Access-Control-Allow-Origin': '*',
 			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
 			//'Access-Control-Allow-Headers': '*',
-		 };
+		};
 		result.headers = headers;
 		result.body    = body;
 	}
 	catch ( err ) {
-		result.statusCode = err.statusCode || 500;
+		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 	}
 
-	 return result;
+	return result;
 }
 
-async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
-	const result : TypeHandlerResponse = {
+async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
+	const result : Type_HandlerResponse = {
 		statusCode: 200,
 	};
 	try {
-		const rawBody = event.body || '[]';
-		const programs : TypeDbProgramItem[] = JSON.parse( rawBody );
+		const rawBody = event.body ?? '[]';
+		const programs = JSON.parse( rawBody ) as Type_DbProgramItem[];
 		logger.log( 'debug', 'handlePOST: START: ', { programs } );
-		const newPrograms = await saveProgs( { programs } );
-		logger.log( 'debug', 'handlePOST: saveProgs: success: ', newPrograms );
-		const strPrograms = stringifyUTF16( newPrograms );
+		await savePrograms( { programs } );
+		logger.log( 'debug', 'handlePOST: savePrograms: success: ' );
+		const strPrograms = stringifyUTF16( programs );
 		logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
 		const headers = {
 			'Content-Type':  CONTENT_TYPE_JSON,
@@ -78,13 +90,13 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerRespons
 			//'Access-Control-Allow-Origin': '*',
 			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
 			//'Access-Control-Allow-Headers': '*',
-		 };
-		 result.headers = headers;
-		 result.body    = strPrograms;
+		};
+		result.headers = headers;
+		result.body    = strPrograms;
 	}
 	catch ( err ) {
-		result.statusCode = err.statusCode || 500;
-		const retMessage  = JSON.stringify( { message: err.message || '' } );
+		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+		const retMessage  = JSON.stringify( { message: ( err as HttpError ).message || '' } );
 		result.body       = retMessage;
 		result.headers = {
 			'Content-Type':   CONTENT_TYPE_JSON,
@@ -95,28 +107,28 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<TypeHandlerRespons
 	return result;
 }
 
-async function handlePATCH( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
+async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
 	const result = {
 		statusCode: 200,
 	};
 	try {
-		const rawBody = event.body || '[]';
+		const rawBody = event.body ?? '[]';
 		if ( rawBody.length > 0 ) {
-			const newPrograms : TypeDbProgramItem[] = JSON.parse( rawBody );
+			const newPrograms = JSON.parse( rawBody ) as Type_DbProgramItem[];
 			logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
-			await updateProgs( { programs: newPrograms } );
+			await updatePrograms( { programs: newPrograms } );
 		} else {
 			logger.log( 'info', 'handlePATCH: called with no programs' );
 			result.statusCode = 400;
 		}
 	}
 	catch ( err ) {
-		result.statusCode = err.statusCode || 500;
+		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
 	}
 	return result;
 }
 
-async function handleUnsupported( event: APIGatewayEvent ) : Promise<TypeHandlerResponse> {
+async function handleUnsupported( /* event: APIGatewayEvent */ ) : Promise<Type_HandlerResponse> { // eslint-disable-line @typescript-eslint/require-await
 	//const headers = {
 	//  'Content-Type': 'text/plain',
 	//  'Content-Length': 0,
@@ -127,19 +139,19 @@ async function handleUnsupported( event: APIGatewayEvent ) : Promise<TypeHandler
 	};
 }
 
-export async function handler( event: APIGatewayEvent, _context: Context ): Promise<APIGatewayProxyResultV2> {
+export async function handler( event: APIGatewayEvent /*, _context: Context */ ): Promise<Type_HandlerResponse> { // APIGatewayProxyResultV2
 	logger.log( 'info',  `handler:BEGIN: `, { httpMethod: event.httpMethod, path: event.path } );
 	logger.log( 'debug', `handler:programs: `, { event } );
 
-	const METHOD_HANDLER : Record<string, Function> = {
+	const METHOD_HANDLER : Record<string, Type_APIGatewayEventHandler> = {
 		'GET':     handleGET,
 		'POST':    handlePOST,
 		'PATCH':   handlePATCH,
 		'default': handleUnsupported,
 	};
 
-	const method    = event.httpMethod || 'default'; // 'method' may be undefined
-	const fnHandler = METHOD_HANDLER[ method ] || METHOD_HANDLER.default;
+	const method    = event.httpMethod ?? 'default';                      // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+	const fnHandler = METHOD_HANDLER[ method ] || METHOD_HANDLER.default; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
 	const result = await fnHandler( event );
 

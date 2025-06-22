@@ -1,5 +1,5 @@
 /** Webpack `stats.json` file structure */
-export type Stats = {
+export interface Stats {
 	scripts: string[]
 	styles: string[]
 }

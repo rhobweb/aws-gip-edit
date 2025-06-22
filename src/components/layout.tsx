@@ -3,9 +3,9 @@ import React, { ReactNode } from 'react';
 
 export const siteTitle = 'GIP Program Edit';
 
-type TypeLayoutProps = {
+interface TypeLayoutProps {
 	children: ReactNode,
-};
+}
 
 /*
 <Head>
@@ -19,7 +19,7 @@ type TypeLayoutProps = {
 </Head>
 */
 
-export default function Layout( { children } : TypeLayoutProps ) {
+export default function Layout( { children } : TypeLayoutProps ) : React.JSX.Element {
 	return (
 		<div>
 			<main>{ children }</main>

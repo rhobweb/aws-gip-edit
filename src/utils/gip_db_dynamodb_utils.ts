@@ -1,22 +1,47 @@
+/**
+ * File:        utils/gip_db_dynamodb_utils.ts
+ * Description: DB access utilities for the program database.
+ *
+ * Types Used:
+ *   Program:           an object containing the program properties, e.g., { pid: 'mypid', ... }.
+ *   DB Record:         a program object in DynamoDB format, e.g., { mypid: { S: 'mypid' }, ... }.
+ *   DB History Record: a program history object in DynamoDB format, e.g., { mypid: { S: 'mypid' }, ... }.
+ */
+'use strict';
 
-//import logger from '@rhobweb/console-logger';
 import {
-	DynamoDBClient, DynamoDBClientConfig, ScanCommand, ScanCommandInput, ScanCommandOutput,
-	BatchWriteItemCommandInput, BatchWriteItemCommand, WriteRequest, AttributeValue,
-	TransactWriteItem, TransactWriteItemsCommandInput, TransactWriteItemsCommand
+	DynamoDBClient,
+	DynamoDBClientConfig,
+	WriteRequest,
+	TransactWriteItem,
 } from '@aws-sdk/client-dynamodb';
+
+import {
+	DynamoDBDocumentClient,
+	BatchWriteCommandInput,
+	BatchWriteCommand,
+	ScanCommand,
+	ScanCommandInput,
+	ScanCommandOutput,
+	TransactWriteCommand,
+	TransactWriteCommandInput,
+} from '@aws-sdk/lib-dynamodb';
+
 import process    from 'node:process';
 import assert     from 'node:assert';
 import logger     from '@rhobweb/console-logger';
 
-const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';
-const STAGE                    = process.env.STAGE        || 'dev';
-const IS_LOCAL                 = ( process.env.IS_LOCAL ? true : false );
-const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;
-const GIP_MAX_PROGRAMS         = parseInt( process.env.GIP_MAX_PROGRAMS || '0' );
+import type {
+	Nullable,
+} from './gip_types.ts';
 
-assert( AWS_REGION, 'AWS_REGION not defined' );
-assert( STAGE,      'STAGE not defined' );
+const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';         // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const STAGE                    = process.env.STAGE        || 'dev';               // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const SERVICE_NAME             = process.env.SERVICE_NAME || 'gip-edit-react';    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const IS_LOCAL                 = ( process.env.IS_LOCAL ? true : false );
+const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const GIP_MAX_PROGRAMS         = parseInt( process.env.GIP_MAX_PROGRAMS || '0' ); // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+
 assert( GIP_MAX_PROGRAMS > 0, 'GIP_MAX_PROGRAMS not defined' );
 
 const MODULE_NAME = 'gip_db_dynamodb_utils';
@@ -31,26 +56,32 @@ if ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) {
 	DEFAULT_DB_CLIENT_CONFIG.endpoint = LOCAL_DYNAMO_DB_ENDPOINT;
 }
 
+import type {
+	Type_DbProgramItem,
+	Type_DbFullProgramItem,
+	Type_DbFullProgramHistoryItem,
+} from './gip_prog_fields.ts';
+
 import {
-	DB_FIELD_STATUS, DB_FIELD_PID, DB_FIELD_TITLE, DB_FIELD_SYNOPSIS, DB_FIELD_GENRE, DB_FIELD_QUALITY, DB_FIELD_MODIFY_TIME, DB_FIELD_DOWNLOAD_TIME, DB_FIELD_DAY_OF_WEEK, DB_FIELD_POS, DB_FIELD_IMAGE_URI,
-	VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY, TypeDbProgramItem
+	DB_FIELD_STATUS,
+	DB_FIELD_PID,
+	DB_FIELD_TITLE,
+	DB_FIELD_SYNOPSIS,
+	DB_FIELD_GENRE,
+	DB_FIELD_QUALITY,
+	DB_FIELD_MODIFY_TIME,
+	DB_FIELD_DOWNLOAD_TIME,
+	DB_FIELD_DAY_OF_WEEK,
+	DB_FIELD_POS,
+	DB_FIELD_IMAGE_URI,
+	VALUE_STATUS_ERROR,
+	VALUE_STATUS_SUCCESS,
+	VALUE_STATUS_ALREADY,
 } from './gip_prog_fields';
 
-type TYPE_DB_RECORD = Record< string, AttributeValue >;
-
-const DB_FIELD_TYPES : Record<string,string> = {
-	[DB_FIELD_PID]:           "S",
-	[DB_FIELD_STATUS]:        "S",
-	[DB_FIELD_GENRE]:         "S",
-	[DB_FIELD_DAY_OF_WEEK]:   "S",
-	[DB_FIELD_QUALITY]:       "S",
-	[DB_FIELD_TITLE]:         "S",
-	[DB_FIELD_SYNOPSIS]:      "S",
-	[DB_FIELD_MODIFY_TIME]:   "S",
-	[DB_FIELD_IMAGE_URI]:     "S",
-	[DB_FIELD_POS]:           "N",
-	[DB_FIELD_DOWNLOAD_TIME]: "S",
-};
+import {
+	HttpError,
+} from './gip_http_utils';
 
 const PROGRAM_FIELDS = [
 	DB_FIELD_POS,
@@ -66,218 +97,291 @@ const PROGRAM_FIELDS = [
 	DB_FIELD_DOWNLOAD_TIME,
 ];
 
-const SERVICE_NAME          = 'gip-edit-react';
+export type Type_ProgramField = typeof PROGRAM_FIELDS[number];
+
 const TABLE_PROGRAM         = [ STAGE, SERVICE_NAME, 'Program' ].join( '_' );
 const TABLE_PROGRAM_HISTORY = [ STAGE, SERVICE_NAME, 'ProgramHistory' ].join( '_' );
 const ARR_HISTORY_STATUSES  = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ERROR, VALUE_STATUS_ALREADY ];
 
-class HttpError extends Error {
-	statusCode : number;
+export interface Type_genDbRecord_args {
+	program:    Type_DbProgramItem,
+	programPos: number,
+};
+export type Type_genDbRecord_ret = Type_DbFullProgramItem;
 
-	constructor ( { statusCode, message } : { statusCode: number, message: string }) {
-		const err : unknown = super( message );
-		( err as HttpError ).statusCode = statusCode;
-		return this;
-	}
+export type Type_genDbHistoryRecord_args = Type_DbProgramItem;
+export type Type_genDbHistoryRecord_ret  = Type_DbFullProgramHistoryItem;
+
+export interface Type_loadTable_args { dbDocClient : DynamoDBDocumentClient, tableName: string };
+export type      Type_loadTable_ret = Promise<Type_DbFullProgramItem[]>;
+
+export type Type_extractProgram_args = Type_DbFullProgramItem;
+export type Type_extractProgram_ret  = Type_DbFullProgramItem;
+
+export type Type_extractPrograms_args = Type_DbFullProgramItem[];
+export type Type_extractPrograms_ret  = Type_DbFullProgramItem[];
+
+export type Type_genDeleteCommandParams_args = Type_DbFullProgramItem[];
+export type Type_genDeleteCommandParams_ret  = BatchWriteCommandInput;
+
+export interface Type_deletePrograms_args {
+	dbDocClient: DynamoDBDocumentClient,
+	programs:    Type_DbFullProgramItem[],
+};
+export type Type_deletePrograms_ret = Promise<void>;
+
+export type Type_genWriteCommandParams_args = Type_DbProgramItem[];
+export type Type_genWriteCommandParams_ret  = BatchWriteCommandInput;
+
+export interface Type_writePrograms_args {
+	dbDocClient: DynamoDBDocumentClient,
+	programs:    Type_DbProgramItem[],
+};
+export type Type_writePrograms_ret = Promise<void>;
+
+export type Type_validateUpdate_args = Type_DbProgramItem;
+export type Type_validateUpdate_ret  = void; // eslint-disable-line @typescript-eslint/no-invalid-void-type
+
+export type Type_genUpdateItem_args = Type_DbProgramItem;
+export type Type_genUpdateItem_ret  = TransactWriteItem;
+
+export type Type_genUpdateHistoryItemCommand_args = Type_DbProgramItem;
+export type Type_genUpdateHistoryItemCommand_ret  = TransactWriteItem;
+
+export interface Type_genUpdateHistoryCommandParams_args {
+	programs       : Type_DbProgramItem[],
+	actualPrograms : Type_DbProgramItem[],
+};
+export type Type_genUpdateHistoryCommandParams_ret = TransactWriteItem[];
+
+export interface Type_genUpdateCommandParams_args {
+	programs       : Type_DbFullProgramItem[],
+	actualPrograms : Type_DbFullProgramItem[]
 }
+export type Type_genUpdateCommandParams_ret = TransactWriteCommandInput;
 
-function genAttributeValue( { field, value } : { field: string, value: string } ) : AttributeValue {
-	let attributeValue : AttributeValue;
+export interface Type_updateProgramsHelper_args {
+	dbDocClient: DynamoDBDocumentClient,
+	programs:    Type_DbFullProgramItem[],
+};
+export type Type_updateProgramsHelper_ret  = Promise<void>;
 
-	const fieldType = DB_FIELD_TYPES[ field ];
-	assert( fieldType, `genAttributeValue: Unknown field type ${fieldType} for ${field}` );
+export type Type_sortPrograms_args = Type_DbFullProgramItem[];
+export type Type_sortPrograms_ret  = Type_DbFullProgramItem[];
 
-	switch ( fieldType ) {
-		case 'S': attributeValue = { S: value }; break;
-		case 'N': attributeValue = { N: value }; break;
-		default:  assert( false, `Unsupported fieldType ${fieldType}` );
+export type Type_loadProgramsHelper_args = DynamoDBDocumentClient;
+export type Type_loadProgramsHelper_ret  = Promise<Type_DbFullProgramItem[]>;
+
+export type Type_clearProgramsHelper_args = DynamoDBDocumentClient;
+export type Type_clearProgramsHelper_ret  = Promise<void>;
+
+export interface Type_saveProgramsHelper_args {
+	dbDocClient: DynamoDBDocumentClient,
+	programs:    Type_DbProgramItem[],
+};
+export type Type_saveProgramsHelper_ret  = Promise<void>;
+
+export type Type_resetDb_args = GipDynamoDB | null;
+
+export type Type_loadPrograms_ret =Promise<Type_DbProgramItem[]>;
+
+export interface Type_savePrograms_args { programs: Type_DbProgramItem[] };
+export type Type_savePrograms_ret  = Promise<void>;
+
+export interface Type_updatePrograms_args { programs: Type_DbProgramItem[] };
+export type Type_updatePrograms_ret  = Promise<void>;
+
+
+/**
+ * @param object with properties:
+ *         - program:    a program object in DB format;
+ *         - programPos: identifies the position of the program in the list.
+ * @returns a program object in regular format.
+ */
+function genDbRecord( { program, programPos } : Type_genDbRecord_args ) : Type_genDbRecord_ret {
+
+	const cookedRecord = JSON.parse( JSON.stringify( program ) ) as Record<string,unknown>;
+
+	if ( ! cookedRecord[ DB_FIELD_DAY_OF_WEEK ] ) { // If the day of the week is null, delete the field
+		delete cookedRecord[ DB_FIELD_DAY_OF_WEEK ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 	}
 
-	return attributeValue
-}
-
-function extractAttributeValue( { field, attrValue } : { field: string, attrValue: AttributeValue } ) : string | number {
-	let value;
-
-	const fieldType = DB_FIELD_TYPES[ field ];
-	assert( fieldType, `extractAttributeValue: Unknown field type ${fieldType} for ${field}` );
-
-	switch ( fieldType ) {
-		case 'S': value = attrValue.S; break;
-		case 'N': value = convertToInt( attrValue.N ); break;
-		default: assert( false, `Unsupported fieldType ${fieldType}` );
-	}
-
-	assert( value !== undefined, `Value is undefined: ${JSON.stringify( { fieldType, attrValue } )}` );
-
-	return value;
-}
-
-function convertToInt( val : string | undefined ) : number {
-	let intVal : number;
-	assert ( val !== undefined, 'convertToInt: Integer value is undefined' );
-	intVal = parseInt( val );
-	return intVal;
-}
-
-function programToRecord( { program, programPos } : { program: TypeDbProgramItem, programPos: Number } ) : TYPE_DB_RECORD {
-	logger.log( 'debug',  'programToRecord: BEGIN: ', { program, programPos } );
-
-	const cookedRecord = JSON.parse( JSON.stringify( program ) );
-
-	if ( ! cookedRecord[ DB_FIELD_DAY_OF_WEEK ] ) {
-		delete cookedRecord[ DB_FIELD_DAY_OF_WEEK ];
-	}
-
-	if ( ! cookedRecord[ DB_FIELD_MODIFY_TIME ] ) {
-		cookedRecord[ DB_FIELD_MODIFY_TIME ] = new Date().toISOString();
-	}
+	cookedRecord[ DB_FIELD_MODIFY_TIME ] = cookedRecord[ DB_FIELD_MODIFY_TIME ] ?? new Date().toISOString();
 
 	if ( ! cookedRecord[ DB_FIELD_POS ] ) {
-		cookedRecord[ DB_FIELD_POS ] = programPos.toString();
+		cookedRecord[ DB_FIELD_POS ] = programPos;
 	} else {
-		cookedRecord[ DB_FIELD_POS ] = cookedRecord[ DB_FIELD_POS ].toString();
+		cookedRecord[ DB_FIELD_POS ] = cookedRecord[ DB_FIELD_POS ] as number; // Ensure the position is a number
 	}
 
-	delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // Not stored in the program table
+	// Not stored in the program table
+	delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 
-	const saveRecord : TYPE_DB_RECORD = {};
-
-	Object.entries( cookedRecord ).forEach( ( [ field, value ] : [ string, string ] ) => {
-		saveRecord[ field ] = genAttributeValue( { field, value } );
-	} );
-
-	logger.log( 'debug',  'programToRecord: END: ', { record: saveRecord } );
-
-	return saveRecord;
+	return cookedRecord as Type_DbFullProgramItem;
 }
 
-function programToHistoryRecord( program : TypeDbProgramItem ) : TYPE_DB_RECORD {
+/**
+ * @param program: a program object.
+ * @returns a program object suitable for writing to the database.
+ */
+function genDbHistoryRecord( program : Type_genDbHistoryRecord_args ) : Type_genDbHistoryRecord_ret {
 
-	const cookedRecord = JSON.parse( JSON.stringify( program ) );
+	const cookedRecord = JSON.parse( JSON.stringify( program ) ) as Record<string,unknown>;
 
-	delete cookedRecord[ DB_FIELD_DAY_OF_WEEK ];
-	delete cookedRecord[ DB_FIELD_POS ];
+	delete cookedRecord[ DB_FIELD_DAY_OF_WEEK ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
+	delete cookedRecord[ DB_FIELD_POS ];         // eslint-disable-line @typescript-eslint/no-dynamic-delete
 
 	const strTime = new Date().toISOString();
 	cookedRecord[ DB_FIELD_MODIFY_TIME ]   = strTime;
 	cookedRecord[ DB_FIELD_DOWNLOAD_TIME ] = strTime;
 
-	const saveRecord : TYPE_DB_RECORD = {};
-
-	Object.entries( cookedRecord ).forEach( ( [ field, value ] : [ string, string ] ) => {
-		saveRecord[ field ] = genAttributeValue( { field, value } );
-	} );
-
-	return saveRecord;
-}
-
-function recordToProgram( rec: TYPE_DB_RECORD ) : TypeDbProgramItem {
-	const cookedRecord : Record<string,any> = {};
-
-	PROGRAM_FIELDS.forEach( field => {
-		if ( field in rec ) {
-			cookedRecord[ field ] = extractAttributeValue( { field, attrValue: rec[ field ] } );
-		} else {
-			switch ( field ) {
-				case DB_FIELD_DAY_OF_WEEK:   cookedRecord[ field ] = null; break;
-				case DB_FIELD_DOWNLOAD_TIME: cookedRecord[ field ] = '';   break;
-			}
-		}
-	} );
-
-	return cookedRecord as TypeDbProgramItem;
+	return cookedRecord as Type_DbFullProgramHistoryItem;
 }
 
 /**
  * @param {object} with properties:
- *          - dbClient:  connected DB client;
+ *          - dbClient:  DB client;
  *          - tableName: the table name.
- * @returns array of raw records, e.g., [ { "mykey": { "S": "keyval" }, ... } ]
+ * @returns array of program records, e.g., [ { "mykey": "keyval", ... } ]
  */
-async function loadTable( { dbClient, tableName } : { dbClient : DynamoDBClient, tableName: string } ) {
+async function loadTable( { dbDocClient, tableName } : Type_loadTable_args ) : Type_loadTable_ret {
 	const commandParams : ScanCommandInput = {
 		TableName: tableName,
 	};
 	let lastEvaluatedKey = null;
-	let records          = [];
+	const programs : Type_DbFullProgramItem[] = [];
 
-	logger.log( 'debug', `${MODULE_NAME}: loadTable`, { tableName, client: ( dbClient ? true : false ) } );
+	logger.log( 'debug', `${MODULE_NAME}: loadTable`, { tableName } );
 
 	try {
 		do {
 			if ( lastEvaluatedKey ) {
 				commandParams.ExclusiveStartKey = lastEvaluatedKey;
 			}
-			logger.log( 'debug', `${MODULE_NAME}: loadTable: scan: BEGIN`, { tableName } );
+			logger.log( 'debug', `${MODULE_NAME}: loadTable: scan: BEGIN`, { tableName } ); // Scan is correct as table will have a max of 20 items
 			const command                      = new ScanCommand( commandParams );
-			const response : ScanCommandOutput = await dbClient.send( command );
-			lastEvaluatedKey = response.LastEvaluatedKey || null;
+			const response : ScanCommandOutput = await dbDocClient.send( command );
+			lastEvaluatedKey = response.LastEvaluatedKey ?? null;
 			if ( response.Items ) {
-				records.push( ...response.Items );
+				programs.push( ...response.Items as Type_DbFullProgramItem[] ); // Database type is guaranteed to be Type_DbFullProgramItem[]
 			}
 		} while ( lastEvaluatedKey );
-		logger.log( 'debug', `${MODULE_NAME}: loadTable: scan: COMPLETE`, { tableName, records } );
+		logger.log( 'debug', `${MODULE_NAME}: loadTable: scan: COMPLETE`, { tableName, programs } );
 	}
 	catch ( err ) {
-		logger.log( 'error', `${MODULE_NAME}: loadTable: scan: error`, { tableName, errMessage: err.message, stack: err.stack } );
+		logger.log( 'error', `${MODULE_NAME}: loadTable: scan: error`, { tableName, errMessage: ( err as Error ).message, stack: ( err as Error ).stack } );
 		throw err;
 	}
 
-	return records;
+	return programs;
+}
+
+/**
+ * @param rawProgram : program object in DB format;
+ * @returns program object in regular format.
+ */
+function extractProgram( rawProgram: Type_extractProgram_args ) : Type_extractProgram_ret {
+	// @ts-expect-error initialise empty object then fill it up
+	const cookedProgram : Type_DbFullProgramItem = {};
+
+	PROGRAM_FIELDS.forEach( field => {
+		if ( field in rawProgram ) {
+			cookedProgram[ field ] = rawProgram[ field ];
+		} else {
+			switch ( field ) {
+				case DB_FIELD_DAY_OF_WEEK:   cookedProgram[ field ] = null; break;
+				case DB_FIELD_DOWNLOAD_TIME: cookedProgram[ field ] = '';   break;
+			}
+		}
+	} );
+
+	return cookedProgram;
 }
 
 /**
  * @param {Array} records : array of raw records, e.g., [ { "mykey": { "S": "keyval" }, ... } ]
- * @returns 
+ * @returns array of cooked records, e.g., [ { "mykey": "keyval" }, ... ]
  */
-function extractPrograms( records : TYPE_DB_RECORD[] ) : TypeDbProgramItem[] {
-	const programs : TypeDbProgramItem[] = [];
+function extractPrograms( rawPrograms : Type_extractPrograms_args ) : Type_extractPrograms_ret {
+	const programs : Type_DbFullProgramItem[] = [];
 
-	records.forEach( rec => {
-		const cookedRecord = recordToProgram( rec );
-		programs.push( cookedRecord );
+	rawPrograms.forEach( rec => {
+		const cookedProgram = extractProgram( rec );
+		programs.push( cookedProgram );
 	} );
 
 	return programs;
 }
 
-function genDeleteCommandParams( records : Record<string,any>[] ) {
-	const arrRequest   : WriteRequest[] = [];
-	const commandParams: BatchWriteItemCommandInput = {
+/**
+ * @param records: array of one or more program items, e.g., [ { pid: '1234z', ... }, ... ]
+ * @returns an object suitable for passing to BatchWriteItem to delete records.
+ */
+function genDeleteCommandParams( programs : Type_genDeleteCommandParams_args ) : Type_genDeleteCommandParams_ret {
+	const arrRequest: WriteRequest[] = [];
+	const commandParams: BatchWriteCommandInput = {
 		RequestItems: {
-			[TABLE_PROGRAM]: arrRequest
+			[TABLE_PROGRAM]: arrRequest,
 		}
 	};
 
-	records.forEach( rec => {
+	assert( programs.length > 0, 'No programs specified' ); // Caller to check this
+
+	for ( const rec of programs ) {
 		const thisRequest : WriteRequest = {
 			DeleteRequest: {
 				Key: {
+					//[DB_FIELD_PID]: { S: rec[ DB_FIELD_PID ] },
+					// @ts-expect-error - there does not appear to be a lib type for WriteRequest
 					[DB_FIELD_PID]: rec[ DB_FIELD_PID ],
-				}
-			}
-		}
+				},
+			},
+		};
 		arrRequest.push( thisRequest );
-	} );
+	}
 
 	return commandParams;
 }
 
-function genSaveCommandParams( programs : TypeDbProgramItem[] ) {
+/**
+ * @param object with properties:
+ *          - dbDocClient: database document client;
+ *          - programs:    array of program objects to delete (only pid property required)
+ * @exception if the DB request fails.
+ */
+async function deletePrograms( { dbDocClient, programs } : Type_deletePrograms_args ) : Type_deletePrograms_ret {
+	if ( programs.length > 0 ) {
+		const commandParams = genDeleteCommandParams( programs );
+		const command       = new BatchWriteCommand( commandParams );
+		const result        = await dbDocClient.send( command );
+		// No need to check for UnprocessedItems as the table is small and we delete all items
+		logger.log( 'debug', 'deletePrograms: success', result );
+	} else {
+		logger.log( 'debug', `deletePrograms: success, table already empty` );
+	}
+}
+
+/**
+ * @param records: array of one or more DB records, e.g., [ { pid: { S: '1234z' }, ... }, ... ]
+ * @returns an object suitable for passing to BatchWriteItem to write records.
+ */
+function genWriteCommandParams( programs : Type_genWriteCommandParams_args ) : Type_genWriteCommandParams_ret {
 	const arrRequest   : WriteRequest[] = [];
-	const commandParams: BatchWriteItemCommandInput = {
+	const commandParams: BatchWriteCommandInput = {
 		RequestItems: {
 			[TABLE_PROGRAM]: arrRequest
 		}
 	};
+
+	assert( programs.length > 0, 'No programs specified' ); // Caller to check this
 
 	for ( let i = 0; i < programs.length; i++ ) {
 		const program    = programs[ i ];
 		const programPos = i + 1;
 		const thisRequest : WriteRequest = {
 			PutRequest: {
-				Item: programToRecord( { program, programPos } ),
+				// @ts-expect-error - there does not appear to be a lib type for WriteRequest
+				Item: genDbRecord( { program, programPos } ),
 			}
 		};
 		arrRequest.push( thisRequest );
@@ -286,49 +390,83 @@ function genSaveCommandParams( programs : TypeDbProgramItem[] ) {
 	return commandParams;
 }
 
-function validateUpdate( program: TypeDbProgramItem ) {
-	const pid    = program[ DB_FIELD_PID ] || '';
+/**
+ * @param object with properties:
+ *          - dbDocClient: database document client;
+ *          - programs:    array of program objects to save.
+ * @exception if the DB request fails.
+ */
+async function writePrograms( { dbDocClient, programs } : Type_writePrograms_args ) : Type_writePrograms_ret {
+	if ( programs.length > 0 ) {
+		const commandParams = genWriteCommandParams( programs );
+		const command       = new BatchWriteCommand( commandParams );
+		await dbDocClient.send( command );
+	}
+}
+
+/**
+ * @param program the program object to validate.
+ * @exception if the program does not contain a 'pid' property.
+ * @exception if the program does not contain a 'status' property.
+ */
+function validateUpdate( program: Type_validateUpdate_args ) : Type_validateUpdate_ret {
+	const pid    = program[ DB_FIELD_PID ];
 	const status = program[ DB_FIELD_STATUS ];
-	if ( pid.length === 0 ) {
+	if ( ! pid ) {
 		throw new HttpError( { statusCode: 400, message: 'Invalid PID' } );
 	}
-	if ( ARR_HISTORY_STATUSES.indexOf( status ) < 0 ) {
+	if ( ! ARR_HISTORY_STATUSES.includes( status ) ) {
 		throw new HttpError( { statusCode: 400, message: 'Invalid Status' } );
 	}
 }
 
-function genUpdateItem( program: TypeDbProgramItem ) : TransactWriteItem {
+/**
+ * @param program the program object to be updated.
+ * @returns a TransactWriteItem object to update the program in the database.
+ */
+function genUpdateItem( program: Type_genUpdateItem_args ) : Type_genUpdateItem_ret {
 	validateUpdate( program );
 	const { [DB_FIELD_PID] : pid, [DB_FIELD_STATUS] : status } = program;
 	const thisWriteItem : TransactWriteItem = {
 		Update: {
 			TableName:                 TABLE_PROGRAM,
-			Key:                       { [DB_FIELD_PID]: genAttributeValue( { field: DB_FIELD_PID, value: pid } ) },
+			Key:                       { [DB_FIELD_PID]: { S: pid  } },
 			ExpressionAttributeNames:  { '#S': DB_FIELD_STATUS },
 			ExpressionAttributeValues: { ':s': { S: status } },
 			UpdateExpression:          'SET #S = :s',
 		},
 	};
 
-	return thisWriteItem
+	return thisWriteItem;
 }
 
-function genUpdateHistoryItemCommand( program: TypeDbProgramItem ) : TransactWriteItem {
+/**
+ * @param program : the program object to be written to the history table.
+ * @returns transact write item to update the history table.
+ */
+function genUpdateHistoryItemCommand( program: Type_genUpdateHistoryItemCommand_args ) : Type_genUpdateHistoryItemCommand_ret {
 	const writeItem : TransactWriteItem = {
 		Put: {
 			TableName: TABLE_PROGRAM_HISTORY,
-			Item:      programToHistoryRecord( program ),
+			// @ts-expect-error - there does not appear to be a lib type for WriteRequest
+			Item:      genDbHistoryRecord( program ),
 		},
 	};
 
 	return writeItem;
 }
 
-function genUpdateHistoryCommandParams( { programs, actualPrograms } : { programs : TypeDbProgramItem[], actualPrograms : TypeDbProgramItem[] } ) : TransactWriteItem[] {
+/**
+ * @param object with properties:
+ *          - programs:       array of program objects;
+ *          - actualPrograms: array of actual program objects in the database.
+ * @returns a TransactWriteItem array to update the history table with any status changes.
+ * @exception if a program in the update list does not exist in the actual programs.
+ */
+function genUpdateHistoryCommandParams( { programs, actualPrograms } : Type_genUpdateHistoryCommandParams_args ) : Type_genUpdateHistoryCommandParams_ret {
 	const arrWriteItem : TransactWriteItem[] = [];
 
-	for ( let i = 0; i < programs.length; i++ ) {
-		const updateProgram                                        = programs[ i ];
+	for ( const updateProgram of programs ) {
 		const { [DB_FIELD_PID] : pid, [DB_FIELD_STATUS] : status } = updateProgram;
 		const program = actualPrograms.find( e => e[ DB_FIELD_PID ] === pid );
 		if ( ! program ) {
@@ -342,178 +480,164 @@ function genUpdateHistoryCommandParams( { programs, actualPrograms } : { program
 	return arrWriteItem;
 }
 
-async function genUpdateCommandParams( { programs, actualPrograms } : { programs : TypeDbProgramItem[], actualPrograms : TypeDbProgramItem[] } ) : Promise<TransactWriteItemsCommandInput> {
+/**
+ * @param object with properties:
+ *          - programs:       array of program objects to update;
+ *          - actualPrograms: array of actual program objects in the database.
+ * @returns TransactWriteCommandInput object to update the programs and the program history in the database.
+ * @exception if a program in the update list does not exist in the actual programs.
+ */
+function genUpdateCommandParams( { programs, actualPrograms } : Type_genUpdateCommandParams_args ) : Type_genUpdateCommandParams_ret {
 	const arrWriteItem : TransactWriteItem[] = [];
-	const commandParams: TransactWriteItemsCommandInput = {
+	const commandParams: TransactWriteCommandInput = {
 		TransactItems: arrWriteItem,
 	};
 
-	for ( let i = 0; i < programs.length; i++ ) {
-		const program       = programs[ i ];
-		const thisWriteItem = genUpdateItem( program );
+	for ( const program of programs ) {
+		const thisWriteItem = genUpdateItem( program as Type_DbProgramItem );
 		arrWriteItem.push( thisWriteItem );
 	}
 
-	const arrHistoryWriteItems = genUpdateHistoryCommandParams( { programs, actualPrograms } );
+	const arrHistoryWriteItems = genUpdateHistoryCommandParams( { programs, actualPrograms } as Type_genUpdateHistoryCommandParams_args );
 	arrWriteItem.push( ...arrHistoryWriteItems );
 
 	return commandParams;
 }
 
 /**
- * @param rawPrograms : array of program objects
- * @returns array of program objects in the same order they were created.
+ * @param rawPrograms array of program items in DB format.
+ * @returns the array of program items, sorted by position.
  */
-function sortPrograms( rawPrograms: TypeDbProgramItem[] ) : TypeDbProgramItem[] {
-	const orderedRawPrograms = rawPrograms.sort( ( a, b ) => {
-		// @ts-ignore - a and b shall not be null
+function sortPrograms( rawPrograms: Type_sortPrograms_args ) : Type_sortPrograms_ret {
+	rawPrograms.sort( ( a, b ) => {
 		return a[ DB_FIELD_POS ] - b[ DB_FIELD_POS ];
 	} );
-	return orderedRawPrograms;
+	return rawPrograms;
 }
 
-class GipDynamoDB {
-	config:   DynamoDBClientConfig;
-	dbClient: Nullable<DynamoDBClient> = null;
+/**
+ * @param dbDocClient : DynamoDBDocumentClient object to access the database.
+ * @returns a promise to return an array of program items in DB format.
+ * @exception if a DB error occurs.
+ */
+async function loadProgramsHelper( dbDocClient: Type_loadProgramsHelper_args ) : Type_loadProgramsHelper_ret {
+	const records           = await loadTable( { dbDocClient, tableName: TABLE_PROGRAM } );
+	const unorderedPrograms = extractPrograms( records );
+	const programs          = sortPrograms( unorderedPrograms );
+	logger.log( 'debug', 'loadProgramsHelper: success', { programs } );
+	return programs;
+}
 
-	constructor( { config } : { config: Nullable<DynamoDBClientConfig> } = { config: DEFAULT_DB_CLIENT_CONFIG } ) {
-		this.config = config as DynamoDBClientConfig;
-		this.connect();
+/**
+ * @param dbDocClient : DynamoDBDocumentClient object to access the database.
+ * @exception if a DB error occurs.
+ */
+async function clearProgramsHelper( dbDocClient: Type_clearProgramsHelper_args ) : Type_clearProgramsHelper_ret {
+	const programs = await loadProgramsHelper( dbDocClient );
+	if ( programs.length > 0 ) {
+		await deletePrograms( { dbDocClient, programs } );
+		logger.log( 'debug', 'clearProgramsHelper: success' );
+	} else {
+		logger.log( 'debug', `clearProgramsHelper: success, table already empty` );
+	}
+}
+
+/**
+ * @param object with properties:
+ *                - dbDocClient : DynamoDBDocumentClient object to access the database;
+ *                - programs    : array of programs to save.
+ * @exception if the number of programs exceeds the defined limit.
+ * @exception if a DB error occurs.
+ */
+async function saveProgramsHelper( { dbDocClient, programs } : Type_saveProgramsHelper_args ) : Type_saveProgramsHelper_ret {
+	if ( programs.length > GIP_MAX_PROGRAMS ) {
+		throw new HttpError( { statusCode: 400, message: `Too many programs ${JSON.stringify( { numPrograms: programs.length, max: GIP_MAX_PROGRAMS } )}` } );
 	}
 
-	destroy() {
+	await clearProgramsHelper( dbDocClient );
+	if ( programs.length > 0 ) {
+		await writePrograms( { dbDocClient, programs } );
+	} else {
+		logger.log( 'debug', 'saveProgramsHelper: no programs to save' );
+	}
+	logger.log( 'debug', 'saveProgramsHelper: success', { programs } );
+	logger.log( 'info',  'saveProgramsHelper: success' );
+}
+
+/**
+ * Update the program status and store the program in the program history.
+ * @param object with properties:
+ *                - dbDocClient : DynamoDBDocumentClient object to access the database;
+ *                - programs    : array of programs to update.
+ * @exception if a DB error occurs.
+ */
+async function updateProgramsHelper( { dbDocClient, programs } : Type_updateProgramsHelper_args ) : Type_updateProgramsHelper_ret {
+	try {
+		const actualPrograms = await loadProgramsHelper( dbDocClient );
+		const commandParams  = genUpdateCommandParams( { programs, actualPrograms } as Type_genUpdateCommandParams_args );
+		const command        = new TransactWriteCommand( commandParams );
+		await dbDocClient.send( command );
+	}
+	catch ( err ) {
+		logger.log( 'error', `updatePrograms: failed: `, { message: ( err as Error ).message, stack: ( err as Error ).stack } );
+		throw err;
+	}
+}
+
+export class GipDynamoDB { // exported for unit test purposes
+	config:      DynamoDBClientConfig;
+	dbClient:    Nullable<DynamoDBClient>         = null;
+	dbDocClient: Nullable<DynamoDBDocumentClient> = null;
+
+	constructor( { config } : { config: Nullable<DynamoDBClientConfig> } = { config: DEFAULT_DB_CLIENT_CONFIG } ) {
+		this.config = config!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		this.createClient();
+	}
+
+	/**
+	 * Free up resources for this object
+	 */
+	destroy() : void {
 		if ( this.dbClient ) {
 			this.dbClient.destroy();
 			this.dbClient    = null;
+			this.dbDocClient = null;
 		}
 	}
 
-	connect() {
+	/**
+	 * Create a DynamoDBClient and DynamoDBDocumentClient
+	 */
+	createClient() : void {
 		if ( ! this.dbClient ) {
 			try {
-				this.dbClient = new DynamoDBClient( this.config );
+				this.dbClient    = new DynamoDBClient( this.config );
+				this.dbDocClient = DynamoDBDocumentClient.from( this.dbClient );
 			}
 			catch ( err ) {
-				logger.log( 'error', `${MODULE_NAME}: GipDynamoDB:connect: ${err.message}`, err.stack );
+				logger.log( 'error', `${MODULE_NAME}: GipDynamoDB:createClient: ${( err as Error ).message}`, ( err as Error ).stack );
 				throw err;
 			}
 		}
 	}
 
 	/**
-	 * @returns promise to return an array of program items in DB format.
-	 * @exception if the DB connection or the query fails.
+	 * @returns the DB document client.
+	 * @exception if no client has been created.
 	 */
-	async loadProgs() : Promise<TypeDbProgramItem[]> {
-		let programs : TypeDbProgramItem[] = [];
-	
-		if ( ! this.dbClient ) {
-			throw new Error( 'Not connected' );
+	getDocClient() : DynamoDBDocumentClient {
+		if ( ! this.dbDocClient ) {
+			throw new Error( 'DB not configured' );
 		}
-
-		try {
-			const records  = await loadTable( { dbClient: this.dbClient, tableName: TABLE_PROGRAM } );
-			const unorderedPrograms = extractPrograms( records );
-			programs = sortPrograms( unorderedPrograms );
-			logger.log( 'debug', 'loadProgs: success', { programs } );
-		}
-		catch ( err ) {
-			console.log( 'error', `${MODULE_NAME}: loadProgs: `, { error: err.message, stack: err.stack } );
-			throw err;
-		}
-	
-		return programs;
-	}
-
-	async clearProgs() {
-		if ( ! this.dbClient ) {
-			throw new Error( 'DB not connected' );
-		}
-		try {
-			const records = await loadTable( { dbClient: this.dbClient, tableName: TABLE_PROGRAM } );
-			if ( records.length > 0 ) {
-				const commandParams = genDeleteCommandParams( records );
-				const command       = new BatchWriteItemCommand( commandParams )
-				const result        = await this.dbClient.send( command );
-				logger.log( 'debug', 'clearProgs: success', result );
-			} else {
-				logger.log( 'debug', `clearProgs: success, table already empty` );
-			}
-		}
-		catch ( err ) {
-			logger.log( 'error', `clearProgs: clear table failed: ${err.message}` );
-			throw err;
-		}
-	}
-
-	/**
-	 * @param {Object} with properties:
-	 *           - programs :  array of program items;
-	 * @returns array of DB program items.
-	 */
-	async saveProgs( { programs } : { programs: TypeDbProgramItem[] } ) : Promise<TypeDbProgramItem[]> {
-		//let dbClient = null;
-		let result : TypeDbProgramItem[] = [];
-
-		if ( ! this.dbClient ) {
-			throw new Error( 'DB not connected' );
-		}
-
-		if ( programs.length > GIP_MAX_PROGRAMS ) {
-			throw new HttpError( { statusCode: 400, message: `Too many programs ${JSON.stringify( { numPrograms: programs.length, max: GIP_MAX_PROGRAMS } )}` } );
-		}
-
-		try {
-			await this.clearProgs();
-			if ( programs.length > 0 ) {
-				const commandParams = genSaveCommandParams( programs );
-				const command       = new BatchWriteItemCommand( commandParams )
-				await this.dbClient.send( command );
-			} else {
-				logger.log( 'debug', 'saveProgs: no programs to save' );
-			}
-			logger.log( 'debug', 'saveProgs: success', { programs } );
-			logger.log( 'info',  'saveProgs: success' );
-		}
-		catch ( err ) {
-			logger.log( 'error', `saveProgs: failed: `, { message: err.message, stack: err.stack } );
-			throw err;
-		}
-	
-		return programs;
-	}
-
-	/**
-	 * @param object with properties:
-	 *         - programs: array of program objects, however only the following fields are required:
-	 *                      - pid:    identifies the program;
-	 *                      - status: the status of the object.
-	 */
-	async updateProgs( { programs } : { programs: TypeDbProgramItem[] } ) : Promise<void>
-	{
-		if ( ! this.dbClient ) {
-			throw new Error( 'DB not connected' );
-		}
-	
-		try {
-			const actualPrograms = await this.loadProgs();
-			const commandParams  = await genUpdateCommandParams( { programs, actualPrograms } );
-			const command        = new TransactWriteItemsCommand( commandParams )
-			await this.dbClient.send( command );
-		}
-		catch ( err ) {
-			logger.log( 'error', `updateProgs: failed: `, { message: err.message, stack: err.stack } );
-			throw err;
-		}
+		return this.dbDocClient;
 	}
 };
 
-function getDb() : GipDynamoDB {
-	const objDb = new GipDynamoDB();
-	return objDb;
-}
-
-function resetDb( objDb : GipDynamoDB ) {
+/**
+ * Utility function to free up any DB resources.
+ * @param objDb : optional DB resource object.
+ */
+function resetDb( objDb : Type_resetDb_args ) : void {
 	if ( objDb ) {
 		logger.log( 'debug', 'resetDB: BEGIN' );
 		objDb.destroy();
@@ -521,39 +645,46 @@ function resetDb( objDb : GipDynamoDB ) {
 	}
 }
 
-export async function loadProgs() : Promise<TypeDbProgramItem[]> {
+/**
+ * @returns array of program objects.
+ */
+export async function loadPrograms() : Type_loadPrograms_ret {
 	let   objDb = null;
-	let   programs : TypeDbProgramItem[] = [];
+	let   programs : Type_DbProgramItem[] = [];
 	try {
-		objDb    = getDb();
-		programs = await objDb.loadProgs();
+		objDb    = new GipDynamoDB();
+		programs = await loadProgramsHelper( objDb.getDocClient() ) as Type_DbProgramItem[];
 	}
 	catch ( err ) {
-		logger.log( 'error', `loadProgs: `, { message: err.message } );
+		logger.log( 'error', `loadPrograms: failed: `, { message: ( err as Error ).message, stack: ( err as Error ).stack } );
 		throw err;
 	}
 	finally {
-		resetDb( objDb as GipDynamoDB );
+		resetDb( objDb );
 	}
 
 	return programs;
 }
 
-export async function saveProgs( { programs } : { programs: TypeDbProgramItem[] } ) : Promise<TypeDbProgramItem[]> {
+/**
+ * Save the programs in the database.
+ * @param object with properties:
+ *         - programs: array of program objects.
+ * @exception if a database error occurs.
+ */
+export async function savePrograms( { programs } : Type_savePrograms_args ) : Type_savePrograms_ret {
 	let objDb = null;
 	try {
-		objDb    = getDb();
-		programs = await objDb.saveProgs( { programs } );
+		objDb = new GipDynamoDB();
+		await saveProgramsHelper( { dbDocClient: objDb.getDocClient(), programs } );
 	}
 	catch ( err ) {
-		logger.log( 'error', `saveProgs: `, { message: err.message } );
+		logger.log( 'error', `savePrograms: failed: `, { message: ( err as Error ).message, stack: ( err as Error ).stack } );
 		throw err;
 	}
 	finally {
-		resetDb( objDb as GipDynamoDB );
+		resetDb( objDb );
 	}
-
-	return programs;
 }
 
 /**
@@ -562,20 +693,51 @@ export async function saveProgs( { programs } : { programs: TypeDbProgramItem[] 
  *                      - pid:    identifies the program;
  *                      - status: the status of the object.
  */
-export async function updateProgs( { programs } : { programs: TypeDbProgramItem[] } ) : Promise<void>
+export async function updatePrograms( { programs } : Type_updatePrograms_args ) : Type_updatePrograms_ret
 {
 	let objDb  = null;
 	try {
-		objDb = getDb();
-		await objDb.updateProgs( { programs } );
+		objDb = new GipDynamoDB();
+		await updateProgramsHelper( { dbDocClient: objDb.getDocClient(), programs: ( programs as Type_DbFullProgramItem[] ) } );
 	}
 	catch ( err ) {
-		logger.log( 'error', `updateProgs: `, { message: err.message } );
+		logger.log( 'error', `updatePrograms: failed: `, { message: ( err as Error ).message, stack: ( err as Error ).stack } );
 		throw err;
 	}
 	finally {
-		resetDb( objDb as GipDynamoDB );
+		resetDb( objDb );
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 export default {};
+
+export const privateDefs = {};
+
+if ( process.env.NODE_ENV === 'test-unit' ) {
+	Object.assign( privateDefs, {
+		DEFAULT_DB_CLIENT_CONFIG,
+		STAGE,
+		SERVICE_NAME,
+		genDbRecord,
+		genDbHistoryRecord,
+		loadTable,
+		extractPrograms,
+		genDeleteCommandParams,
+		deletePrograms,
+		genWriteCommandParams,
+		writePrograms,
+		validateUpdate,
+		genUpdateItem,
+		genUpdateHistoryItemCommand,
+		genUpdateHistoryCommandParams,
+		genUpdateCommandParams,
+		loadProgramsHelper,
+		clearProgramsHelper,
+		saveProgramsHelper,
+		updateProgramsHelper,
+		sortPrograms,
+		resetDb,
+	} );
+}

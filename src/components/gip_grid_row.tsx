@@ -1,16 +1,16 @@
 import React, { ReactElement } from 'react';
 
-type TypeGipGridRowProps = {
+interface TypeGipGridRowProps {
 	fieldID?:              string,
 	paramName?:            string | null,
 	labelText:             string,
 	gipComponent:          () => ReactElement,
 	additionalClassNames?: string[],
-};
+}
 
-type TypeLabelProps = {
+interface TypeLabelProps {
 	htmlFor?: string,
-};
+}
 
 
 export function GipGridRow( props : TypeGipGridRowProps ) : ReactElement  {

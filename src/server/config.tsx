@@ -1,11 +1,11 @@
 /**
  * Configuration
  */
-import manifest from '../../public/manifest.json';
+import manifest from '../../public/manifest.json'; // with { type: 'json' };
 import process  from 'process';
 
 /** Whether we're running on a local desktop or on AWS Lambda */
-const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE;
+const isLocal = process.env.IS_LOCAL ?? process.env.IS_OFFLINE;
 
 /**
  * Configuration Options
@@ -15,7 +15,7 @@ const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE;
  * hook. However, due to this behavior, it is important NOT to expose any sensitive information
  * such as passwords or tokens through the config.
  */
-const LOCAL_APIGATEWAY_URL = 'http://localhost:8082';
+const LOCAL_APIGATEWAY_URL = 'http://0.0.0.0:8082';
 
 const config = {
 	/** Application Config */

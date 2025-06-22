@@ -78,6 +78,12 @@ custom:
     true:  "/${self:custom.basePath}"
     false: ""
   apiBasePath: ${self:custom.basePathMap.${self:custom.isOffline}}
+  distDir: "dist"
+  distPathMap:
+    #true:  "${self:custom.distDir}/"
+    true:  ""
+    false: ""
+  apiDistPath: ${self:custom.distPathMap.${self:custom.isOffline}}
   NODE_LOG_LEVEL: ${env:NODE_LOG_LEVEL, "info"}
   stageToDefaultCustomDomainMap:
     lcl:  "localhost"
@@ -152,7 +158,7 @@ custom:
 functions:
   programs:
     # Any web request regardless of path or method will be handled by a single Lambda function
-    handler: src/api/programs.handler
+    handler: ${self:custom.apiDistPath}src/api/programs.handler
     events:
       - http:
           path: ${self:custom.apiBasePath}/api/programs
@@ -161,7 +167,7 @@ functions:
           integration: aws_proxy
   serve:
     # Any web request regardless of path or method will be handled by a single Lambda function
-    handler: handler.serve
+    handler: ${self:custom.apiDistPath}handler.serve
     events:
       - http:
           path: ${self:custom.apiBasePath}/
