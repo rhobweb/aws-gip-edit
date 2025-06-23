@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
-import { Config }    from '../server/config.js';
-import ConfigContext from './ConfigContext.js';
+import { Config }    from '../server/config';
+import ConfigContext from './ConfigContext';
 
 /**
  * Hook to read application configuration settings

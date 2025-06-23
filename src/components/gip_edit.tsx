@@ -16,7 +16,7 @@ import type {
 } from '../utils/gip_types.ts';
 import React, { useState, useEffect, useRef }               from 'react';
 import { Helmet }                                           from 'react-helmet';
-import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils.js';
+import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils';
 import {
 	PROG_FIELD_URI,
 	PROG_FIELD_PID,
@@ -24,16 +24,16 @@ import {
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_IMAGE_URI,
-} from '../utils/gip_types.js';
-import { Type_DbProgramItem }      from '../utils/gip_prog_fields.js';
-import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils.js';
-import { GipProgramEntry }         from './gip_program_entry.js';
-import { GipProgramTable }         from './gip_program_table.js';
-import { GipActionButtons }        from './gip_action_buttons.js';
-import GipProgramEditInput         from '../utils/gip_program_edit_input.js';
-import GipProgramEditOptions       from '../utils/gip_program_edit_options.js';
-import GipProgramItem              from '../utils/gip_program_item.js';
-import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils.js';
+} from '../utils/gip_types';
+import { Type_DbProgramItem }      from '../utils/gip_prog_fields';
+import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
+import { GipProgramEntry }         from './gip_program_entry';
+import { GipProgramTable }         from './gip_program_table';
+import { GipActionButtons }        from './gip_action_buttons';
+import GipProgramEditInput         from '../utils/gip_program_edit_input';
+import GipProgramEditOptions       from '../utils/gip_program_edit_options';
+import GipProgramItem              from '../utils/gip_program_item';
+import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
 import logger                      from '@rhobweb/console-logger';
 import ourPackage                  from '../../package.json'; // with { type: "json" };
 
@@ -364,7 +364,7 @@ function GipEdit() : React.JSX.Element {
 				/>
 				<GipActionButtons
 					programs={ programs }
-					onProgramChange={ ( newPrograms ) => { onProgramChange( newPrograms ); } }
+					onProgramChange={ ( newPrograms ) => {  onProgramChange( newPrograms ); } }
 					savePrograms={ savePrograms }
 					programsSaved={ () => { setInitialFocus(); } }
 				/>

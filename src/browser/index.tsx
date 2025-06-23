@@ -11,9 +11,9 @@ import * as React from 'react';
 //import { hydrate } from 'react-dom';
 import { hydrateRoot } from 'react-dom/client';
 
-import ConfigContext from '../components/ConfigContext.js';
-import { Config } from '../server/config.js';
-import App from '../App.js';
+import ConfigContext from '../components/ConfigContext';
+import { Config } from '../server/config';
+import App from '../App';
 
 interface Type_Window {
 	__CONFIG__?: Config;

@@ -13,8 +13,8 @@ import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
 	DUMMY_HEADER_FIELD,
-} from '../utils/gip_prog_fields.js';
-import { GipGridRow } from './gip_grid_row.js';
+} from '../utils/gip_prog_fields';
+import { GipGridRow } from './gip_grid_row';
 import {
 	PROG_FIELD_SELECTED,
 	Type_ProgramItem,
@@ -22,7 +22,7 @@ import {
 	Type_EventHandlerMouse,
 	Type_HandlerProgramChange,
 	Type_EventMouse,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 const LABEL_PROGRAM_TABLE     = 'Programs';
 const SELECTED_PROGRAM_COLOUR = 'rgb(100, 210, 255)';

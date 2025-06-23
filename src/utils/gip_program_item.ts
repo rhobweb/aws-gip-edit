@@ -2,13 +2,13 @@
 
 import {
 	VALUE_STATUS_PENDING,
-} from '../utils/gip_prog_fields.js';
+} from '../utils/gip_prog_fields';
 
 import type {
 	Type_ProgramItem,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 import {
 	PROG_FIELD_PID,
@@ -21,7 +21,7 @@ import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
 	PROG_FIELD_SELECTED,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 function getTrimmedField( field : string ) : string {
 	return ( field ? field.trim() : '' );

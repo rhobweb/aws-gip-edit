@@ -26,13 +26,13 @@ interface Type_ProgramAttributes {
 	episode:   string,
 	synopsis:  string,
 	image_uri: string,
-}
+};
 
 interface Type_ElementTagNameAndClassTag {
 	tagName:  string,
 	classTag: string | string[],
 	retProp:  string,
-}
+};
 
 type Type_TextConversionItem = [ ( string | RegExp ), string ];
 type Type_TextConversionList = Type_TextConversionItem[];

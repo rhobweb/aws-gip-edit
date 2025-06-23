@@ -5,7 +5,7 @@ import type {
 import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
-} from '../utils/gip_prog_fields.js';
+} from '../utils/gip_prog_fields';
 //import type {
 //	Type_FieldMap
 //} from '../utils/gip_prog_fields';
@@ -18,7 +18,7 @@ import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_GENRE,
 	PROG_FIELD_QUALITY,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 interface TypeProgramOptionSelectProps {
 	onChange:     ( newOptions : Type_ProgramEditOptions ) => void,

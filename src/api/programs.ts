@@ -3,7 +3,7 @@ import {
 	loadPrograms,
 	savePrograms,
 	updatePrograms,
-} from '../utils/gip_db_dynamodb_utils.js';
+} from '../utils/gip_db_dynamodb_utils';
 //import { Context, APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { APIGatewayEvent } from 'aws-lambda';
 import logger from '@rhobweb/console-logger';
@@ -13,12 +13,12 @@ import logger from '@rhobweb/console-logger';
 //  VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS
 //}
 //from '../../utils/gip_prog_fields';
-import { filterPrograms } from '../utils/gip_prog_filter_utils.js';
+import { filterPrograms } from '../utils/gip_prog_filter_utils';
 import {
 	HttpError,
 	parseQueryParams,
 	stringifyUTF16,
-} from '../utils/gip_http_utils.js';
+} from '../utils/gip_http_utils';
 import type { Type_RawQueryParams } from '../utils/gip_http_utils.ts';
 import type { Type_DbProgramItem }  from '../utils/gip_prog_fields.ts';
 

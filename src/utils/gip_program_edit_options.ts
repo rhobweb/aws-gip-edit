@@ -8,8 +8,8 @@ import {
 	PROG_FIELD_GENRE,
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
-} from './gip_types.js';
-import { FIELD_DEFAULT_VALUES } from '../utils/gip_prog_fields.js';
+} from './gip_types';
+import { FIELD_DEFAULT_VALUES } from '../utils/gip_prog_fields';
 
 export default class GipProgramEditOptions implements Type_ProgramEditOptions {
 

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "target": "ESNext",
-    "allowJs": false,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "lib": [ "DOM" ],
@@ -15,15 +15,13 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "esModuleInterop": true,
-    "strict": true,
-    "paths": {
-      "*": ["dist/*"], // Ensure Webpack resolves source files
-    },
-    "isolatedModules": true, // https://www.typescriptlang.org/tsconfig/#isolatedModules
+    "isolatedModules": true,
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "handler.ts",
-  ]
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"test/**/*.ts",
+		"test/**/*.tsx",
+		"handler.ts",
+	],
 }

@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
-import { FIELD_DEFAULT_VALUES, VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS } from '../utils/gip_prog_fields.js';
-import { GipGridRow }          from './gip_grid_row.js';
+import { FIELD_DEFAULT_VALUES, VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS } from '../utils/gip_prog_fields';
+import { GipGridRow }          from './gip_grid_row';
 import {
 	PROG_FIELD_STATUS,
 	PROG_FIELD_SELECTED,
@@ -8,7 +8,7 @@ import {
 	Type_ProgramItem,
 	Type_ProgramItemField,
 	Type_HandlerProgramChange,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 type Type_ProgramList = Type_ProgramItem[];
 

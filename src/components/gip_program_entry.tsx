@@ -6,8 +6,8 @@ import type {
 	Type_EventHandlerKeyboard,
 } from '../browser_event.ts';
 //import Image                    from 'next/image';
-import { GipGridRow }           from './gip_grid_row.js';
-import { GipProgramOptions }    from './gip_program_options.js';
+import { GipGridRow }           from './gip_grid_row';
+import { GipProgramOptions }    from './gip_program_options';
 import type {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
@@ -18,7 +18,7 @@ import {
 	PROG_FIELD_TITLE,
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_IMAGE_URI,
-} from '../utils/gip_types.js';
+} from '../utils/gip_types';
 
 const LABEL_PROGRAM_URL      = 'Program URL';
 const LABEL_PROGRAM_TITLE    = 'Program Name';

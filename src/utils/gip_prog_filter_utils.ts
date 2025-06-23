@@ -2,11 +2,11 @@ import type {
 	Type_ProgramDownloadOptions,
 	Nullable,
 } from './gip_types.ts';
-import type { Type_DbProgramItem }                    from './gip_prog_fields.js';
+import type { Type_DbProgramItem }                    from './gip_prog_fields';
 
-import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields.js';
-import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types.js';
-import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils.js';
+import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
+import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
+import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils';
 
 const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
 

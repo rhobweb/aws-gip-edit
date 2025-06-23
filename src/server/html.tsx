@@ -1,5 +1,5 @@
-import type { Config } from './config.js';
-import type { Stats }  from './types.js';
+import type { Config } from './config';
+import type { Stats }  from './types';
 
 /**
  * This HTML file acts as a template that we insert all our generated
