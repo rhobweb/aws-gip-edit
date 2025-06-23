@@ -9,12 +9,18 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 import type {
 	Type_convertToCamelCase_args,
 	Type_convertToCamelCase_ret,
+	Type_elementClassTagMatches_args,
+	Type_elementClassTagMatches_ret,
 	Type_getProgDetailsFromLink_args,
 	Type_getProgDetailsFromLink_ret,
+	Type_getDecendentsByTagNameAndClassTag_args,
+	Type_getDecendentsByTagNameAndClassTag_ret,
 } from '../../../src/utils/gip_prog_edit_utils';
 
 interface Type_TestModulePrivateDefs {
-	convertToCamelCase: (args: Type_convertToCamelCase_args) =>	Type_convertToCamelCase_ret,
+	convertToCamelCase:                (args: Type_convertToCamelCase_args)                 => Type_convertToCamelCase_ret,
+	elementClassTagMatches:            (args: Type_elementClassTagMatches_args)             => Type_elementClassTagMatches_ret,
+	getDecendentsByTagNameAndClassTag: (args: Type_getDecendentsByTagNameAndClassTag_args ) => Type_getDecendentsByTagNameAndClassTag_ret,
 };
 
 interface Type_TestModule {
@@ -162,6 +168,131 @@ describe(MODULE_NAME + ':convertToCamelCase', () => {
 
 	test( 'All properties specified', () => {
 		actualResult = testModuleObj.convertToCamelCase( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':elementClassTagMatches', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_elementClassTagMatches_args;
+	let actualResult   : Type_elementClassTagMatches_ret;
+	let expectedResult : Type_elementClassTagMatches_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule.privateDefs;
+		testArgs = {
+			className: 'test-class-name1',
+			classTag:  'test-class-name1',
+		};
+		expectedResult = true;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Scalar matches exactly', () => {
+		testArgs = {
+			className: 'test-class-name1',
+			classTag:  'test-class-name1',
+		};
+		expectedResult = true;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Scalar matches case insensitive', () => {
+		testArgs = {
+			className: 'test-class-name1',
+			classTag:  'test-CLASS-name1',
+		};
+		expectedResult = true;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Scalar does not match', () => {
+		testArgs = {
+			className: 'test-class-name1',
+			classTag:  'test-class-name2',
+		};
+		expectedResult = false;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Array match case insensitive', () => {
+		testArgs = {
+			className: 'test-class-name1',
+			classTag:  [ 'test-CLASS-name1', '!test-class-name2' ],
+		};
+		expectedResult = true;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Array matches class name and not negated class name', () => {
+		testArgs = {
+			className: 'test-class-name1 test-class-name3',
+			classTag:  [ 'test-CLASS-name1', '!test-class-name2' ],
+		};
+		expectedResult = true;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Array matches all', () => {
+		testArgs = {
+			className: 'test-class-name1 test-class-name2 test-class-name3',
+			classTag:  [ 'test-class-name2', 'test-CLASS-name3', 'test-class-namE1' ],
+		};
+		expectedResult = true;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Scalar matches none', () => {
+		testArgs = {
+			className: 'test-class-name1 test-class-name2 test-class-name3',
+			classTag:  'test-class-name',
+		};
+		expectedResult = false;
+		actualResult = testModuleObj.elementClassTagMatches( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':getDecendentsByTagNameAndClassTag', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_getDecendentsByTagNameAndClassTag_args;
+	let actualResult   : Type_getDecendentsByTagNameAndClassTag_ret;
+	let expectedResult : Type_getDecendentsByTagNameAndClassTag_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule.privateDefs;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Parse full program item', () => {
+		testArgs = {
+			elem: JSON.parse(TEST_PROG_FULL_ELEMENT_1 ) as Element,
+			arrTagNameAndClassTag: [
+				{
+					tagName:  'span',
+					classTag: 'sw-text-primary',
+					retProp:  'title',
+				},
+			],
+		};
+		expectedResult = {
+			title: 'ConversationsFromALongMarriage-S6E05',
+		};
+		actualResult = testModuleObj.getDecendentsByTagNameAndClassTag( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
 });

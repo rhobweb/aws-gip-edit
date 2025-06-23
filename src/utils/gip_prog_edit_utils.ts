@@ -160,13 +160,24 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 
 /**
  * @param object with properties:
- *         - className: the name of a class.
- *         - classTag:  a class name or array of class names.
- * @returns true if className case insensitive matches a classTag.
+ *         - className: space separated string of class names.
+ *         - classTag:  either:
+ *                       - a class name;
+ *                       - array of two or more:
+ *                          - class name   : class name to find in the string of class names;
+ *                          - ! class name : class name to not find in the string of class names.
+ * @returns true if className case insensitive matches a classTag..
+ * e.g.1, className = 'c1 c2 c3', classTag = [ 'c1, 'c2' ], returns true
+ * e.g.2, className = 'c1 c2 c3', classTag = [ 'c1, 'c4' ], returns false
+ * e.g.3, className = 'c1 c2 c3', classTag = [ 'c1, '!c4' ], returns true
+ * e.g.4, className = 'c1 c2 c3', classTag = [ 'c1, '!c3' ], returns false
  */
 function elementClassTagMatches( { className, classTag } : Type_elementClassTagMatches_args ) : Type_elementClassTagMatches_ret {
 	let bMatch      = true; // Default to true
 	let arrClassTag = [];
+	const arrClassName = className.split( /\s/ ).map( e => e.toLowerCase() );
+
+	//console.log( `elementClassTagMatches: `, JSON.stringify({ className, classTag }) );
 
 	if ( Array.isArray( classTag ) ) {
 		arrClassTag = classTag;
@@ -174,18 +185,17 @@ function elementClassTagMatches( { className, classTag } : Type_elementClassTagM
 		arrClassTag = [ classTag ];
 	}
 
-	arrClassTag.forEach( classTagItem => {
-		let   thisClassTag = classTagItem;
+	for ( const classTagItem of arrClassTag ) {
 		const matchResult  = /^!(.*)/.exec(classTagItem);
 		if ( matchResult ) {
-			thisClassTag = matchResult[ 1 ];
+			const thisClassTag = matchResult[ 1 ];
 			//console.log( `Matching not: ${thisClassTag}` );
-			bMatch = bMatch && ( !className.toLowerCase().includes( thisClassTag.toLowerCase() ) );
+			bMatch = bMatch && ( !arrClassName.includes( thisClassTag.toLowerCase() ) );
 			//console.log( `Result: ${bMatch}` );
 		} else {
-			bMatch = bMatch && ( className.toLowerCase().includes( thisClassTag.toLowerCase() ) );
+			bMatch = bMatch && ( arrClassName.includes( classTagItem.toLowerCase() ) );
 		}
-	} );
+	}
 
 	return bMatch;
 }
@@ -196,9 +206,9 @@ function elementClassTagMatches( { className, classTag } : Type_elementClassTagM
  *          - elem                  : the HTML element to search.
  *          - arrTagNameAndClassTag : array of objects with properties:
  *                                     - tagName:  HTML tag name;
- *                                     - classTag: a class name, or a negated class name, e.g., '!myclass';
+ *                                     - classTag: a class name, or a negated class name, e.g., '!myclass', or an array of these.
  *                                     - retProp:  the name of the property in which to return the data.
- * @return object with properties being the requested return properties and value being either the found child object.
+ * @return object with properties being the requested return properties and value being either the found child object or an array of child objects.
  */
 function getDecendentsByTagNameAndClassTag( { elem, arrTagNameAndClassTag } : Type_getDecendentsByTagNameAndClassTag_args ) : Type_getDecendentsByTagNameAndClassTag_ret
 {
@@ -213,7 +223,7 @@ function getDecendentsByTagNameAndClassTag( { elem, arrTagNameAndClassTag } : Ty
 		try {
 			if ( ( typeof child === 'object' ) && child.getAttribute ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 				const childClass = child.getAttribute( 'class' );
-				//console.log( 'Child tagName: ', `[${child.tagName}]` );
+				//console.log( 'Child tagName: ', child.tagName );
 				if ( childClass != null ) {
 					for ( const tagNameAndClassTag of arrTagNameAndClassTag ) {
 						if ( ( child.tagName.toLowerCase() === tagNameAndClassTag.tagName.toLowerCase() ) && elementClassTagMatches( { className: childClass, classTag: tagNameAndClassTag.classTag } ) ) {
@@ -239,7 +249,7 @@ function getDecendentsByTagNameAndClassTag( { elem, arrTagNameAndClassTag } : Ty
 			}
 		}
 		catch ( err ) {
-			console.log( 'getDecendentsByTypeAndClassTag: ', (err as Error).message );
+			console.log( 'getDecendentsByTagNameAndClassTag: ', (err as Error).message );
 		}
 	}
 
@@ -289,8 +299,8 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 		image_uri: '',
 	};
 
-	console.log('objFoundItem');
-	console.log(objFoundItem);
+	//console.log('objFoundItem');
+	//console.log(objFoundItem);
 
 	if ( objFoundItem.title ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 		objProgAttributes.title    = extractFoundElementText( objFoundItem.title );
@@ -305,8 +315,8 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 		objProgAttributes.synopsis += extractFoundElementText( objFoundItem.secondary );
 	}
 
-	console.log('objProgAttributes');
-	console.log(objProgAttributes);
+	//console.log('objProgAttributes');
+	//console.log(objProgAttributes);
 
 	return objProgAttributes;
 }
