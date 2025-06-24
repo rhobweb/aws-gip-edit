@@ -15,6 +15,7 @@ import ConfigContext from "../components/ConfigContext";
 import { Config } from "../server/config";
 import App from "../App";
 
+// TODO: Fix types
 const config = (window as any).__CONFIG__ as Config;
 delete (window as any).__CONFIG__;
 

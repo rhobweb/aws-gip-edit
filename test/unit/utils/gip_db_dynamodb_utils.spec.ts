@@ -919,9 +919,9 @@ describe(MODULE_NAME + ':genUpdateItem', () => {
 		expectedResult = {
 			Update: {
 				TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-				Key:                       { pid: { S: testArgs.pid  } },
+				Key:                       { pid: testArgs.pid },
 				ExpressionAttributeNames:  { '#S': 'status' },
-				ExpressionAttributeValues: { ':s': { S: testArgs.status } },
+				ExpressionAttributeValues: { ':s': testArgs.status },
 				UpdateExpression:          'SET #S = :s',
 			}
 		};
@@ -973,7 +973,6 @@ describe(MODULE_NAME + ':genUpdateHistoryItemCommand', () => {
 		expectedResult = {
 			Put: {
 				TableName: EXPECTED_TABLE_NAME_PROGRAM_HISTORY,
-				// @ts-expect-error - there does not appear to be a lib type for WriteRequest
 				Item:      expectedObject,
 			},
 		};
@@ -1055,14 +1054,12 @@ describe(MODULE_NAME + ':genUpdateHistoryCommandParams', () => {
 			{
 				Put: {
 					TableName: EXPECTED_TABLE_NAME_PROGRAM_HISTORY,
-					// @ts-expect-error - there does not appear to be a lib type for WriteRequest
 					Item:      expectedObject1,
 				},
 			},
 			{
 				Put: {
 					TableName: EXPECTED_TABLE_NAME_PROGRAM_HISTORY,
-					// @ts-expect-error - there does not appear to be a lib type for WriteRequest
 					Item:      expectedObject2,
 				},
 			},
@@ -1105,9 +1102,9 @@ describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 		const retObj = {
 			Update: {
 				TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-				Key:                       { pid: { S: prog.pid  } },
+				Key:                       { pid: prog.pid },
 				ExpressionAttributeNames:  { '#S': 'status' },
-				ExpressionAttributeValues: { ':s': { S: prog.status } },
+				ExpressionAttributeValues: { ':s': prog.status },
 				UpdateExpression:          'SET #S = :s',
 			}
 		};
@@ -1709,27 +1706,27 @@ describe(MODULE_NAME + ':updateProgramsHelper', () => {
 				{
 					Update: {
 						TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-						Key:                       { pid: { S: 'pid2'  } },
+						Key:                       { pid: 'pid2' },
 						ExpressionAttributeNames:  { '#S': 'status' },
-						ExpressionAttributeValues: { ':s': { S: 'Success' } },
+						ExpressionAttributeValues: { ':s': 'Success' },
 						UpdateExpression:          'SET #S = :s',
 					},
 				},
 				{
 					Update: {
 						TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-						Key:                       { pid: { S: 'pid1'  } },
+						Key:                       { pid: 'pid1' },
 						ExpressionAttributeNames:  { '#S': 'status' },
-						ExpressionAttributeValues: { ':s': { S: 'Already' } },
+						ExpressionAttributeValues: { ':s': 'Already' },
 						UpdateExpression:          'SET #S = :s',
 					},
 				},
 				{
 					Update: {
 						TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-						Key:                       { pid: { S: 'pid3'  } },
+						Key:                       { pid: 'pid3' },
 						ExpressionAttributeNames:  { '#S': 'status' },
-						ExpressionAttributeValues: { ':s': { S: 'Error' } },
+						ExpressionAttributeValues: { ':s': 'Error' },
 						UpdateExpression:          'SET #S = :s',
 					},
 				},
@@ -2172,9 +2169,9 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 				{
 					Update: {
 						TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
-						Key:                       { pid: { S: 'pid1'  } },
+						Key:                       { pid: 'pid1' },
 						ExpressionAttributeNames:  { '#S': 'status' },
-						ExpressionAttributeValues: { ':s': { S: 'Success' } },
+						ExpressionAttributeValues: { ':s': 'Success' },
 						UpdateExpression:          'SET #S = :s',
 					},
 				},

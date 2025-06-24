@@ -15,12 +15,27 @@ import type {
 	Type_getProgDetailsFromLink_ret,
 	Type_getDecendentsByTagNameAndClassTag_args,
 	Type_getDecendentsByTagNameAndClassTag_ret,
+	Type_extractElementText_args,
+	Type_extractElementText_ret,
+	Type_extractElementImageURI_args,
+	Type_extractElementImageURI_ret,
+	Type_preProcessEpisode_args,
+	Type_preProcessEpisode_ret,
+	Type_cookEpisode_args,
+	Type_cookEpisode_ret,
+	Type_cookSynopsis_args,
+	Type_cookSynopsis_ret,
 } from '../../../src/utils/gip_prog_edit_utils';
 
 interface Type_TestModulePrivateDefs {
-	convertToCamelCase:                (args: Type_convertToCamelCase_args)                 => Type_convertToCamelCase_ret,
-	elementClassTagMatches:            (args: Type_elementClassTagMatches_args)             => Type_elementClassTagMatches_ret,
-	getDecendentsByTagNameAndClassTag: (args: Type_getDecendentsByTagNameAndClassTag_args ) => Type_getDecendentsByTagNameAndClassTag_ret,
+	convertToCamelCase:                ( args: Type_convertToCamelCase_args )                => Type_convertToCamelCase_ret,
+	elementClassTagMatches:            ( args: Type_elementClassTagMatches_args )            => Type_elementClassTagMatches_ret,
+	getDecendentsByTagNameAndClassTag: ( args: Type_getDecendentsByTagNameAndClassTag_args ) => Type_getDecendentsByTagNameAndClassTag_ret,
+	extractElementText:                ( args: Type_extractElementText_args )                => Type_extractElementText_ret,
+	extractElementImageURI:            ( args: Type_extractElementImageURI_args )            => Type_extractElementImageURI_ret,
+	preProcessEpisode:                 ( args: Type_preProcessEpisode_args )                 => Type_preProcessEpisode_ret,
+	cookEpisode:                       ( args: Type_cookEpisode_args )                       => Type_cookEpisode_ret,
+	cookSynopsis:                      ( args: Type_cookSynopsis_args )                      => Type_cookSynopsis_ret,
 };
 
 interface Type_TestModule {
@@ -30,6 +45,18 @@ interface Type_TestModule {
 
 import * as TEST_MODULE from '../../../src/utils/gip_prog_edit_utils';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+import { TextEncoder, TextDecoder as NodeTextDecoder } from 'node:util';
+
+if (typeof global.TextEncoder === 'undefined') {
+	global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+}
+if (typeof global.TextDecoder === 'undefined') {
+	global.TextDecoder = NodeTextDecoder as typeof global.TextDecoder;
+}
+
+import jsdom from 'jsdom';
+const { JSDOM } = jsdom;
 
 // Full link element
 const TEST_PROG_FULL_ELEMENT_1 = `
@@ -74,7 +101,7 @@ const TEST_PROG_FULL_ELEMENT_1 = `
 							<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-colors sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus:sw-text-accent group-focus:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Conversations from a Long Marriage</span>
 							<p class="sw-text-long-primer sw-mt-1">Series 6</p>
 							<p class="sw-text-long-primer sw-mt-1">5. Stuck in the Middle with You</p>
-							<p class="sw-text-secondary sw-text-brevier sw-mt-1 sw-hidden m:sw-block">Roger heads for a car wash after a long flight home.</p>
+							<p class="sw-text-long-primer sw-text-secondary sw-text-brevier sw-mt-1 sw-hidden m:sw-block">Roger heads for a car wash after a long flight home.</p>
 						</div>
 					</div>
 					<div class="sw-flex sw-w-1/4 sw-shrink-0 sw-grow sw-items-center sw-justify-end m:sw-hidden">
@@ -89,6 +116,12 @@ const TEST_PROG_FULL_ELEMENT_1 = `
 		</div>
 	</div>
 </a>`;
+
+// Taken from TEST_PROG_FULL_ELEMENT_1
+const TEST_PROG_SPAN_PRIMARY_ELEMENT     = `<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-colors sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus:sw-text-accent group-focus:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Conversations from a Long Marriage</span>`;
+const TEST_PROG_IMG_ELEMENT              = `<img src="https://ichef.bbci.co.uk/images/ic/400x400/p0h7spqk.jpg" width="100" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">`;
+const TEST_PROG_TEXT_LONG_PRIMER_ELEMENT = `<p class="sw-text-long-primer sw-mt-1">Series 6</p><p class="sw-text-long-primer sw-mt-1">5. Stuck in the Middle with You</p>`;
+const TEST_PROG_TEXT_SECONDARY_ELEMENT   = `<p class="sw-text-long-primer sw-text-secondary sw-text-brevier sw-mt-1 sw-hidden m:sw-block">Roger heads for a car wash after a long flight home.</p>`;
 
 // Cut down link element
 const TEST_PROG_DANCE_MOVES_1 = `
@@ -129,6 +162,43 @@ function commonAfterEach() : void {
 	jest.restoreAllMocks();
 	jest.resetModules();
 }
+
+/**
+ * @param strHTML : a valid HTML string.
+ * @returns and array of one or more HTML Element objects.
+ */
+function createElementsFromString( strHTML : string ) : Element[] {
+	const dom            = new JSDOM( strHTML );
+	const htmlCollection = dom.window.document.body.getElementsByTagName( '*' );
+	const arrElement     = [] as Element[];
+	for ( let i = 0; i < htmlCollection.length; ++i ) {
+		arrElement.push( htmlCollection.item( i )! ); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+	}
+	return arrElement;
+}
+
+/**
+ * @param strHTML : an HTML string containing a containing element and the child contents, e.g., <div><p>dsada</p></div>
+ * @returns the containing element, e.g., the 'div' element in the param example.
+ */
+function createContainingElementFromString( strHTML : string ) : Element {
+	const arrElement = createElementsFromString( strHTML );
+	return arrElement[ 0 ];
+}
+
+/**
+ * @param strHTML : an HTML string containing one or more elements, with no containing element, e.g, <p>p1</p><p>p2</p>
+ * @returns either a single Element object or an array of Element objects
+ */
+function createElementOrElementsFromString( strHTML : string ) : Element | Element [] {
+	const arrElement = createElementsFromString( strHTML );
+	if ( arrElement.length === 1 ) {
+		return arrElement[ 0 ];
+	} else {
+		return arrElement;
+	}
+}
+
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;
@@ -278,21 +348,397 @@ describe(MODULE_NAME + ':getDecendentsByTagNameAndClassTag', () => {
 		commonAfterEach();
 	});
 
-	test( 'Parse full program item', () => {
+	test( 'Find one item with a single element', () => {
 		testArgs = {
-			elem: JSON.parse(TEST_PROG_FULL_ELEMENT_1 ) as Element,
+			elem: createContainingElementFromString( TEST_PROG_FULL_ELEMENT_1 ),
 			arrTagNameAndClassTag: [
-				{
-					tagName:  'span',
-					classTag: 'sw-text-primary',
-					retProp:  'title',
-				},
+				{ tagName: 'span', classTag: 'sw-text-primary', retProp: 'title' },
 			],
 		};
 		expectedResult = {
-			title: 'ConversationsFromALongMarriage-S6E05',
+			title: createElementOrElementsFromString( TEST_PROG_SPAN_PRIMARY_ELEMENT ),
 		};
 		actualResult = testModuleObj.getDecendentsByTagNameAndClassTag( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Find one item with multiple elements', () => {
+		testArgs = {
+			elem: createContainingElementFromString( TEST_PROG_FULL_ELEMENT_1 ),
+			arrTagNameAndClassTag: [
+				{ tagName: 'p', classTag: [ 'sw-text-long-primer', '!sw-text-secondary' ], retProp: 'primary' },
+			],
+		};
+		expectedResult = {
+			primary: createElementOrElementsFromString( TEST_PROG_TEXT_LONG_PRIMER_ELEMENT ),
+		};
+		actualResult = testModuleObj.getDecendentsByTagNameAndClassTag( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Find multiple items', () => {
+		testArgs = {
+			elem: createContainingElementFromString( TEST_PROG_FULL_ELEMENT_1 ),
+			arrTagNameAndClassTag: [
+				{ tagName: 'img',  classTag: 'sw-object-cover',                               retProp: 'image' },
+				{ tagName: 'span', classTag: 'sw-text-primary',                               retProp: 'title' },
+				{ tagName: 'p',    classTag: [ 'sw-text-long-primer', '!sw-text-secondary' ], retProp: 'primary' },
+				{ tagName: 'p',    classTag: 'sw-text-secondary',                             retProp: 'secondary' },
+			],
+		};
+		expectedResult = {
+			title:     createElementOrElementsFromString( TEST_PROG_SPAN_PRIMARY_ELEMENT ),
+			image:     createElementOrElementsFromString( TEST_PROG_IMG_ELEMENT ),
+			primary:   createElementOrElementsFromString( TEST_PROG_TEXT_LONG_PRIMER_ELEMENT ),
+			secondary: createElementOrElementsFromString( TEST_PROG_TEXT_SECONDARY_ELEMENT ),
+		};
+		actualResult = testModuleObj.getDecendentsByTagNameAndClassTag( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Invalid html', () => {
+		testArgs = {
+			// @ts-expect-error pass in invalid data
+			elem: 'Not valid HTML',
+			arrTagNameAndClassTag: [
+				{ tagName: 'span', classTag: 'sw-text-primary', retProp: 'title' },
+			],
+		};
+		expectedResult = {};
+		actualResult   = testModuleObj.getDecendentsByTagNameAndClassTag( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':extractElementText', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_extractElementText_args;
+	let actualResult   : Type_extractElementText_ret;
+	let expectedResult : Type_extractElementText_ret;
+	let testStr        : string;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Array of one element', () => {
+		testStr        = `<p>Text 1</p>`;
+		testArgs       = createElementsFromString( testStr );
+		expectedResult = 'Text 1';
+		actualResult   = testModuleObj.extractElementText( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'One element', () => {
+		testStr        = `<p>Text 1</p>`;
+		testArgs       = createElementsFromString( testStr )[ 0 ];
+		expectedResult = 'Text 1';
+		actualResult   = testModuleObj.extractElementText( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Two elements', () => {
+		testStr        = `<p>Text 1</p><p>Text 2</p>`;
+		testArgs       = createElementsFromString( testStr );
+		expectedResult = 'Text 1-Text 2';
+		actualResult   = testModuleObj.extractElementText( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Three elements', () => {
+		testStr        = `<p>Text 1</p><p>Text 2</p><p>Text3</p>`;
+		testArgs       = createElementsFromString( testStr );
+		expectedResult = 'Text 1-Text 2-Text3';
+		actualResult   = testModuleObj.extractElementText( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':extractElementImageURI', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_extractElementImageURI_args;
+	let actualResult   : Type_extractElementImageURI_ret;
+	let expectedResult : Type_extractElementImageURI_ret;
+	let testStr        : string;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Array of one element', () => {
+		testStr        = `<img src="https://ichef.bbci.co.uk/images/ic/400x400/p0h7spqk.jpg" width="100" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">`;
+		testArgs       = createElementsFromString( testStr );
+		expectedResult = 'https://ichef.bbci.co.uk/images/ic/400x400/p0h7spqk.jpg';
+		actualResult   = testModuleObj.extractElementImageURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'One element', () => {
+		testStr        = `<img src="my-image-url" width="100" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">`;
+		testArgs       = createElementsFromString( testStr )[0];
+		expectedResult = 'my-image-url';
+		actualResult   = testModuleObj.extractElementImageURI( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+// padNumberString is tested by cookEpisode
+// padEpisode is tested by cookEpisode
+// padSeries is tested by cookEpisode
+// formatDashDate is tested by preProcessEpisode
+
+describe(MODULE_NAME + ':preProcessEpisode', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_preProcessEpisode_args;
+	let actualResult   : Type_preProcessEpisode_ret;
+	let expectedResult : Type_preProcessEpisode_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Just two numbers separated by a slash', () => {
+		testArgs       = '01/02';
+		expectedResult = testArgs;
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Two numbers separated by a slash mid-string', () => {
+		testArgs       = 'Leading stuff 01/02 trailing stuff.';
+		expectedResult = testArgs;
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just slash date', () => {
+		testArgs       = '15/06/2025';
+		expectedResult = '2025-06-15';
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Slash date, single digits mid-string', () => {
+		testArgs       = 'leading stuff 5/6/2025 trailing stuff';
+		expectedResult = 'leading stuff 2025-06-05 trailing stuff';
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Slash date, single digits, two digit year, mid-string', () => {
+		testArgs       = 'leading stuff 5/6/25 trailing stuff';
+		expectedResult = 'leading stuff 2025-06-05 trailing stuff';
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Percent sign', () => {
+		testArgs       = 'Are 4% of women?';
+		expectedResult = 'Are 4 percent of women?';
+		actualResult   = testModuleObj.preProcessEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':cookEpisode', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_cookEpisode_args;
+	let actualResult   : Type_cookEpisode_ret;
+	let expectedResult : Type_cookEpisode_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Just a number', () => {
+		testArgs       = '123';
+		expectedResult = testArgs;
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'A number mid-string', () => {
+		testArgs       = 'Leading stuff 123 trailing stuff';
+		expectedResult = testArgs;
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( '4. Super heroes.', () => {
+		testArgs       = '4. Super heroes.';
+		expectedResult = '04-SuperHeroes';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Two numbers separated by a dash', () => {
+		testArgs       = '1-2';
+		expectedResult = '01of02';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Two numbers separated by a dash mid-string', () => {
+		testArgs       = 'Leading stuff 1-02 trailing stuff';
+		expectedResult = '01of02-LeadingStuff-TrailingStuff';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'One number with a leading dash mid-string', () => {
+		testArgs       = 'Half-Life-8. A Fracture.';
+		expectedResult = '08-Half-Life-AFracture';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just two numbers separated by a slash', () => {
+		testArgs       = '01/02';
+		expectedResult = '01of02';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Two numbers separated by a slash mid-string', () => {
+		testArgs       = 'Leading stuff 01/02 trailing stuff.';
+		expectedResult = '01of02-LeadingStuff-TrailingStuff';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Series text followed by a number dot', () => {
+		testArgs       = 'Series 5. 2. My ep';
+		expectedResult = 'S05E02-MyEp';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just series and episode text', () => {
+		testArgs       = 'Series 5. Episode 2.';
+		expectedResult = 'S05E02';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Long series and long episode text', () => {
+		testArgs       = 'Leading stuff. Series 125. Episode 234. Trailing stuff.';
+		expectedResult = 'S125E234-LeadingStuff-TrailingStuff';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Series and episode text mid-string', () => {
+		testArgs       = 'Leading stuff Series 5. Episode 2. trailing stuff';
+		expectedResult = 'S05E02-LeadingStuff-TrailingStuff';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Series followed by a dash', () => {
+		testArgs       = 'Series 8-Spon';
+		expectedResult = 'S08-Spon';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just slash date', () => {
+		testArgs       = '15/06/2025';
+		expectedResult = '2025-06-15';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Slash date mid-string', () => {
+		testArgs       = 'leading stuff 2025-06-15 trailing stuff';
+		expectedResult = testArgs;
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Percent sign', () => {
+		testArgs       = 'Are 4% of women?';
+		expectedResult = 'Are 4 percent of women?';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+
+describe(MODULE_NAME + ':cookSynopsis', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_cookSynopsis_args;
+	let actualResult   : Type_cookSynopsis_ret;
+	let expectedResult : Type_cookSynopsis_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'Just text, no replacements', () => {
+		testArgs = {
+			rawText: 'Nothing to change here',
+		};
+		expectedResult = 'Nothing to change here.'; // Added trailing dot.
+		actualResult   = testModuleObj.cookSynopsis( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Text and episode, no replacements', () => {
+		testArgs = {
+			rawText: 'Nothing to change here',
+			episode: 'No episode changes',
+		};
+		expectedResult = "No episode changes.\nNothing to change here.";
+		actualResult   = testModuleObj.cookSynopsis( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just text, all replacements', () => {
+		testArgs = {
+			rawText: "\u{0060}Some poorly quoted &amp;text\u{2019}",
+		};
+		expectedResult = "'Some poorly quoted &text'.";
+		actualResult   = testModuleObj.cookSynopsis( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Text and episode, all replacements', () => {
+		testArgs = {
+			rawText: "\u{0060}Some poorly quoted &amp;text\u{2019}",
+			episode: "Ep \u{0060}quoted &amp;text\u{2019} isode",
+		};
+		expectedResult = "Ep 'quoted &text' isode.\n'Some poorly quoted &text'.";
+		actualResult   = testModuleObj.cookSynopsis( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
 });
@@ -315,7 +761,7 @@ describe(MODULE_NAME + ':getProgDetailsFromLink', () => {
 	test( 'Parse full program item', () => {
 		testArgs = TEST_PROG_FULL_ELEMENT_1;
 		expectedResult = {
-			title:     'ConversationsFromALongMarriage-S6E05',
+			title:     'ConversationsFromALongMarriage-S06E05-StuckInTheMiddleWithYou',
 			synopsis:  "Series 6-5. Stuck in the Middle with You.\nRoger heads for a car wash after a long flight home.",
 			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p0h7spqk.jpg',
 		};
@@ -326,7 +772,7 @@ describe(MODULE_NAME + ':getProgDetailsFromLink', () => {
 	test( 'Parse cut down program item - Dance Moves', () => {
 		testArgs = TEST_PROG_DANCE_MOVES_1;
 		expectedResult = {
-			title:     'DanceMoveByWendyErskine-3',
+			title:     'DanceMoveByWendyErskine-03-Bildungsroman',
 			synopsis:  "Episode 3 - Bildungsroman.\nWhilst on his work experience placement, teenager Lee must stay with a complete stranger.",
 			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p0d6bs33.jpg',
 		};

@@ -1,3 +1,7 @@
+/**
+ * Common Jest config for all tests.
+ * This file is pulled in by the unit test jest config.
+ */
 import type { JestConfigWithTsJest } from 'ts-jest/dist/types'
 //import { defaults as tsjPreset } from 'ts-jest/presets'
 //import { jsWithTs as tsjPreset } from 'ts-jest/presets'
