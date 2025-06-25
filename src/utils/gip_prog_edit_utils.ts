@@ -4,8 +4,22 @@
  * Description: Utilities for manipulating the contents of HTML elements.
  */
 
-import { PROG_FIELD_SYNOPSIS, PROG_FIELD_TITLE, PROG_FIELD_IMAGE_URI } from './gip_types';
-import { convertKnownTitle }  from './gip_prog_title_utils';
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {
+	PROG_FIELD_SYNOPSIS,
+	PROG_FIELD_TITLE,
+	PROG_FIELD_IMAGE_URI,
+} from './gip_types';
+
+import { convertKnownTitle } from './gip_prog_title_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Local Types
 
 type Type_HtmlElement = Element;
 
@@ -25,14 +39,10 @@ interface Type_ElementTagNameAndClassTag {
 type Type_TextConversionItem = [ ( string | RegExp ), string ];
 type Type_TextConversionList = Type_TextConversionItem[];
 
-const ARR_COMMON_TEXT_CONVERSIONS : Type_TextConversionList = [
-	[ '\u{2019}', '\'' ], // Right single quotation
-	[ '\u{0060}', '\'' ], // Grave accent
-	[ '&amp;',    '&'  ], // Escaped ampersand
-];
-
-
 type Type_FoundElement = Record<string,Type_HtmlElement | Type_HtmlElement[]>;
+
+////////////////////////////////////////
+// Exported Types
 
 export type Type_convertToCamelCase_args = string;
 export type Type_convertToCamelCase_ret  = string;
@@ -66,7 +76,6 @@ export type Type_preProcessEpisode_ret  = string;
 export type Type_cookEpisode_args = string;
 export type Type_cookEpisode_ret  = string;
 
-
 export interface Type_cookSynopsis_args {
 	rawText : string,
 	episode?: string,
@@ -85,6 +94,18 @@ export interface Type_getProgDetailsFromLink_ret {
 	[PROG_FIELD_SYNOPSIS]:  string,
 	[PROG_FIELD_IMAGE_URI]: string,
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const ARR_COMMON_TEXT_CONVERSIONS : Type_TextConversionList = [
+	[ '\u{2019}', '\'' ], // Right single quotation
+	[ '\u{0060}', '\'' ], // Grave accent
+	[ '&amp;',    '&'  ], // Escaped ampersand
+];
+
+////////////////////////////////////////////////////////////////////////////////
+// Local functions
 
 /**
  * Convert the specified string to camelcase, with first letter capitalised.
@@ -255,9 +276,6 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 		image_uri: '',
 	};
 
-	//console.log('objFoundItem');
-	//console.log(objFoundItem);
-
 	if ( objFoundItem.title ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 		objProgAttributes.title  = extractElementText( objFoundItem.title );
 	}
@@ -270,9 +288,6 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 	if ( objFoundItem.secondary ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 		objProgAttributes.synopsis = extractElementText( objFoundItem.secondary );
 	}
-
-	//console.log('objProgAttributes');
-	//console.log(objProgAttributes);
 
 	return objProgAttributes;
 }
@@ -377,7 +392,16 @@ function preProcessEpisode( rawText : Type_preProcessEpisode_args ) : Type_prePr
 
 /**
  * @param rawText : the text to process.
- * @returns array of zero or more strings, containing items matched as episode numbers.
+ * @returns the processed text with series and episode data extracted and date format standardised.
+ *          If there is no Prelude or postcript then it is ignored, e.g.,
+ *           - 'Series 1-2'                            => 'S01E02';
+ *           - 'Prelude Series 1-2 postscript'         => 'S01E02-Prelude-postscript';
+ *           - 'Prelude Series 1 Episode 2 postscript' => 'S01E02-Prelude-postscript';
+ *           - 'Prelude Series 1-2 postscript'         => 'S01E02-Prelude-postscript';
+ *           - 'Prelude Series 1. 2. postscript'       => 'S01E02-Prelude-postscript';
+ *           - 'Prelude Series 1-postscript'           => 'S01-Prelude-postscript';
+ *           - 'Prelude 01/05 postscript               => '01of05-prelude-postscript';
+ *           - 'Prelude 15/06/2025 postscript'         => '2025-06-15-Prelude-postscript';
  */
 function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 {
@@ -388,11 +412,17 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 		RegExp, number[],
 	];
 
-	const I_SERIES        = 0;
-	const I_EPISPODE      = 1;
-	const I_NUM_EPISPODES = 2;
-	const I_PRE           = 3;
-	const I_POST          = 4;
+	// Define a set of regexps to extract data from the raw text.
+	// The order is important as only the first match is processed.
+	// This is an array of arrays with elements:
+	//  - 0 : the regexp with capture groups defined;
+	//  - 1 : an array of elements that contain either a capture group index or zero if the value is not defined;
+	//        the array elements are as follows:
+	const I_SERIES       = 0; // Contains the capture group index of the series number.
+	const I_EPISODE      = 1; // Contains the capture group index of the episode number.
+	const I_NUM_EPISODES = 2; // Contains the capture group index of the number of episodes.
+	const I_PRE          = 3; // Contains the capture group index of text before the series and episode text.
+	const I_POST         = 4; // Contains the capture group index of text after the series and episode text.
 	const arrMatch = [
 		[ /^(.*)Series ([0-9]+)-([0-9]+)(.*)$/i,               [ 2, 3, 0, 1, 4 ] ], // Series 1-2
 		[ /^(.*)Series ([0-9]+).*?Episode.?([0-9]+)\.?(.*)$/i, [ 2, 3, 0, 1, 4 ] ], // Series 1  Episode 2
@@ -400,7 +430,7 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 		[ /^(.*)Series ([0-9]+)-?(.*)$/i,                      [ 2, 0, 0, 1, 3 ] ],
 		[ /^(.*)Episode ([0-9]+)-?(.*)$/i,                     [ 0, 2, 0, 1, 3 ] ],
 		// If the greedy match fails it then does a non-greedy match, so need to check for 0-9 as well as / at either end
-		[ /(^|.*[^/0-9])([0-9]+)\/([0-9]+)($|[^/].*)/,         [ 0, 2, 3, 1, 4 ] ], // 01/02 - no need to igore dates due to pre-processing
+		[ /(^|.*[^/0-9])([0-9]+)\/([0-9]+)($|[^/].*)/,         [ 0, 2, 3, 1, 4 ] ], // 01/02 - no need to ignore dates due to pre-processing
 		[ /(^|.*[^-0-9])([0-9]+)-([0-9]+)($|[^-0-9].*)/,       [ 0, 2, 3, 1, 4 ] ], // 01-02
 		[ /(^|.*?)-?([0-9]+)\.(.*)$/,                          [ 0, 2, 0, 1, 3 ] ], // Number followed by a dot, either at the start or following a dash
 	] as Type_EpisodeMatchItem[];
@@ -411,45 +441,50 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 		const matchResult = arrMatchItem[ 0 ].exec( preProcessedText );
 		if ( matchResult ) {
 			for ( const pos of arrMatchItem[ 1 ] ) {
-				if ( pos === 0 ) {
+				if ( pos === 0 ) { // If capture group 0 is specified, it means the element is not present
 					arrFoundItem.push( '' );
 				} else {
 					arrFoundItem.push( matchResult[ pos ] );
 				}
 			}
 			if ( arrFoundItem.length ) {
-				break;
+				break; // Only match one of the regexps
 			}
 		}
 	}
 
-	if ( arrFoundItem.length ) {
+	if ( arrFoundItem.length ) { // If a match has been found
 		if ( arrFoundItem[ I_SERIES ].length ) {
-			if ( arrFoundItem[ I_EPISPODE ].length ) {
-				cookedEpisode = `S${padSeries(arrFoundItem[0])}E${padEpisode(arrFoundItem[1])}`;
+			if ( arrFoundItem[ I_EPISODE ].length ) {
+				cookedEpisode = `S${padSeries(arrFoundItem[ I_SERIES ])}E${padEpisode(arrFoundItem[1])}`;
 			} else {
-				cookedEpisode = `S${padSeries(arrFoundItem[0])}`;
+				cookedEpisode = `S${padSeries(arrFoundItem[ I_SERIES ])}`;
 			}
-		} else {
-			cookedEpisode = padEpisode(arrFoundItem[1]);
+		} else { // If no series is specified, an episode number must have been found
+			cookedEpisode = padEpisode(arrFoundItem[ I_EPISODE ]);
 		}
-		if ( arrFoundItem[ I_NUM_EPISPODES ].length ) {
-			cookedEpisode += `of${padEpisode(arrFoundItem[ I_NUM_EPISPODES ])}`;
+		if ( arrFoundItem[ I_NUM_EPISODES ].length ) {
+			cookedEpisode += `of${padEpisode(arrFoundItem[ I_NUM_EPISODES ])}`;
 		}
+
 		const additionalText = [ arrFoundItem[ I_PRE ], arrFoundItem[ I_POST ] ]
 			.filter( e => e )
 			.map( e => e.replace( /[.;:?!]$/, '') ) // Replace any trailing punctuation
 			.map( e => convertToCamelCase( e ) )
 			.join( '-' );
+
 		cookedEpisode = [ cookedEpisode, additionalText ]
 			.filter( e => e )
 			.join( '-' );
-	} else {
+	} else { // No match for series or episode, just use the pre-processed text
 		cookedEpisode = preProcessedText;
 	}
 
 	return cookedEpisode;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Exported functions
 
 /**
  * @param object with properties:
@@ -485,10 +520,17 @@ export function cookSynopsis( { rawText, episode } : Type_cookSynopsis_args ) : 
 //  }
 //} );
 
-export function getProgDetailsFromLink( textHTML : Type_getProgDetailsFromLink_args ) : Type_getProgDetailsFromLink_ret
+/**
+ * @param {string} strHTML : the HTML of the dropped program link.
+ * @returns object with properties:
+ *           - title:     the program title string;
+ *           - synopsis:  the program synopsis string;
+ *           - image_uri: the program image URI.
+ */
+export function getProgDetailsFromLink( strHTML : Type_getProgDetailsFromLink_args ) : Type_getProgDetailsFromLink_ret
 {
 	const parser         = new DOMParser();
-	const htmlDoc        = parser.parseFromString( textHTML, 'text/html' );
+	const htmlDoc        = parser.parseFromString( strHTML, 'text/html' );
 	//console.log( htmlDoc );
 	const linkElemList   = htmlDoc.getElementsByTagName( 'A' );
 	const linkElem       = linkElemList[ 0 ];
@@ -511,8 +553,7 @@ export function getProgDetailsFromLink( textHTML : Type_getProgDetailsFromLink_a
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-export default {};
+// Unit test exports
 
 export const privateDefs = {};
 
@@ -527,6 +568,5 @@ if ( process.env.NODE_ENV === 'test-unit' ) {
 		convertText,
 		preProcessEpisode,
 		cookEpisode,
-		cookSynopsis,
 	} );
 }

@@ -2,9 +2,19 @@
  * DESCRIPTION:
  * Unit Tests for utils/gip_prog_edit_utils.ts.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_prog_edit_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
 
 import type {
 	Type_convertToCamelCase_args,
@@ -27,6 +37,8 @@ import type {
 	Type_cookSynopsis_ret,
 } from '../../../src/utils/gip_prog_edit_utils';
 
+////////////////////////////////////////
+// Test module types
 interface Type_TestModulePrivateDefs {
 	convertToCamelCase:                ( args: Type_convertToCamelCase_args )                => Type_convertToCamelCase_ret,
 	elementClassTagMatches:            ( args: Type_elementClassTagMatches_args )            => Type_elementClassTagMatches_ret,
@@ -35,30 +47,44 @@ interface Type_TestModulePrivateDefs {
 	extractElementImageURI:            ( args: Type_extractElementImageURI_args )            => Type_extractElementImageURI_ret,
 	preProcessEpisode:                 ( args: Type_preProcessEpisode_args )                 => Type_preProcessEpisode_ret,
 	cookEpisode:                       ( args: Type_cookEpisode_args )                       => Type_cookEpisode_ret,
-	cookSynopsis:                      ( args: Type_cookSynopsis_args )                      => Type_cookSynopsis_ret,
 };
 
 interface Type_TestModule {
 	privateDefs: Type_TestModulePrivateDefs,
-	getProgDetailsFromLink: (args: Type_getProgDetailsFromLink_args) => Type_getProgDetailsFromLink_ret,
+	getProgDetailsFromLink: ( args: Type_getProgDetailsFromLink_args ) => Type_getProgDetailsFromLink_ret,
+	cookSynopsis:           ( args: Type_cookSynopsis_args )           => Type_cookSynopsis_ret,
 };
 
-import * as TEST_MODULE from '../../../src/utils/gip_prog_edit_utils';
-const testModule = TEST_MODULE as unknown as Type_TestModule;
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
-import { TextEncoder, TextDecoder as NodeTextDecoder } from 'node:util';
+import { // TODO: These may not work client-side
+	TextEncoder as NodeTextEncoder,
+	TextDecoder as NodeTextDecoder,
+} from 'node:util';
 
+// jsdom expects global definitions for: TextEncoder, TextDecoder
 if (typeof global.TextEncoder === 'undefined') {
-	global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+	global.TextEncoder = NodeTextEncoder as typeof global.TextEncoder;
 }
 if (typeof global.TextDecoder === 'undefined') {
 	global.TextDecoder = NodeTextDecoder as typeof global.TextDecoder;
 }
 
 import jsdom from 'jsdom';
-const { JSDOM } = jsdom;
 
-// Full link element
+import * as TEST_MODULE from '../../../src/utils/gip_prog_edit_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////
+// The module under test
+const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+const { JSDOM }  = jsdom;
+
+// A full link element test data item
 const TEST_PROG_FULL_ELEMENT_1 = `
 <a href="https://www.bbc.co.uk/sounds/play/m002d1v9"
   aria-label="14:15, Conversations from a Long Marriage, Series 6, 5. Stuck in the Middle with You, Roger heads for a car wash after a long flight home."
@@ -155,6 +181,9 @@ const TEST_PROG_ARCHERS_1 = `
 </a>
 `;
 
+////////////////////////////////////////////////////////////////////////////////
+// Local test functions
+
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
@@ -199,6 +228,8 @@ function createElementOrElementsFromString( strHTML : string ) : Element | Eleme
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;
@@ -494,6 +525,9 @@ describe(MODULE_NAME + ':extractElementImageURI', () => {
 	});
 });
 
+// getProgAttributes is tested by getProgDetailsFromLink
+// convertText is tested by cookSynopsis which is called from getProgDetailsFromLink
+// cookTitle is tested by getProgDetailsFromLink
 // padNumberString is tested by cookEpisode
 // padEpisode is tested by cookEpisode
 // padSeries is tested by cookEpisode
@@ -689,14 +723,14 @@ describe(MODULE_NAME + ':cookEpisode', () => {
 
 
 describe(MODULE_NAME + ':cookSynopsis', () => {
-	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testModuleObj  : Type_TestModule;
 	let testArgs       : Type_cookSynopsis_args;
 	let actualResult   : Type_cookSynopsis_ret;
 	let expectedResult : Type_cookSynopsis_ret;
 
 	beforeEach( () => {
 		commonBeforeEach();
-		testModuleObj  = testModule.privateDefs;
+		testModuleObj  = testModule;
 		expectedResult = '';
 	});
 

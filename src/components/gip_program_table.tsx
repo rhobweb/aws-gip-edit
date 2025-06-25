@@ -6,7 +6,7 @@ import type {
 } from '../browser_event.ts';
 import React, { ReactNode } from 'react';
 import type {
-	TypeFieldOrder,
+	Type_FieldOrder,
 	Type_FieldMap,
 } from '../utils/gip_prog_fields.ts';
 import {
@@ -39,7 +39,7 @@ const genSelectedStyle = ( isSelected: boolean ) : { background?: string } => {
 };
 
 interface TypeProgHeadersProps {
-	arrFieldOrder:    TypeFieldOrder,
+	arrFieldOrder:    Type_FieldOrder,
 	headerDisplayMap: Type_FieldMap,
 }
 
@@ -96,7 +96,7 @@ function ProgInputField( props: TypeProgInputFieldProps ) : React.JSX.Element {
 
 interface TypeProgInputFieldsProps {
 	programs:        Type_ProgramItem[],
-	arrFieldOrder:   TypeFieldOrder,
+	arrFieldOrder:   Type_FieldOrder,
 	onKeyDown:       Type_EventHandlerKeyboard,
 	onProgramChange: Type_HandlerProgramChange,
 }
@@ -148,7 +148,7 @@ interface TypeProgramTableProps {
 	programs:         Type_ProgramItem[],
 	onProgramChange:  Type_HandlerProgramChange,
 	onKeyDown:        Type_EventHandlerKeyboard,
-	arrFieldOrder:    TypeFieldOrder,
+	arrFieldOrder:    Type_FieldOrder,
 	headerDisplayMap: Type_FieldMap,
 }
 

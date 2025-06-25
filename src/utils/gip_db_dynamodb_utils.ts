@@ -776,8 +776,6 @@ export async function updatePrograms( { programs } : Type_updatePrograms_args ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-export default {};
-
 export const privateDefs = {};
 
 if ( process.env.NODE_ENV === 'test-unit' ) {
