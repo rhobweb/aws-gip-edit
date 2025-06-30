@@ -4,6 +4,15 @@
  * Client side utilities to determine the client browser type.
  */
 
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Exported Types
+
 export interface Type_BrowserInfo {
 	os:    string,
 	isIOS: boolean,
@@ -26,6 +35,12 @@ export type Type_os_is_IOS_ret  = boolean;
 export type Type_getBrowserInfoFromUserAgent_args = string;
 export type Type_getBrowserInfoFromUserAgent_ret  = Type_BrowserInfo;
 export type Type_BrowserInfo_ret = Type_BrowserInfo;
+
+////////////////////////////////////////
+// Local Types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
 
 const UNKNOWN_OS = 'unknown';
 
@@ -67,6 +82,9 @@ const USER_AGENT_MAP : Type_UserAgentMap = {
 };
 
 const IOS_OS = [ 'iOS', 'iPhone', 'iPod', 'iPad' ]; // The OS that are part of the iOS family
+
+////////////////////////////////////////////////////////////////////////////////
+// Local definitions
 
 /**
  * @param {string} userAgent : the user agent information received from the client,
@@ -158,6 +176,9 @@ function getBrowserInfoFromUserAgent( userAgent : Type_getBrowserInfoFromUserAge
 	return browserInfo;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Exported definitions
+
 /**
  * @returns object with properties:
  *   - os   : the OS as determined from the USER_AGENT_MAP;
@@ -168,11 +189,12 @@ export function getBrowserInfo() : Type_BrowserInfo_ret {
 	return getBrowserInfoFromUserAgent( userAgent );
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 export default {
 	getBrowserInfo,
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 const privateDefs = {};
 

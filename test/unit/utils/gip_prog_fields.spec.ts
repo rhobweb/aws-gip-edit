@@ -23,6 +23,7 @@ import type {
 
 ////////////////////////////////////////
 // Test module types
+
 //interface Type_TestModulePrivateDefs {
 //	convertToCamelCase:                ( args: Type_convertToCamelCase_args )                => Type_convertToCamelCase_ret,
 //};
@@ -226,9 +227,15 @@ const testModule = TEST_MODULE as unknown as Type_TestModule;
 ////////////////////////////////////////////////////////////////////////////////
 // Local test functions
 
+/**
+ * Actions to be performed before every test
+ */
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
+/**
+ * Actions to be performed after every test
+ */
 function commonAfterEach() : void {
 	jest.restoreAllMocks();
 	jest.resetModules();

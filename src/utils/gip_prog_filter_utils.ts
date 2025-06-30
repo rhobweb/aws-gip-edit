@@ -2,15 +2,26 @@
  * File:        utils/gip_prog_filter_utils.ts
  * Description: Utilities to filter the program list to determine the programs to download.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import type {
 	Type_ProgramDownloadOptions,
 	Nullable,
 } from './gip_types.ts';
+
 import type { Type_DbProgramItem }                    from './gip_prog_fields';
 
 import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
 import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
 import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Exported Types
 
 export interface Type_isDayActive_args {
 	current:      boolean,
@@ -24,8 +35,13 @@ export interface Type_filterPrograms_args {
 };
 export type Type_filterPrograms_ret = Type_DbProgramItem[];
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
 
 const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
+
+////////////////////////////////////////////////////////////////////////////////
+// Local definitions
 
 /**
  * @param object with properties:
@@ -40,8 +56,12 @@ function isDayActive( { current, day_of_week } : Type_isDayActive_args ) : Type_
 		const currDay = getCurrentDayOfWeek( { iOffset } );
 		bActive       = isDayOfWeekAvailable( { checkDay: day_of_week, currDay } );
 	}
+
 	return bActive;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Exported definitions
 
 /**
  * @param object with properties:
@@ -75,6 +95,7 @@ export function filterPrograms( { programs, params } : Type_filterPrograms_args 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 export const privateDefs = {};
 

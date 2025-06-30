@@ -243,7 +243,7 @@ const RAW_FIELD_MAP_COLLECTION : Type_RawFieldMapCollection = {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local functions
+// Local definitions
 
 /**
  * @param {Type_RawFieldMap} rawFieldMap - see comment at head of file,
@@ -348,8 +348,9 @@ function genDefaultFieldValue( fieldMapCollection : Type_FieldMapCollection, rev
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Generate the exported constants using the local functions
+// Exported definitions
 
+// Generate the exported constants using the local functions
 export const REVERSE_FIELD_MAP_COLLECTION = genReverseFieldMapCollection( RAW_FIELD_MAP_COLLECTION );
 export const FIELD_MAP_COLLECTION         = genFieldMapCollection( RAW_FIELD_MAP_COLLECTION );
 export const FIELD_ORDER_COLLECTION       = genFieldOrderCollection( RAW_FIELD_MAP_COLLECTION );
