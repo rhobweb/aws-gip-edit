@@ -17,8 +17,8 @@ import {
 import { GipGridRow } from './gip_grid_row';
 import {
 	PROG_FIELD_SELECTED,
-	Type_ProgramItem,
-	Type_ProgramItemPropName,
+	Type_DisplayProgramItem,
+	Type_DisplayProgramItemPropName,
 	Type_EventHandlerMouse,
 	Type_HandlerProgramChange,
 	Type_EventMouse,
@@ -95,7 +95,7 @@ function ProgInputField( props: TypeProgInputFieldProps ) : React.JSX.Element {
 }
 
 interface TypeProgInputFieldsProps {
-	programs:        Type_ProgramItem[],
+	programs:        Type_DisplayProgramItem[],
 	arrFieldOrder:   Type_FieldOrder,
 	onKeyDown:       Type_EventHandlerKeyboard,
 	onProgramChange: Type_HandlerProgramChange,
@@ -108,7 +108,7 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 	const arrCookedFieldOrder = [ ...arrFieldOrder ];
 	const counterFieldName = arrCookedFieldOrder.shift();
 
-	const onClick = ( event: Type_EventMouse, program: Type_ProgramItem ) : void => {
+	const onClick = ( event: Type_EventMouse, program: Type_DisplayProgramItem ) : void => {
 		if ( ! event.ctrlKey ) {
 			programs.forEach( prog => prog[ PROG_FIELD_SELECTED ] = false );
 			program[ PROG_FIELD_SELECTED ] = true;
@@ -126,7 +126,7 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 			{ programs.map( ( thisProgram, programIndex ) => (
 				<div className="gip-prog-item-row gip-prog-item-data-row" id={ `prog-item-row-${programIndex + 1}` } key={ `prog-item-row-${programIndex + 1}` }>
 					<div className={ ` gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${counterFieldName}` } id={ `prog-item-count-${programIndex + 1}` } style={ genSelectedStyle( thisProgram[ PROG_FIELD_SELECTED ] ) }>{ programIndex + 1 }</div>
-					{ arrCookedFieldOrder.map( ( fieldName : Type_ProgramItemPropName, fieldIndex : number ) : ReactNode => (
+					{ arrCookedFieldOrder.map( ( fieldName : Type_DisplayProgramItemPropName, fieldIndex : number ) : ReactNode => (
 						<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${fieldName}` } key={ `prog-item-field-${ programIndex + 1 }-${ fieldIndex + 1 }` }>
 							<ProgInputField key={ `prog-field-${programIndex + 1}-${fieldIndex + 1}` }
 								fieldName={ fieldName as string }
@@ -145,7 +145,7 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
 interface TypeProgramTableProps {
-	programs:         Type_ProgramItem[],
+	programs:         Type_DisplayProgramItem[],
 	onProgramChange:  Type_HandlerProgramChange,
 	onKeyDown:        Type_EventHandlerKeyboard,
 	arrFieldOrder:    Type_FieldOrder,
@@ -171,7 +171,7 @@ function ProgramTable( props: TypeProgramTableProps ) : React.JSX.Element {
 }
 
 interface TypeGipProgramTableProps {
-	programs:        Type_ProgramItem[],
+	programs:        Type_DisplayProgramItem[],
 	onProgramChange: Type_HandlerProgramChange,
 	onKeyDown:       Type_EventHandlerKeyboard,
 }

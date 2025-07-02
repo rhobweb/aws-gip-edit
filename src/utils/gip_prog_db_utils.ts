@@ -8,12 +8,12 @@
  */
 
 import type {
-	Type_ProgramItemPropName,
+	Type_DisplayProgramItemPropName,
 } from './gip_types.ts';
 
 import type {
-	Type_DbProgramItem,
-	Type_DbProgramItemPropName,
+	Type_DbProgramEditItem,
+	Type_DbProgramEditItemPropName,
 } from './gip_prog_fields.ts';
 
 import {
@@ -35,8 +35,8 @@ import {
 } from './gip_prog_fields';
 
 import type {
-	Type_ProgramItem,
-	Type_ProgramItemStringPropName,
+	Type_DisplayProgramItem,
+	Type_DisplayProgramItemStringPropName,
 } from './gip_types';
 
 import {
@@ -55,14 +55,14 @@ import {
 const PROG_TO_DB_FIELD_MAP = FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 const DB_TO_PROG_FIELD_MAP = REVERSE_FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 
-export type Type_dbToProg_args = Type_DbProgramItem;
-export type Type_dbToProg_ret  = Type_ProgramItem;
+export type Type_dbToProg_args = Type_DbProgramEditItem;
+export type Type_dbToProg_ret  = Type_DisplayProgramItem;
 
-export type Type_progToDb_args = Type_ProgramItem;
-export type Type_progToDb_ret  = Type_DbProgramItem;
+export type Type_progToDb_args = Type_DisplayProgramItem;
+export type Type_progToDb_ret  = Type_DbProgramEditItem;
 
-export type Type_dbToProgArray_args = Type_DbProgramItem[];
-export type Type_dbToProgArray_ret  = Type_ProgramItem[];
+export type Type_dbToProgArray_args = Type_DbProgramEditItem[];
+export type Type_dbToProgArray_ret  = Type_DisplayProgramItem[];
 
 
 /**
@@ -70,7 +70,7 @@ export type Type_dbToProgArray_ret  = Type_ProgramItem[];
  * @returns a Program Item object.
  */
 export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
-	const prog : Type_ProgramItem = {
+	const prog : Type_DisplayProgramItem = {
 		[PROG_FIELD_PID]:         '',
 		[PROG_FIELD_STATUS]:      '',
 		[PROG_FIELD_TITLE]:       '',
@@ -84,8 +84,8 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 	};
 
 	// Say 'value' is a string, but it may be null or for FIELD_POS it may be a number
-	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) as [Type_DbProgramItemPropName, string][] ) {
-		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_ProgramItemStringPropName | undefined;
+	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) as [Type_DbProgramEditItemPropName, string][] ) {
+		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_DisplayProgramItemStringPropName | undefined;
 
 		if ( progField ) {
 			prog[ progField ] = dbValue;
@@ -105,7 +105,7 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
  * @returns a DB Program Item object.
  */
 export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret {
-	const dbProg : Type_DbProgramItem = {
+	const dbProg : Type_DbProgramEditItem = {
 		[DB_FIELD_STATUS]:        '',
 		[DB_FIELD_GENRE]:         '',
 		[DB_FIELD_DAY_OF_WEEK]:   '',
@@ -120,8 +120,8 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
 	};
 
 	// Say 'value' is a string, but it may be null or for DB_FIELD_POS it may be a number
-	for ( const [field, value] of Object.entries( programItem ) as [Type_ProgramItemPropName, string][] ) {
-		const dbField = PROG_TO_DB_FIELD_MAP[ field ] as Type_DbProgramItemPropName | undefined;
+	for ( const [field, value] of Object.entries( programItem ) as [Type_DisplayProgramItemPropName, string][] ) {
+		const dbField = PROG_TO_DB_FIELD_MAP[ field ] as Type_DbProgramEditItemPropName | undefined;
 
 		if ( dbField ) {
 			if ( dbField !== DB_FIELD_POS ) {
@@ -141,7 +141,7 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
  * @param rawPrograms : array of DB Program Item objects;
  * @returns array of Program Item objects.
  */
-export function dbToProgArray( rawPrograms: Type_DbProgramItem[] ) : Type_ProgramItem[] {
+export function dbToProgArray( rawPrograms: Type_DbProgramEditItem[] ) : Type_DisplayProgramItem[] {
 	const programs = rawPrograms.map( prog => dbToProg( prog ) );
 	return programs;
 }

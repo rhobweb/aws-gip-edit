@@ -20,7 +20,7 @@ import type {
 	Type_ProgramDownloadOptions,
 } from '../../../src/utils/gip_types.ts';
 
-import type { Type_DbProgramItem } from '../../../src/utils/gip_prog_fields';
+import type { Type_DbProgramEditItem } from '../../../src/utils/gip_prog_fields';
 
 import type {
 	Type_isDayActive_args,
@@ -49,7 +49,7 @@ import * as TEST_MODULE from '../../../src/utils/gip_prog_filter_utils';
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 
-const TEST_PROGRAM_ITEM : Type_DbProgramItem = {
+const TEST_PROGRAM_ITEM : Type_DbProgramEditItem = {
 	pid:           'pid',
 	title:         'title',
 	synopsis:      'synopsis',
@@ -100,8 +100,8 @@ function randomDate(start : (Date | string), end : (Date | string) = new Date() 
  * @param numItems : the number of program items to create.
  * @returns an array of 'numItems' program items.
  */
-function createProgramItems( numItems: number ) : Type_DbProgramItem[] {
-	const arrItem = [] as Type_DbProgramItem[];
+function createProgramItems( numItems: number ) : Type_DbProgramEditItem[] {
+	const arrItem = [] as Type_DbProgramEditItem[];
 	for ( let i = 0 ; i < numItems ; ++i ) {
 		const pos    = i + 1;
 		const item   = { ...TEST_PROGRAM_ITEM };
@@ -273,7 +273,7 @@ describe(MODULE_NAME + ':filterPrograms', () => {
 	let actualResult   : Type_filterPrograms_ret;
 	let expectedResult : Type_filterPrograms_ret;
 	let testArgs       : Type_filterPrograms_args;
-	let testPrograms   : Type_DbProgramItem[];
+	let testPrograms   : Type_DbProgramEditItem[];
 	let testParams     : Type_ProgramDownloadOptions;
 	const testStrSystemTime = '2025-06-04T01:02:03.456Z'; // A Wednesday
 	const testDtSystemTime  = new Date( testStrSystemTime );

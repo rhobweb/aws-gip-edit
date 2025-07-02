@@ -240,6 +240,9 @@ export function genURI( { uri, queryParams } : Type_genURI_args ) : Type_genURI_
 	return cookedURI;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
+
 const privateDefs = {};
 
 if ( process.env.NODE_ENV === 'test-unit' ) {

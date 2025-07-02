@@ -17,7 +17,7 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 // Imported types
 
 import type {
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramEditOptions,
 } from '.../../../src/utils/gip_types.ts';
 
@@ -82,7 +82,7 @@ describe(MODULE_NAME + ':GipProgramEditOptions', () => {
 		day_of_week: 'Fri',
 		quality:     'High',
 	};
-	const testProgramItem : Type_ProgramItem = {
+	const testDisplayProgramItem : Type_DisplayProgramItem = {
 		pid:         'myitem-pid',
 		uri:         'myitem-uri',
 		title:       'myitem-title',
@@ -97,89 +97,66 @@ describe(MODULE_NAME + ':GipProgramEditOptions', () => {
 
 	beforeEach( () => {
 		commonBeforeEach();
-		testObj = new GipProgramEditOptions();
-		expectedUri      = '';
-		expectedTitle    = '';
-		expectedSynopsis = '';
-		expectedImageUri = '';
+		testObj           = new GipProgramEditOptions();
+		expectedGenre     = '';
+		expectedDayOfWeek = '';
+		expectedQuality   = '';
 	});
 
 	afterEach( () => {
 		commonAfterEach();
 	});
 
-	test( 'Initialised OK', () => {
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
+	test( 'Initialised with defaults', () => {
+		expectedGenre     = 'Comedy';
+		expectedDayOfWeek = 'Any';
+		expectedQuality   = 'Normal';
+		testObj = new GipProgramEditOptions();
+		expect( testObj.genre ).toEqual( expectedGenre );
+		expect( testObj.day_of_week ).toEqual( expectedDayOfWeek );
+		expect( testObj.quality ).toEqual( expectedQuality );
 	});
 
-	test( 'setField uri', () => {
-		testObj.setField( 'uri', 'myuri' );
-		expectedUri = 'myuri';
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
+	test( 'Initialised with object', () => {
+		expectedGenre     = testEditOptions.genre;
+		expectedDayOfWeek = testEditOptions.day_of_week;
+		expectedQuality   = testEditOptions.quality;
+		testObj = new GipProgramEditOptions( testEditOptions );
+		expect( testObj.genre ).toEqual( expectedGenre );
+		expect( testObj.day_of_week ).toEqual( expectedDayOfWeek );
+		expect( testObj.quality ).toEqual( expectedQuality );
 	});
 
-	test( 'setField title', () => {
-		testObj.setField( 'title', 'mytitle' );
-		expectedTitle = 'mytitle';
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
+	test( 'Initialised with object, then cleared', () => {
+		expectedGenre     = 'Comedy';
+		expectedDayOfWeek = 'Any';
+		expectedQuality   = 'Normal';
+		testObj = new GipProgramEditOptions( testEditOptions );
+		testObj.clear();
+		expect( testObj.genre ).toEqual( expectedGenre );
+		expect( testObj.day_of_week ).toEqual( expectedDayOfWeek );
+		expect( testObj.quality ).toEqual( expectedQuality );
 	});
 
-	test( 'setField synopsis', () => {
-		testObj.setField( 'synopsis', 'mysynopsis' );
-		expectedSynopsis = 'mysynopsis';
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
+	test( 'Assign from object', () => {
+		expectedGenre     = testEditOptions.genre;
+		expectedDayOfWeek = testEditOptions.day_of_week;
+		expectedQuality   = testEditOptions.quality;
+		testObj = new GipProgramEditOptions();
+		testObj.assign( testEditOptions );
+		expect( testObj.genre ).toEqual( expectedGenre );
+		expect( testObj.day_of_week ).toEqual( expectedDayOfWeek );
+		expect( testObj.quality ).toEqual( expectedQuality );
 	});
 
-	test( 'setField image_uri', () => {
-		testObj.setField( 'image_uri', 'myimageuri' );
-		expectedImageUri = 'myimageuri';
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
-	});
-
-	test( 'setField unknown field', () => {
-		testObj.setField( 'unknown', 'myunknown' );
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
-	});
-
-	test( 'assign', () => {
-		expectedUri      = testEditObject.uri;
-		expectedTitle    = testEditObject.title;
-		expectedSynopsis = testEditObject.synopsis;
-		expectedImageUri = testEditObject.image_uri;
-		testObj.assign( testEditObject );
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
-	});
-
-	test( 'assignFromProgram', () => {
-		expectedUri      = testProgramItem.pid;
-		expectedTitle    = testProgramItem.title;
-		expectedSynopsis = testProgramItem.synopsis;
-		expectedImageUri = testProgramItem.image_uri;
-		testObj.assignFromProgram( testProgramItem );
-		expect( testObj.uri ).toEqual( expectedUri );
-		expect( testObj.title ).toEqual( expectedTitle );
-		expect( testObj.synopsis ).toEqual( expectedSynopsis );
-		expect( testObj.image_uri ).toEqual( expectedImageUri );
+	test( 'Assign from display program item', () => {
+		expectedGenre     = testDisplayProgramItem.genre;
+		expectedDayOfWeek = testDisplayProgramItem.day_of_week;
+		expectedQuality   = testDisplayProgramItem.quality;
+		testObj = new GipProgramEditOptions( testEditOptions );
+		testObj.assignFromProgram( testDisplayProgramItem );
+		expect( testObj.genre ).toEqual( expectedGenre );
+		expect( testObj.day_of_week ).toEqual( expectedDayOfWeek );
+		expect( testObj.quality ).toEqual( expectedQuality );
 	});
 });

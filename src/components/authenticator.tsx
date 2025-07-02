@@ -59,11 +59,11 @@ import React, { useState, useEffect, /* useRef, ForwardedRef */ } from 'react';
 //	return cookedAuthURI;
 //}
 
-//async function loadPrograms() : Promise<Type_ProgramItem[]> {
+//async function loadPrograms() : Promise<Type_DisplayProgramItem[]> {
 //  const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_LOAD } );
 //  logger.log( 'info', `loadPrograms: URI: `, uri );
 //  const response         = await fetch( uri, options as RequestInit );
-//  const rawPrograms      = await extractJsonResponse( response ) as Type_DbProgramItem[];
+//  const rawPrograms      = await extractJsonResponse( response ) as Type_DbProgramEditItem[];
 //  const programs         = rawPrograms.map( prog => processLoadedProgram( prog ) );
 //  logger.log( 'info', `loadPrograms: Programs: `, programs );
 //  return programs;

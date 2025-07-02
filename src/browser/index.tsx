@@ -16,11 +16,11 @@ import { Config } from "../server/config";
 import App from "../App";
 
 // TODO: Fix types
-const config = (window as any).__CONFIG__ as Config;
-delete (window as any).__CONFIG__;
+const config = (window as any).__CONFIG__ as Config; // eslint-disable-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
+delete (window as any).__CONFIG__; // eslint-disable-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
 
 /** Components added here will _only_ be loaded in the web browser, never for server-side rendering */
-const render = () => {
+const render = () : void => {
 	const container = (document.getElementById('root') as Element);
 	hydrateRoot(
 		container,

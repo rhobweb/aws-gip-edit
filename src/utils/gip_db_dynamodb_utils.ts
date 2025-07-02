@@ -64,10 +64,10 @@ if ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) {
 }
 
 import type {
+	Type_DbProgramEditItem,
 	Type_DbProgramItem,
-	Type_DbFullProgramItem,
-	Type_DbFullProgramHistoryItem,
-	Type_DbFullProgramItemPropName,
+	Type_DbProgramHistoryItem,
+	Type_DbProgramItemPropName,
 } from './gip_prog_fields.ts';
 
 import {
@@ -103,7 +103,7 @@ const PROGRAM_FIELDS = [
 	DB_FIELD_MODIFY_TIME,
 	DB_FIELD_IMAGE_URI,
 	DB_FIELD_DOWNLOAD_TIME,
-] as Type_DbFullProgramItemPropName[];
+] as Type_DbProgramItemPropName[];
 
 export type Type_ProgramField = typeof PROGRAM_FIELDS[number];
 
@@ -112,91 +112,91 @@ const TABLE_PROGRAM_HISTORY = [ STAGE, SERVICE_NAME, 'ProgramHistory' ].join( '_
 const ARR_HISTORY_STATUSES  = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ERROR, VALUE_STATUS_ALREADY ];
 
 export interface Type_genDbRecord_args {
-	program:    Type_DbProgramItem,
+	program:    Type_DbProgramEditItem,
 	programPos: number,
 };
-export type Type_genDbRecord_ret = Type_DbFullProgramItem;
+export type Type_genDbRecord_ret = Type_DbProgramItem;
 
-export type Type_genDbHistoryRecord_args = Type_DbProgramItem;
-export type Type_genDbHistoryRecord_ret  = Type_DbFullProgramHistoryItem;
+export type Type_genDbHistoryRecord_args = Type_DbProgramEditItem;
+export type Type_genDbHistoryRecord_ret  = Type_DbProgramHistoryItem;
 
 export interface Type_loadTable_args { dbDocClient : DynamoDBDocumentClient, tableName: string };
-export type      Type_loadTable_ret = Promise<Type_DbFullProgramItem[]>;
+export type      Type_loadTable_ret = Promise<Type_DbProgramItem[]>;
 
-export type Type_extractProgram_args = Type_DbFullProgramItem;
-export type Type_extractProgram_ret  = Type_DbFullProgramItem;
+export type Type_extractProgram_args = Type_DbProgramItem;
+export type Type_extractProgram_ret  = Type_DbProgramItem;
 
-export type Type_extractPrograms_args = Type_DbFullProgramItem[];
-export type Type_extractPrograms_ret  = Type_DbFullProgramItem[];
+export type Type_extractPrograms_args = Type_DbProgramItem[];
+export type Type_extractPrograms_ret  = Type_DbProgramItem[];
 
-export type Type_genDeleteCommandParams_args = Type_DbFullProgramItem[];
+export type Type_genDeleteCommandParams_args = Type_DbProgramItem[];
 export type Type_genDeleteCommandParams_ret  = BatchWriteCommandInput;
 
 export interface Type_deletePrograms_args {
 	dbDocClient: DynamoDBDocumentClient,
-	programs:    Type_DbFullProgramItem[],
+	programs:    Type_DbProgramItem[],
 };
 export type Type_deletePrograms_ret = Promise<void>;
 
-export type Type_genWriteCommandParams_args = Type_DbProgramItem[];
+export type Type_genWriteCommandParams_args = Type_DbProgramEditItem[];
 export type Type_genWriteCommandParams_ret  = BatchWriteCommandInput;
 
 export interface Type_writePrograms_args {
 	dbDocClient: DynamoDBDocumentClient,
-	programs:    Type_DbProgramItem[],
+	programs:    Type_DbProgramEditItem[],
 };
 export type Type_writePrograms_ret = Promise<void>;
 
-export type Type_validateUpdate_args = Type_DbProgramItem;
+export type Type_validateUpdate_args = Type_DbProgramEditItem;
 export type Type_validateUpdate_ret  = void; // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
-export type Type_genUpdateItem_args = Type_DbProgramItem;
+export type Type_genUpdateItem_args = Type_DbProgramEditItem;
 export type Type_genUpdateItem_ret  = TransactWriteItem;
 
-export type Type_genUpdateHistoryItemCommand_args = Type_DbProgramItem;
+export type Type_genUpdateHistoryItemCommand_args = Type_DbProgramEditItem;
 export type Type_genUpdateHistoryItemCommand_ret  = TransactWriteItem;
 
 export interface Type_genUpdateHistoryCommandParams_args {
-	programs       : Type_DbProgramItem[],
-	actualPrograms : Type_DbProgramItem[],
+	programs       : Type_DbProgramEditItem[],
+	actualPrograms : Type_DbProgramEditItem[],
 };
 export type Type_genUpdateHistoryCommandParams_ret = TransactWriteItem[];
 
 export interface Type_genUpdateCommandParams_args {
-	programs       : Type_DbFullProgramItem[],
-	actualPrograms : Type_DbFullProgramItem[]
+	programs       : Type_DbProgramItem[],
+	actualPrograms : Type_DbProgramItem[]
 }
 export type Type_genUpdateCommandParams_ret = TransactWriteCommandInput;
 
 export interface Type_updateProgramsHelper_args {
 	dbDocClient: DynamoDBDocumentClient,
-	programs:    Type_DbFullProgramItem[],
+	programs:    Type_DbProgramItem[],
 };
 export type Type_updateProgramsHelper_ret  = Promise<void>;
 
-export type Type_sortPrograms_args = Type_DbFullProgramItem[];
-export type Type_sortPrograms_ret  = Type_DbFullProgramItem[];
+export type Type_sortPrograms_args = Type_DbProgramItem[];
+export type Type_sortPrograms_ret  = Type_DbProgramItem[];
 
 export type Type_loadProgramsHelper_args = DynamoDBDocumentClient;
-export type Type_loadProgramsHelper_ret  = Promise<Type_DbFullProgramItem[]>;
+export type Type_loadProgramsHelper_ret  = Promise<Type_DbProgramItem[]>;
 
 export type Type_clearProgramsHelper_args = DynamoDBDocumentClient;
 export type Type_clearProgramsHelper_ret  = Promise<void>;
 
 export interface Type_saveProgramsHelper_args {
 	dbDocClient: DynamoDBDocumentClient,
-	programs:    Type_DbProgramItem[],
+	programs:    Type_DbProgramEditItem[],
 };
 export type Type_saveProgramsHelper_ret  = Promise<void>;
 
 export type Type_resetDb_args = GipDynamoDB | null;
 
-export type Type_loadPrograms_ret =Promise<Type_DbProgramItem[]>;
+export type Type_loadPrograms_ret =Promise<Type_DbProgramEditItem[]>;
 
-export interface Type_savePrograms_args { programs: Type_DbProgramItem[] };
+export interface Type_savePrograms_args { programs: Type_DbProgramEditItem[] };
 export type Type_savePrograms_ret  = Promise<void>;
 
-export interface Type_updatePrograms_args { programs: Type_DbProgramItem[] };
+export interface Type_updatePrograms_args { programs: Type_DbProgramEditItem[] };
 export type Type_updatePrograms_ret  = Promise<void>;
 
 
@@ -225,7 +225,7 @@ function genDbRecord( { program, programPos } : Type_genDbRecord_args ) : Type_g
 	// Not stored in the program table
 	delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 
-	return cookedRecord as unknown as Type_DbFullProgramItem;
+	return cookedRecord as unknown as Type_DbProgramItem;
 }
 
 /**
@@ -243,7 +243,7 @@ function genDbHistoryRecord( program : Type_genDbHistoryRecord_args ) : Type_gen
 	cookedRecord[ DB_FIELD_MODIFY_TIME ]   = strTime;
 	cookedRecord[ DB_FIELD_DOWNLOAD_TIME ] = strTime;
 
-	return cookedRecord as Type_DbFullProgramHistoryItem;
+	return cookedRecord as unknown as Type_DbProgramHistoryItem;
 }
 
 /**
@@ -257,7 +257,7 @@ async function loadTable( { dbDocClient, tableName } : Type_loadTable_args ) : T
 		TableName: tableName,
 	};
 	let lastEvaluatedKey = null;
-	const programs : Type_DbFullProgramItem[] = [];
+	const programs : Type_DbProgramItem[] = [];
 
 	logger.log( 'debug', `${MODULE_NAME}: loadTable`, { tableName } );
 
@@ -271,7 +271,7 @@ async function loadTable( { dbDocClient, tableName } : Type_loadTable_args ) : T
 			const response : ScanCommandOutput = await dbDocClient.send( command );
 			lastEvaluatedKey = response.LastEvaluatedKey ?? null;
 			if ( response.Items ) {
-				programs.push( ...response.Items as Type_DbFullProgramItem[] ); // Database type is guaranteed to be Type_DbFullProgramItem[]
+				programs.push( ...response.Items as Type_DbProgramItem[] ); // Database type is guaranteed to be Type_DbProgramItem[]
 			}
 		} while ( lastEvaluatedKey );
 		logger.log( 'debug', `${MODULE_NAME}: loadTable: END: `, { tableName, programs } );
@@ -290,17 +290,12 @@ async function loadTable( { dbDocClient, tableName } : Type_loadTable_args ) : T
  */
 function extractProgram( rawProgram: Type_extractProgram_args ) : Type_extractProgram_ret {
 	// @ts-expect-error initialise empty object then fill it up
-	const cookedProgram : Type_DbFullProgramItem = {};
+	const cookedProgram : Type_DbProgramItem = {};
 
 	PROGRAM_FIELDS.forEach( field => {
 		if ( field in rawProgram ) {
-			// @ts-expect-error types and values do not match exactly
+			// @ts-expect-error the types of the values vary between fields
 			cookedProgram[ field ] = rawProgram[ field ];
-		} else {
-			switch ( field ) {
-				case DB_FIELD_DAY_OF_WEEK: cookedProgram[ field ] = null; break;
-				//case DB_FIELD_DOWNLOAD_TIME: cookedProgram[ field ] = '';   break;
-			}
 		}
 	} );
 
@@ -312,7 +307,7 @@ function extractProgram( rawProgram: Type_extractProgram_args ) : Type_extractPr
  * @returns array of cooked records, e.g., [ { "mykey": "keyval" }, ... ]
  */
 function extractPrograms( rawPrograms : Type_extractPrograms_args ) : Type_extractPrograms_ret {
-	const programs : Type_DbFullProgramItem[] = [];
+	const programs : Type_DbProgramItem[] = [];
 
 	rawPrograms.forEach( rec => {
 		const cookedProgram = extractProgram( rec );
@@ -540,7 +535,7 @@ function genUpdateCommandParams( { programs, actualPrograms } : Type_genUpdateCo
 	logger.log( 'debug', `${MODULE_NAME}: genUpdateCommandParams: BEGIN` );
 
 	for ( const program of programs ) {
-		const thisWriteItem = genUpdateItem( program as Type_DbProgramItem );
+		const thisWriteItem = genUpdateItem( program as Type_DbProgramEditItem );
 		arrWriteItem.push( thisWriteItem );
 	}
 
@@ -711,11 +706,11 @@ function resetDb( objDb : Type_resetDb_args ) : void {
  */
 export async function loadPrograms() : Type_loadPrograms_ret {
 	let   objDb = null;
-	let   programs : Type_DbProgramItem[] = [];
+	let   programs : Type_DbProgramEditItem[] = [];
 	try {
 		logger.log( 'debug', `${MODULE_NAME}: loadPrograms: BEGIN` );
 		objDb    = new GipDynamoDB();
-		programs = await loadProgramsHelper( objDb.getDocClient() ) as Type_DbProgramItem[];
+		programs = await loadProgramsHelper( objDb.getDocClient() ) as Type_DbProgramEditItem[];
 		logger.log( 'debug', `${MODULE_NAME}: loadPrograms: END: `, { programs } );
 	}
 	catch ( err ) {
@@ -764,7 +759,7 @@ export async function updatePrograms( { programs } : Type_updatePrograms_args ) 
 	try {
 		logger.log( 'debug', `${MODULE_NAME}: updatePrograms: BEGIN: `, { programs } );
 		objDb = new GipDynamoDB();
-		await updateProgramsHelper( { dbDocClient: objDb.getDocClient(), programs: ( programs as Type_DbFullProgramItem[] ) } );
+		await updateProgramsHelper( { dbDocClient: objDb.getDocClient(), programs: ( programs as Type_DbProgramItem[] ) } );
 		logger.log( 'debug', `${MODULE_NAME}: updatePrograms: END` );
 	}
 	catch ( err ) {
@@ -777,6 +772,7 @@ export async function updatePrograms( { programs } : Type_updatePrograms_args ) 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 export const privateDefs = {};
 

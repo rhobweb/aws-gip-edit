@@ -1,3 +1,7 @@
+/**
+ * File:        utils/gip_types.ts
+ * Description: Types used throughout this app.
+ */
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
 
 export type Nullable<T> = T | null;
@@ -31,8 +35,7 @@ export interface Type_ProgramEditOptions {
 	[PROG_FIELD_QUALITY]     : string;
 }
 
-//export interface Type_ProgramItem extends Record<string, string | boolean | number | null> {
-export interface Type_ProgramItem {
+export interface Type_DisplayProgramItem {
 	[PROG_FIELD_URI]         : string;
 	[PROG_FIELD_PID]         : string;
 	[PROG_FIELD_STATUS]      : string;
@@ -45,22 +48,10 @@ export interface Type_ProgramItem {
 	[PROG_FIELD_SELECTED]    : boolean;
 }
 
-export type Type_ProgramItemPropName       = keyof Type_ProgramItem;
-export type Type_ProgramItemStringPropName = Exclude<Type_ProgramItemPropName,typeof PROG_FIELD_SELECTED>;
+export type Type_DisplayProgramItemPropName       = keyof Type_DisplayProgramItem;
+export type Type_DisplayProgramItemStringPropName = Exclude<Type_DisplayProgramItemPropName,typeof PROG_FIELD_SELECTED>;
 
-//export type Type_ProgramItemPropName =
-//  typeof PROG_FIELD_PID         |
-//  typeof PROG_FIELD_STATUS      |
-//  typeof PROG_FIELD_TITLE       |
-//  typeof PROG_FIELD_SYNOPSIS    |
-//  typeof PROG_FIELD_IMAGE_URI   |
-//  typeof PROG_FIELD_GENRE       |
-//  typeof PROG_FIELD_DAY_OF_WEEK |
-//  typeof PROG_FIELD_QUALITY     |
-//  typeof PROG_FIELD_SELECTED    |
-//  typeof PROG_FIELD_URI;
-
-export type Type_ProgramList = Type_ProgramItem[];
+export type Type_ProgramList = Type_DisplayProgramItem[];
 
 export type Type_HandlerProgramChange = ( newPrograms: Type_ProgramList ) => void;
 
@@ -104,4 +95,4 @@ export type Type_EventHandlerMouse        = (event: Type_EventMouse)          =>
 export type Type_EventHandlerSelectChange = (event: Type_EventChangeSelect)   => void;
 export type Type_EventHandlerSelectKey    = (event: Type_EventKeyboardSelect) => void;
 
-//export type Type_HandlerProgramChange     = ( programs: { newPrograms: Type_ProgramItem[] } ) => void;
+//export type Type_HandlerProgramChange     = ( programs: { newPrograms: Type_DisplayProgramItem[] } ) => void;

@@ -11,7 +11,7 @@ import type {
 	Nullable,
 } from './gip_types.ts';
 
-import type { Type_DbProgramItem }                    from './gip_prog_fields';
+import type { Type_DbProgramEditItem }                    from './gip_prog_fields';
 
 import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
 import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
@@ -30,10 +30,10 @@ export interface Type_isDayActive_args {
 export type Type_isDayActive_ret = boolean;
 
 export interface Type_filterPrograms_args {
-	programs: Type_DbProgramItem[],
+	programs: Type_DbProgramEditItem[],
 	params:   Type_ProgramDownloadOptions,
 };
-export type Type_filterPrograms_ret = Type_DbProgramItem[];
+export type Type_filterPrograms_ret = Type_DbProgramEditItem[];
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants

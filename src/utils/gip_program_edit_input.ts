@@ -5,14 +5,14 @@
  * Types used:
  *   GipProgramEditInput:   class defined in this file for use in program editing.
  *   Type_ProgramEditInput: contains the editable and display text fields, URI, title, description, image.
- *   Type_ProgramItem:      contains all program fields including display options (e.g., selected).
+ *   Type_DisplayProgramItem:      contains all program fields including display options (e.g., selected).
  */
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
 import type {
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
 } from './gip_types.ts';
 
@@ -76,7 +76,7 @@ export default class GipProgramEditInput implements Type_ProgramEditInput {
 	/**
 	 * @param source : the program item to copy from.
 	 */
-	assignFromProgram( programItem: Type_ProgramItem ) : void {
+	assignFromProgram( programItem: Type_DisplayProgramItem ) : void {
 		this[ PROG_FIELD_URI ]       = programItem[ PROG_FIELD_PID ];    // The PID is extracted from URI, when editing just display and edit the PID
 		this[ PROG_FIELD_TITLE ]     = programItem[ PROG_FIELD_TITLE ];
 		this[ PROG_FIELD_SYNOPSIS ]  = programItem[ PROG_FIELD_SYNOPSIS ];

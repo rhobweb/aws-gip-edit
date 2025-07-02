@@ -7,7 +7,7 @@
 // Types
 
 import type {
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramEditOptions,
 } from './gip_types.ts';
 
@@ -52,7 +52,7 @@ export default class GipProgramEditOptions implements Type_ProgramEditOptions {
 		this[ PROG_FIELD_QUALITY ]     = source[ PROG_FIELD_QUALITY ];
 	}
 
-	assignFromProgram( programItem: Type_ProgramItem ) : void {
+	assignFromProgram( programItem: Type_DisplayProgramItem ) : void {
 		this[ PROG_FIELD_GENRE ]       = programItem[ PROG_FIELD_GENRE ];
 		this[ PROG_FIELD_DAY_OF_WEEK ] = programItem[ PROG_FIELD_DAY_OF_WEEK ];
 		this[ PROG_FIELD_QUALITY ]     = programItem[ PROG_FIELD_QUALITY ];

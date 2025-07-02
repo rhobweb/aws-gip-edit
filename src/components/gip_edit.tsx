@@ -12,7 +12,7 @@ import type {
 
 import type {
 	Type_EndpointDef,
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramList,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
@@ -30,8 +30,12 @@ import {
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_IMAGE_URI,
 } from '../utils/gip_types';
-import { Type_DbProgramItem }      from '../utils/gip_prog_fields';
-import { processEndpointDef, extractJsonResponse, extractJsonResponseStream } from '../utils/gip_http_utils';
+import { Type_DbProgramEditItem }      from '../utils/gip_prog_fields';
+import {
+	processEndpointDef,
+	extractJsonResponse,
+	extractJsonResponseStream,
+} from '../utils/gip_http_utils';
 import { GipProgramEntry }         from './gip_program_entry';
 import { GipProgramTable }         from './gip_program_table';
 import { GipActionButtons }        from './gip_action_buttons';
@@ -42,10 +46,10 @@ import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
 import logger                      from '@rhobweb/console-logger';
 import ourPackage                  from '../../package.json'; // with { type: "json" };
 
-interface TypeGipEditState {
+interface Type_GipEditState {
 	programEditInput:   Type_ProgramEditInput,
 	programEditOptions: Type_ProgramEditOptions,
-	programs:           Type_ProgramItem[],
+	programs:           Type_DisplayProgramItem[],
 }
 
 interface Type_BodyMessageError {
@@ -89,25 +93,25 @@ class ErrorWithBody extends Error {
 	}
 }
 
-function processProgramForSaving( prog : Type_ProgramItem ) : Type_DbProgramItem {
-	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) ) as Type_ProgramItem;
+function processProgramForSaving( prog : Type_DisplayProgramItem ) : Type_DbProgramEditItem {
+	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) ) as Type_DisplayProgramItem;
 	cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
 	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( { rawText: cookedProgram[ PROG_FIELD_SYNOPSIS ] } );
 	return progToDb( cookedProgram );
 }
 
-async function loadPrograms() : Promise<Type_ProgramItem[]> {
+async function loadPrograms() : Promise<Type_DisplayProgramItem[]> {
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_LOAD } );
 	logger.log( 'info', `loadPrograms: URI: `, uri );
 	const response         = await fetch( uri, options as RequestInit );
-	const rawPrograms      = await extractJsonResponse( response ) as Type_DbProgramItem[];
+	const rawPrograms      = await extractJsonResponse( response ) as Type_DbProgramEditItem[];
 	const programs         = dbToProgArray( rawPrograms );
 	logger.log( 'info', `loadPrograms: Programs: `, programs );
 	return programs;
 }
 
-async function savePrograms( programs : Type_ProgramItem[] ) : Promise<Type_ProgramItem[]> {
-	let   newPrograms = [] as Type_ProgramItem[];
+async function savePrograms( programs : Type_DisplayProgramItem[] ) : Promise<Type_DisplayProgramItem[]> {
+	let   newPrograms = [] as Type_DisplayProgramItem[];
 	const dbPrograms  = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
 	const params      = dbPrograms as Type_RawHttpParams; // Force casting to match the processEndpointDef function
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
@@ -116,7 +120,7 @@ async function savePrograms( programs : Type_ProgramItem[] ) : Promise<Type_Prog
 		const response      = await fetch( uri, options as RequestInit );
 		if ( response.ok ) {
 			logger.log( 'verbose', 'savePrograms: OK', );
-			const newDbPrograms = await extractJsonResponseStream( response ) as Type_DbProgramItem[];
+			const newDbPrograms = await extractJsonResponseStream( response ) as Type_DbProgramEditItem[];
 			newPrograms         = dbToProgArray( newDbPrograms );
 		} else {
 			const body    = await extractJsonResponseStream( response );
@@ -141,7 +145,7 @@ async function savePrograms( programs : Type_ProgramItem[] ) : Promise<Type_Prog
 	return newPrograms;
 }
 
-function processProgram( { programEditInput, programEditOptions, programs } : TypeGipEditState ) : Type_ProgramList | null {
+function processProgram( { programEditInput, programEditOptions, programs } : Type_GipEditState ) : Type_ProgramList | null {
 	let newProgramList : Type_ProgramList = [];
 	const newOrUpdatedProgram = new GipProgramItem( { inputItem: programEditInput, inputOptions: programEditOptions } );
 
@@ -161,7 +165,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 		if ( existingProgram ) {
 			Object.assign( existingProgram, newOrUpdatedProgram );
 		} else {
-			newProgramList.push( newOrUpdatedProgram as Type_ProgramItem );
+			newProgramList.push( newOrUpdatedProgram as Type_DisplayProgramItem );
 		}
 	} else {
 		alert( 'Incomplete program info' );
@@ -258,7 +262,7 @@ function GipEdit() : React.JSX.Element {
 		setProgramEditInput( newProgramEditInput );
 	};
 
-	const setInputFieldsFromProgram = ( program : Type_ProgramItem ) : void => {
+	const setInputFieldsFromProgram = ( program : Type_DisplayProgramItem ) : void => {
 		const newProgramEditInput   = new GipProgramEditInput();
 		const newProgramEditOptions = new GipProgramEditOptions();
 		newProgramEditInput.assignFromProgram( program );

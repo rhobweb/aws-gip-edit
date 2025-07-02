@@ -20,7 +20,7 @@ import {
 	stringifyUTF16,
 } from '../utils/gip_http_utils';
 import type { Type_RawQueryParams } from '../utils/gip_http_utils.ts';
-import type { Type_DbProgramItem }  from '../utils/gip_prog_fields.ts';
+import type { Type_DbProgramEditItem }  from '../utils/gip_prog_fields.ts';
 
 interface Type_HandlerResponse {
 	statusCode: number,
@@ -78,7 +78,7 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
 	};
 	try {
 		const rawBody = event.body ?? '[]';
-		const programs = JSON.parse( rawBody ) as Type_DbProgramItem[];
+		const programs = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
 		logger.log( 'debug', 'handlePOST: START: ', { programs } );
 		await savePrograms( { programs } );
 		logger.log( 'debug', 'handlePOST: savePrograms: success: ' );
@@ -114,7 +114,7 @@ async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerRespo
 	try {
 		const rawBody = event.body ?? '[]';
 		if ( rawBody.length > 0 ) {
-			const newPrograms = JSON.parse( rawBody ) as Type_DbProgramItem[];
+			const newPrograms = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
 			logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
 			await updatePrograms( { programs: newPrograms } );
 		} else {

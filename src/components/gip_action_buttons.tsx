@@ -5,12 +5,12 @@ import {
 	PROG_FIELD_STATUS,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_DAY_OF_WEEK,
-	Type_ProgramItem,
-	Type_ProgramItemStringPropName,
+	Type_DisplayProgramItem,
+	Type_DisplayProgramItemStringPropName,
 	Type_HandlerProgramChange,
 } from '../utils/gip_types';
 
-type Type_ProgramList = Type_ProgramItem[];
+type Type_ProgramList = Type_DisplayProgramItem[];
 
 interface Type_ActionButtonsProps {
 	programs:        Type_ProgramList,
@@ -35,7 +35,7 @@ function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 	const selectOK = () : void => {
 		if ( programs.length > 0 ) {
 			const newPrograms = programs.map( prog => {
-				const program = JSON.parse( JSON.stringify( prog ) ) as Type_ProgramItem;
+				const program = JSON.parse( JSON.stringify( prog ) ) as Type_DisplayProgramItem;
 				if ( program[PROG_FIELD_STATUS] === VALUE_STATUS_SUCCESS ) {
 					program[PROG_FIELD_SELECTED] = true;
 				} else {
@@ -61,7 +61,7 @@ function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 		}
 	};
 
-	const resetField = ( fieldName : Type_ProgramItemStringPropName ) : void => {
+	const resetField = ( fieldName : Type_DisplayProgramItemStringPropName ) : void => {
 		const defaultValue = FIELD_DEFAULT_VALUES[ fieldName ];
 		for ( const prog of programs ) {
 			if ( prog[ fieldName ] !== defaultValue ) {

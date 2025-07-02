@@ -5,7 +5,7 @@ import {
 } from '../utils/gip_prog_fields';
 
 import type {
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
 } from '../utils/gip_types';
@@ -23,15 +23,29 @@ import {
 	PROG_FIELD_SELECTED,
 } from '../utils/gip_types';
 
-function getTrimmedField( field : string ) : string {
-	return ( field ? field.trim() : '' );
+export type Type_getTrimmedField_args = string | null;
+export type Type_getTrimmedField_ret  = string;
+export type Type_extractPID_args      = string;
+export type Type_extractPID_ret       = string;
+
+/**
+ * @param strValue : optional string value, may be null.
+ * @returns the string value trimmed of whitepace or the null string.
+ */
+function getTrimmedField( strValue? : Type_getTrimmedField_args ) : Type_getTrimmedField_ret {
+	return ( strValue ? strValue.trim() : '' );
 }
 
-function extractPID( uri : string ) : string {
+/**
+ * @param uri : the program URI, e.g., https://www.bbc.co.uk/sounds/play/m002fcbv
+ * @returns the PID extracted from the URI, i.e., leaf part, e.g., m002fcbv
+ */
+function extractPID( uri : Type_extractPID_args ) : Type_extractPID_ret {
 	return uri.replace( /.*\//, '' );
 }
 
-export default class GipProgramItem implements Type_ProgramItem {
+// Class to handle the program display fields
+export default class GipProgramItem implements Type_DisplayProgramItem {
 
 	[PROG_FIELD_PID]         : string;
 	[PROG_FIELD_STATUS]      : string;
@@ -56,4 +70,16 @@ export default class GipProgramItem implements Type_ProgramItem {
 		this[PROG_FIELD_SELECTED]    = false;
 		this[PROG_FIELD_URI]         = '';
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
+
+export const privateDefs = {};
+
+if ( process.env.NODE_ENV === 'test-unit' ) {
+	Object.assign( privateDefs, {
+		getTrimmedField,
+		extractPID,
+	} );
 }

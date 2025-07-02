@@ -51,10 +51,10 @@ import type {
 } from '../../../src/utils/gip_db_dynamodb_utils.ts';
 
 import type {
-	Type_DbFullProgramHistoryItem,
-	Type_DbFullProgramItem,
-	//Type_DbFullProgramHistoryItem,
+	Type_DbProgramHistoryItem,
 	Type_DbProgramItem,
+	//Type_DbProgramHistoryItem,
+	Type_DbProgramEditItem,
 	//Type_FieldMap
 } from '../../../src/utils/gip_prog_fields.ts';
 
@@ -241,7 +241,7 @@ describe(MODULE_NAME + ':genDbRecord', () => {
 	let actualResult   : Type_genDbRecord_ret;
 	let expectedResult : Type_genDbRecord_ret;
 	let testArgs       : Type_genDbRecord_args;
-	let testProgram    : Type_DbProgramItem;
+	let testProgram    : Type_DbProgramEditItem;
 	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
 	const testDtSystemTime  = new Date( testStrSystemTime );
 
@@ -372,8 +372,8 @@ describe(MODULE_NAME + ':loadTable', () => {
 	let sendExpectedArgsArr  : object[];
 	let sendExpectedArgs1    : object;
 	let sendExpectedArgs2    : object;
-	const testItem1            = { p: 'val1' } as unknown as Type_DbFullProgramItem;
-	const testItem2            = { p: 'val2' } as unknown as Type_DbFullProgramItem;
+	const testItem1            = { p: 'val1' } as unknown as Type_DbProgramItem;
+	const testItem2            = { p: 'val2' } as unknown as Type_DbProgramItem;
 	const testLastEvaluatedKey = { p: 'last' };
 	const testTableName        = 'mytable';
 
@@ -442,7 +442,7 @@ describe(MODULE_NAME + ':loadTable', () => {
 
 	test( 'OK, one pass', async () => {
 		sendErrArr[ 0 ] = null;
-		expectedResult = sendRet1.Items as Type_DbFullProgramItem[];
+		expectedResult = sendRet1.Items as Type_DbProgramItem[];
 		delete sendRet1.LastEvaluatedKey;
 		try {
 			actualResult = await testModuleObj.loadTable( testArgs );
@@ -543,8 +543,8 @@ describe(MODULE_NAME + ':extractPrograms', () => {
 			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage1.png',
 			pos:           2,
-			day_of_week:   null,
-			download_time: '',
+			day_of_week:   undefined,
+			//download_time: '',
 		},
 		{
 			pid:           'mypid2',
@@ -556,8 +556,8 @@ describe(MODULE_NAME + ':extractPrograms', () => {
 			modify_time:   '2025-06-02T13:00:00Z',
 			image_uri:     'http://mydom/myimage2.png',
 			pos:           1,
-			day_of_week:   null,
-			download_time: '',
+			day_of_week:   undefined,
+			//download_time: '',
 		} ];
 	});
 
@@ -593,7 +593,7 @@ describe(MODULE_NAME + ':genDeleteCommandParams', () => {
 		testArgs = [
 			{ pid: 'mypid1' },
 			{ pid: 'mypid2' },
-		] as unknown as Type_DbFullProgramItem[]; // Only need pid for delete
+		] as unknown as Type_DbProgramItem[]; // Only need pid for delete
 		expectedItems = [
 			// @ts-expect-error there is no lib type for WriteRequest
 			{	DeleteRequest: { Key: testArgs[ 0 ] } },
@@ -652,7 +652,7 @@ describe(MODULE_NAME + ':deletePrograms', () => {
 	const testItem1 = {
 		pid: 'pid1',
 		pos: 1,
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -737,7 +737,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 	let actualErr      : Error | null;
 	let expectedItems  : WriteRequest[];
 	let expectedErrMessage : string;
-	const rawProg1 : Type_DbProgramItem = {
+	const rawProg1 : Type_DbProgramEditItem = {
 		pid:           'mypid1',
 		status:        'Pending',
 		genre:         'Books&Spoken',
@@ -750,7 +750,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		download_time: '2025-06-01T11:00:00Z',
 		pos:           null,
 	};
-	const rawProg2 : Type_DbProgramItem = {
+	const rawProg2 : Type_DbProgramEditItem = {
 		pid:           'mypid2',
 		status:        'OK',
 		genre:         'Comedy',
@@ -764,7 +764,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		pos:           null,
 	};
 	testArgs = [ rawProg1, rawProg2 ];
-	const expectedItem1 : Type_DbFullProgramItem = {
+	const expectedItem1 : Type_DbProgramItem = {
 		pid:           'mypid1',
 		status:        'Pending',
 		genre:         'Books&Spoken',
@@ -777,7 +777,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		// download_time is not stored
 		pos:           1,
 	};
-	const expectedItem2 : Type_DbFullProgramItem = {
+	const expectedItem2 : Type_DbProgramItem = {
 		pid:           'mypid2',
 		status:        'OK',
 		genre:         'Comedy',
@@ -842,7 +842,7 @@ describe(MODULE_NAME + ':validateUpdate', () => {
 	let testModuleObj      : Type_TestModulePrivateDefs;
 	let actualErr          : Error | null;
 	let expectedErrMessage : string;
-	let testArgs           : Type_DbProgramItem;
+	let testArgs           : Type_DbProgramEditItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -935,7 +935,7 @@ describe(MODULE_NAME + ':genUpdateHistoryItemCommand', () => {
 	let testArgs       : Type_genUpdateHistoryItemCommand_args;
 	let actualResult   : Type_genUpdateHistoryItemCommand_ret;
 	let expectedResult : Type_genUpdateHistoryItemCommand_ret;
-	let expectedObject : Record<string, unknown>;
+	let expectedObject : Type_DbProgramHistoryItem;
 	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
 	const testDtSystemTime  = new Date( testStrSystemTime );
 
@@ -957,11 +957,12 @@ describe(MODULE_NAME + ':genUpdateHistoryItemCommand', () => {
 			download_time: '2025-06-01T11:00:00Z',
 			pos:           null,
 		};
-		expectedObject = JSON.parse( JSON.stringify( testArgs ) ) as Type_DbFullProgramHistoryItem;
-		delete expectedObject.pos;         // pos is not stored in history
-		delete expectedObject.day_of_week; // day_of_week is not stored in history
-		expectedObject.modify_time   = testStrSystemTime;
-		expectedObject.download_time = testStrSystemTime;
+		const tempExpectedObject = JSON.parse( JSON.stringify( testArgs ) ) as Record<string,unknown>;
+		delete tempExpectedObject.pos;         // pos is not stored in history
+		delete tempExpectedObject.day_of_week; // day_of_week is not stored in history
+		tempExpectedObject.modify_time   = testStrSystemTime;
+		tempExpectedObject.download_time = testStrSystemTime;
+		expectedObject = tempExpectedObject as unknown as Type_DbProgramHistoryItem;
 	});
 
 	afterEach( () => {
@@ -987,22 +988,22 @@ describe(MODULE_NAME + ':genUpdateHistoryCommandParams', () => {
 	let actualErr            : HttpError;
 	let expectedErrStatusCode: number;
 	let expectedErrMessage   : string;
-	let testProg1            : Type_DbProgramItem;
-	let testProg2            : Type_DbProgramItem;
+	let testProg1            : Type_DbProgramEditItem;
+	let testProg2            : Type_DbProgramEditItem;
 	let actualResult         : Type_genUpdateHistoryCommandParams_ret;
 	let expectedResult       : Type_genUpdateHistoryCommandParams_ret;
-	let expectedObject1      : Record<string, unknown>;
-	let expectedObject2      : Record<string, unknown>;
+	let expectedObject1      : Type_DbProgramHistoryItem;
+	let expectedObject2      : Type_DbProgramHistoryItem;
 	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
 	const testDtSystemTime  = new Date( testStrSystemTime );
 
-	function genExpectedObject( prog : Type_DbProgramItem ) : Record<string, unknown> {
-		const retObj = JSON.parse( JSON.stringify( prog ) ) as Type_DbFullProgramHistoryItem;
+	function genExpectedObject( prog : Type_DbProgramEditItem ) : Type_DbProgramHistoryItem {
+		const retObj = JSON.parse( JSON.stringify( prog ) ) as Record<string, unknown>;
 		delete retObj.pos;         // pos is not stored in history
 		delete retObj.day_of_week; // day_of_week is not stored in history
 		retObj.modify_time   = testStrSystemTime;
 		retObj.download_time = testStrSystemTime;
-		return retObj;
+		return retObj as unknown as Type_DbProgramHistoryItem;
 	}
 
 	beforeEach( () => {
@@ -1087,18 +1088,18 @@ describe(MODULE_NAME + ':genUpdateHistoryCommandParams', () => {
 describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 	let testModuleObj          : Type_TestModulePrivateDefs;
 	let testArgs               : Type_genUpdateCommandParams_args;
-	let testProg1              : Type_DbFullProgramItem;
-	let testProg2              : Type_DbFullProgramItem;
+	let testProg1              : Type_DbProgramItem;
+	let testProg2              : Type_DbProgramItem;
 	let actualResult           : Type_genUpdateCommandParams_ret;
 	let expectedResult         : Type_genUpdateCommandParams_ret;
 	let expectedProgUpdate1    : Record<string, unknown>;
 	let expectedProgUpdate2    : Record<string, unknown>;
-	let expectedHistoryObject1 : Record<string, unknown>;
-	let expectedHistoryObject2 : Record<string, unknown>;
+	let expectedHistoryObject1 : Type_DbProgramHistoryItem;
+	let expectedHistoryObject2 : Type_DbProgramHistoryItem;
 	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
 	const testDtSystemTime  = new Date( testStrSystemTime );
 
-	function genExpectedUpdateItem( prog : Type_DbFullProgramItem ) : Record<string, unknown> {
+	function genExpectedUpdateItem( prog : Type_DbProgramItem ) : Record<string, unknown> {
 		const retObj = {
 			Update: {
 				TableName:                 EXPECTED_TABLE_NAME_PROGRAM,
@@ -1111,8 +1112,8 @@ describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 		return retObj;
 	}
 
-	function genExpectedHistoryUpdateItem( prog : Type_DbFullProgramItem ) : Record<string, unknown> {
-		const expectedObj = JSON.parse( JSON.stringify( prog ) ) as Type_DbFullProgramHistoryItem;
+	function genExpectedHistoryUpdateItem( prog : Type_DbProgramItem ) : Type_DbProgramHistoryItem {
+		const expectedObj = JSON.parse( JSON.stringify( prog ) ) as Record<string, unknown>;
 		delete expectedObj.pos;         // pos is not stored in history
 		delete expectedObj.day_of_week; // day_of_week is not stored in history
 		expectedObj.modify_time   = testStrSystemTime;
@@ -1123,7 +1124,7 @@ describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 				Item:      expectedObj,
 			},
 		};
-		return retObj;
+		return retObj as unknown as Type_DbProgramHistoryItem;
 	}
 
 	beforeEach( () => {
@@ -1141,20 +1142,18 @@ describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 			synopsis:      'My Synopsis1',
 			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage1.png',
-			download_time: '2025-06-01T11:00:00Z',
 			pos:           1,
 		};
 		testProg2 = {
 			pid:           'mypid2',
 			status:        'Error',
 			genre:         'Books&Spoken',
-			day_of_week:   null,
+			day_of_week:   undefined,
 			quality:       'High',
 			title:         'My Title2',
 			synopsis:      'My Synopsis2',
 			modify_time:   '2025-06-01T12:02:30Z',
 			image_uri:     'http://mydom/myimage2.png',
-			download_time: '2025-06-01T11:02:00Z',
 			pos:           2,
 		};
 		expectedProgUpdate1    = genExpectedUpdateItem( testProg1 );
@@ -1189,9 +1188,9 @@ describe(MODULE_NAME + ':genUpdateCommandParams', () => {
 describe(MODULE_NAME + ':sortPrograms', () => {
 	let testModuleObj  : Type_TestModulePrivateDefs;
 	let testArgs       : Type_sortPrograms_args;
-	let testProg1      : Type_DbFullProgramItem;
-	let testProg2      : Type_DbFullProgramItem;
-	let testProg3      : Type_DbFullProgramItem;
+	let testProg1      : Type_DbProgramItem;
+	let testProg2      : Type_DbProgramItem;
+	let testProg3      : Type_DbProgramItem;
 	let actualResult   : Type_sortPrograms_ret;
 	let expectedResult : Type_sortPrograms_ret;
 
@@ -1267,10 +1266,10 @@ describe(MODULE_NAME + ':loadProgramsHelper', () => {
 	let sendExpectedArgs : object;
 	const testItem1 = {
 		pos: 2,
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 	const testItem2 = {
 		pos: 1
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -1306,7 +1305,7 @@ describe(MODULE_NAME + ':loadProgramsHelper', () => {
 				day_of_week:   null, // day_of_week is not returned by the scan
 				download_time: '',  // download_time is not returned by the scan
 			},
-		] as unknown as Awaited<Type_DbFullProgramItem[]>;
+		] as unknown as Awaited<Type_DbProgramItem[]>;
 		actualErr = null;
 	});
 
@@ -1353,11 +1352,11 @@ describe(MODULE_NAME + ':clearProgramsHelper', () => {
 	const testItem1 = {
 		pid: 'pid2',
 		pos: 2,
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 	const testItem2 = {
 		pid: 'pid1',
 		pos: 1
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -1481,10 +1480,10 @@ describe(MODULE_NAME + ':saveProgramsHelper', () => {
 	const testDtSystemTime  = new Date( testStrSystemTime );
 	const testItem1 = {
 		pid: 'pid2',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 	const testItem2 = {
 		pid: 'pid1',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -1495,7 +1494,7 @@ describe(MODULE_NAME + ':saveProgramsHelper', () => {
 		testDbDocClient = libDynamodbMocks.dynamoDBDocumentClientMock; // eslint-disable-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
 		testArgs        = {
 			dbDocClient: testDbDocClient,
-			programs:    [ testItem1, testItem2 ] as Type_DbProgramItem[],
+			programs:    [ testItem1, testItem2 ] as Type_DbProgramEditItem[],
 		};
 		sendRetArr = [
 			{
@@ -1568,7 +1567,7 @@ describe(MODULE_NAME + ':saveProgramsHelper', () => {
 	});
 
 	test( 'Maximum number of programs exceeded', async () => {
-		testArgs.programs = Array(11).fill( testItem1 ) as Type_DbProgramItem[];
+		testArgs.programs = Array(11).fill( testItem1 ) as Type_DbProgramEditItem[];
 		expectedErrMessage = `Too many programs ${JSON.stringify( { numPrograms: 11, max: 10 } )}`;
 		try {
 			await testModuleObj.saveProgramsHelper( testArgs );
@@ -1640,17 +1639,17 @@ describe(MODULE_NAME + ':updateProgramsHelper', () => {
 		pid:    'pid2',
 		pos:    2,
 		status: 'Pending',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 	const testItem2 = {
 		pid:    'pid1',
 		pos:    1,
 		status: 'Pending',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 	const testItem3 = {
 		pid:    'pid3',
 		pos:    3,
 		status: 'Pending',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -1918,7 +1917,7 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 	const testItem1 = {
 		pos: 1,
 		pid: 'pid1',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -1948,7 +1947,7 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 				day_of_week:   null, // day_of_week is not returned by the scan
 				download_time: '',  // download_time is not returned by the scan
 			},
-		] as unknown as Awaited<Type_DbProgramItem[]>;
+		] as unknown as Awaited<Type_DbProgramEditItem[]>;
 		actualErr = null;
 	});
 
@@ -1996,7 +1995,7 @@ describe(MODULE_NAME + ':savePrograms', () => {
 	const testDtSystemTime  = new Date( testStrSystemTime );
 	const testItem1 = {
 		pid: 'pid1',
-	} as unknown as Type_DbFullProgramItem;
+	} as unknown as Type_DbProgramItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -2009,7 +2008,7 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		sendMock             = jest.fn();
 		testDbDocClient.send = sendMock;
 		testArgs = {
-			programs: [ testItem1 ] as Type_DbProgramItem[],
+			programs: [ testItem1 ] as Type_DbProgramEditItem[],
 		};
 		sendRetArr = [
 			{
@@ -2115,7 +2114,7 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 	const testItem1 = {
 		pid: 'pid1',
 		pos: 1,
-	} as unknown as Type_DbProgramItem;
+	} as unknown as Type_DbProgramEditItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -2161,7 +2160,6 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 			{ ...testItem1, status: 'Success', modify_time: testStrSystemTime, download_time: testStrSystemTime },
 		];
 		for ( const histItem of arrHistoryItem ) {
-			// @ts-expect-error pos has been added above, but is not in the history object
 			delete histItem.pos;
 		}
 		const sendExpectedUpdateArgs = {

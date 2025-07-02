@@ -17,7 +17,7 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 // Imported types
 
 import type {
-	Type_ProgramItem,
+	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
 } from '.../../../src/utils/gip_types.ts';
 
@@ -84,7 +84,7 @@ describe(MODULE_NAME + ':GipProgramEditInput', () => {
 		synopsis:  'myedit-synopsis',
 		image_uri: 'myedit-imageuri',
 	};
-	const testProgramItem  : Type_ProgramItem = {
+	const testProgramItem  : Type_DisplayProgramItem = {
 		pid:         'myitem-pid',
 		uri:         'myitem-uri',
 		title:       'myitem-title',
