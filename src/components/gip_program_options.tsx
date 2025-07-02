@@ -24,13 +24,13 @@ interface TypeProgramOptionSelectProps {
 	onChange:     ( newOptions : Type_ProgramEditOptions ) => void,
 	onKeyDown:    Type_EventHandlerSelectKey,
 	optionFields: Type_ProgramEditOptions,
-	fieldName:    string,
+	fieldName:    keyof Type_ProgramEditOptions,
 }
 
 function ProgramOptionSelect( props : TypeProgramOptionSelectProps ) : React.JSX.Element {
 	const { fieldName } = props;
 	const fieldMap      = FIELD_MAP_COLLECTION[ fieldName ]; // TODO: check if fieldName is in fieldMap
-	const fieldValue    = ( props.optionFields[ fieldName ]   ?? 'UNK' ) as string;
+	const fieldValue    = ( props.optionFields[ fieldName ]   ?? 'UNK' ); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 	const arrOption     = FIELD_ORDER_COLLECTION[ fieldName ] ?? [];
 	const onChange  = ( event: Type_EventChangeSelect ) : void => {
 		const newOptions = props.optionFields;

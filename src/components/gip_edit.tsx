@@ -1,11 +1,15 @@
-//import React from 'react';
-
+/**
+ * File:        components/gip_edit.tsx
+ * Description: The main React component for the program edit page.
+ *              Displays the program list and the components to edit a program.
+ */
 import type {
 	Type_EventKeyboardAny,
 	Type_EventDragAny,
 	//Type_EventTouchAny,
 	Type_Refs,
 } from '../browser_event.ts';
+
 import type {
 	Type_EndpointDef,
 	Type_ProgramItem,
@@ -14,6 +18,7 @@ import type {
 	Type_ProgramEditOptions,
 	Type_RawHttpParams,
 } from '../utils/gip_types.ts';
+
 import React, { useState, useEffect, useRef }               from 'react';
 import { Helmet }                                           from 'react-helmet';
 import { getProgDetailsFromLink, cookTitle, cookSynopsis }  from '../utils/gip_prog_edit_utils';
@@ -46,9 +51,13 @@ interface TypeGipEditState {
 interface Type_BodyMessageError {
 	message: string,
 };
+
 interface Type_ErrorWithBody extends Error {
 	body: ( Record<string,unknown>[] | Type_BodyMessageError ),
 };
+
+const BOOTSTRAP_CSS_URI  = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
+const BOOTSTRAP_CSS_HASH = 'sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65';
 
 const ENDPOINT_LOAD : Type_EndpointDef = {
 	method: 'GET',
@@ -193,18 +202,32 @@ function processDrop( event : Type_EventDragAny ) : Type_processDrop_ret {
 	return result;
 }
 
+/**
+ * @returns the main program edit page React element, including:
+ *           - the program list;
+ *           - program edit elements:
+ *              - title;
+ *              - synopsis;
+ *              - genre;
+ *              - day of week;
+ *              - qualiry;
+ *            - program display elements:
+ *              - program image.
+ */
 function GipEdit() : React.JSX.Element {
 
+	// Sub-elements of this element
 	const [ programEditInput,   setProgramEditInput ]   = useState( new GipProgramEditInput() );
 	const [ programEditOptions, setProgramEditOptions ] = useState( new GipProgramEditOptions() );
 	const [ programs,           setPrograms ]           = useState( [] as Type_ProgramList );
 
+	// References to elements in the sub-elements
 	const refs : Type_Refs = {
 		[PROG_FIELD_URI]:   useRef(null),
 		[PROG_FIELD_TITLE]: useRef(null),
 	};
 
-	// TODO: Try to fix types
+	// Set the focus to the element identified by name
 	function setFocus( inputFieldName : string ) : void {
 		logger.log( 'debug', 'setFocus: Requested: ', inputFieldName );
 		// Focus the text input using the raw DOM API
@@ -214,16 +237,19 @@ function GipEdit() : React.JSX.Element {
 		}
 	}
 
-	function setInitialFocus() : void{
+	// Set the focus to the first element on the page
+	function setInitialFocus() : void {
 		//logger.log( 'debug', 'setInitialFocus' );
 		setFocus( PROG_FIELD_URI );
 	}
 
+	// Clear the input fields
 	const clearProgramInput = () : void => {
 		const newProgramEditInput = new GipProgramEditInput();
 		setProgramEditInput( newProgramEditInput );
 	};
 
+	//
 	const onInputChange = ( { paramName, newValue } : { paramName: string, newValue: string } ) : void => {
 		// logger.log( 'debug', 'onInputChange: ', { paramName, newValue } );
 		const newProgramEditInput = new GipProgramEditInput();
@@ -347,7 +373,7 @@ function GipEdit() : React.JSX.Element {
 	return (
 		<div className="app">
 			<Helmet>
-				<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossOrigin="anonymous"/>
+				<link href={BOOTSTRAP_CSS_URI} rel="stylesheet" integrity={BOOTSTRAP_CSS_HASH} crossOrigin="anonymous"/>
 			</Helmet>
 			<div className="container-fluid gip-grid"
 				onDragOver={ event => { onDragOver( event ); } }

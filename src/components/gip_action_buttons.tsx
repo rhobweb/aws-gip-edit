@@ -6,7 +6,7 @@ import {
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_DAY_OF_WEEK,
 	Type_ProgramItem,
-	Type_ProgramItemField,
+	Type_ProgramItemStringPropName,
 	Type_HandlerProgramChange,
 } from '../utils/gip_types';
 
@@ -61,7 +61,7 @@ function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 		}
 	};
 
-	const resetField = ( fieldName : Type_ProgramItemField ) : void => {
+	const resetField = ( fieldName : Type_ProgramItemStringPropName ) : void => {
 		const defaultValue = FIELD_DEFAULT_VALUES[ fieldName ];
 		for ( const prog of programs ) {
 			if ( prog[ fieldName ] !== defaultValue ) {

@@ -85,11 +85,17 @@ function commonAfterEach() : void {
 	jest.resetModules();
 }
 
+/**
+ * @param {string|Date} start : earliest date/time.
+ * @param {string|Date} end   : optional latest date/time, defaults to current date.
+ * @returns a random date/time between the specified start and end date/times, as an ISO string.
+ */
 function randomDate(start : (Date | string), end : (Date | string) = new Date() ) : string {
 	const dtStart = new Date( start );
 	const dtEnd   = new Date( end );
 	return (new Date(dtStart.getTime() + Math.random() * (dtEnd.getTime() - dtStart.getTime()))).toISOString();
 }
+
 /**
  * @param numItems : the number of program items to create.
  * @returns an array of 'numItems' program items.

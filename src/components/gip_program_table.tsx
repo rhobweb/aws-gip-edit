@@ -18,7 +18,7 @@ import { GipGridRow } from './gip_grid_row';
 import {
 	PROG_FIELD_SELECTED,
 	Type_ProgramItem,
-	Type_ProgramItemField,
+	Type_ProgramItemPropName,
 	Type_EventHandlerMouse,
 	Type_HandlerProgramChange,
 	Type_EventMouse,
@@ -126,7 +126,7 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 			{ programs.map( ( thisProgram, programIndex ) => (
 				<div className="gip-prog-item-row gip-prog-item-data-row" id={ `prog-item-row-${programIndex + 1}` } key={ `prog-item-row-${programIndex + 1}` }>
 					<div className={ ` gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${counterFieldName}` } id={ `prog-item-count-${programIndex + 1}` } style={ genSelectedStyle( thisProgram[ PROG_FIELD_SELECTED ] ) }>{ programIndex + 1 }</div>
-					{ arrCookedFieldOrder.map( ( fieldName : Type_ProgramItemField, fieldIndex : number ) : ReactNode => (
+					{ arrCookedFieldOrder.map( ( fieldName : Type_ProgramItemPropName, fieldIndex : number ) : ReactNode => (
 						<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${fieldName}` } key={ `prog-item-field-${ programIndex + 1 }-${ fieldIndex + 1 }` }>
 							<ProgInputField key={ `prog-field-${programIndex + 1}-${fieldIndex + 1}` }
 								fieldName={ fieldName as string }

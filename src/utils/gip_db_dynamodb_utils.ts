@@ -67,6 +67,7 @@ import type {
 	Type_DbProgramItem,
 	Type_DbFullProgramItem,
 	Type_DbFullProgramHistoryItem,
+	Type_DbFullProgramItemPropName,
 } from './gip_prog_fields.ts';
 
 import {
@@ -102,7 +103,7 @@ const PROGRAM_FIELDS = [
 	DB_FIELD_MODIFY_TIME,
 	DB_FIELD_IMAGE_URI,
 	DB_FIELD_DOWNLOAD_TIME,
-];
+] as Type_DbFullProgramItemPropName[];
 
 export type Type_ProgramField = typeof PROGRAM_FIELDS[number];
 
@@ -224,7 +225,7 @@ function genDbRecord( { program, programPos } : Type_genDbRecord_args ) : Type_g
 	// Not stored in the program table
 	delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 
-	return cookedRecord as Type_DbFullProgramItem;
+	return cookedRecord as unknown as Type_DbFullProgramItem;
 }
 
 /**
@@ -293,11 +294,12 @@ function extractProgram( rawProgram: Type_extractProgram_args ) : Type_extractPr
 
 	PROGRAM_FIELDS.forEach( field => {
 		if ( field in rawProgram ) {
+			// @ts-expect-error types and values do not match exactly
 			cookedProgram[ field ] = rawProgram[ field ];
 		} else {
 			switch ( field ) {
-				case DB_FIELD_DAY_OF_WEEK:   cookedProgram[ field ] = null; break;
-				case DB_FIELD_DOWNLOAD_TIME: cookedProgram[ field ] = '';   break;
+				case DB_FIELD_DAY_OF_WEEK: cookedProgram[ field ] = null; break;
+				//case DB_FIELD_DOWNLOAD_TIME: cookedProgram[ field ] = '';   break;
 			}
 		}
 	} );

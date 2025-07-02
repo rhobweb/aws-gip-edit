@@ -8,8 +8,13 @@
  */
 
 import type {
+	Type_ProgramItemPropName,
+} from './gip_types.ts';
+
+import type {
 	Type_DbProgramItem,
-} from './gip_prog_fields';
+	Type_DbProgramItemPropName,
+} from './gip_prog_fields.ts';
 
 import {
 	FIELD_MAP_COLLECTION,
@@ -31,7 +36,7 @@ import {
 
 import type {
 	Type_ProgramItem,
-	Type_ProgramItemField,
+	Type_ProgramItemStringPropName,
 } from './gip_types';
 
 import {
@@ -78,8 +83,9 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 		[PROG_FIELD_SELECTED]:    false,
 	};
 
-	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) ) {
-		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_ProgramItemField;
+	// Say 'value' is a string, but it may be null or for FIELD_POS it may be a number
+	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) as [Type_DbProgramItemPropName, string][] ) {
+		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_ProgramItemStringPropName | undefined;
 
 		if ( progField ) {
 			prog[ progField ] = dbValue;
@@ -95,10 +101,10 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 }
 
 /**
- * @param prog : a Program Item object;
+ * @param programItem : a Program Item object;
  * @returns a DB Program Item object.
  */
-export function progToDb( prog: Type_progToDb_args ) : Type_progToDb_ret {
+export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret {
 	const dbProg : Type_DbProgramItem = {
 		[DB_FIELD_STATUS]:        '',
 		[DB_FIELD_GENRE]:         '',
@@ -113,11 +119,16 @@ export function progToDb( prog: Type_progToDb_args ) : Type_progToDb_ret {
 		[DB_FIELD_POS]:           null,
 	};
 
-	for ( const [field, value] of Object.entries( prog ) as [string, string][] ) {
-		const dbField = PROG_TO_DB_FIELD_MAP[ field ];
+	// Say 'value' is a string, but it may be null or for DB_FIELD_POS it may be a number
+	for ( const [field, value] of Object.entries( programItem ) as [Type_ProgramItemPropName, string][] ) {
+		const dbField = PROG_TO_DB_FIELD_MAP[ field ] as Type_DbProgramItemPropName | undefined;
 
 		if ( dbField ) {
-			dbProg[ field ] = value;
+			if ( dbField !== DB_FIELD_POS ) {
+				dbProg[ dbField ] = value;
+			} else {
+				dbProg[ dbField ] = value as unknown as number | null;
+			}
 		}
 	}
 

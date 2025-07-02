@@ -18,23 +18,21 @@ export const PROG_FIELD_DAY_OF_WEEK = 'day_of_week';
 export const PROG_FIELD_QUALITY     = 'quality';
 export const PROG_FIELD_SELECTED    = 'selected';
 
-// No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface Type_ProgramEditInput extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditInput {
 	[PROG_FIELD_URI]       : string;
 	[PROG_FIELD_TITLE]     : string;
 	[PROG_FIELD_SYNOPSIS]  : string;
 	[PROG_FIELD_IMAGE_URI] : string;
 }
 
-// No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface Type_ProgramEditOptions extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditOptions {
 	[PROG_FIELD_GENRE]       : string;
 	[PROG_FIELD_DAY_OF_WEEK] : string;
 	[PROG_FIELD_QUALITY]     : string;
 }
 
-
-export interface Type_ProgramItem extends Record<string, string | boolean | number | null> {
+//export interface Type_ProgramItem extends Record<string, string | boolean | number | null> {
+export interface Type_ProgramItem {
 	[PROG_FIELD_URI]         : string;
 	[PROG_FIELD_PID]         : string;
 	[PROG_FIELD_STATUS]      : string;
@@ -47,9 +45,10 @@ export interface Type_ProgramItem extends Record<string, string | boolean | numb
 	[PROG_FIELD_SELECTED]    : boolean;
 }
 
-export type Type_ProgramItemField = keyof Type_ProgramItem;
+export type Type_ProgramItemPropName       = keyof Type_ProgramItem;
+export type Type_ProgramItemStringPropName = Exclude<Type_ProgramItemPropName,typeof PROG_FIELD_SELECTED>;
 
-//export type Type_ProgramItemField =
+//export type Type_ProgramItemPropName =
 //  typeof PROG_FIELD_PID         |
 //  typeof PROG_FIELD_STATUS      |
 //  typeof PROG_FIELD_TITLE       |

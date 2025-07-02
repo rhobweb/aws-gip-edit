@@ -80,6 +80,7 @@ export function filterPrograms( { programs, params } : Type_filterPrograms_args 
 	} else {
 		const { current = false, downloaded = false } = params;
 		cookedPrograms = programs.filter( prog => {
+
 			let ret = true;
 			if ( ARR_STATUS_DOWNLOADED.includes( prog[ PROG_FIELD_STATUS ] ) ) {
 				if ( ! downloaded ) {

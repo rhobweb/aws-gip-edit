@@ -31,7 +31,6 @@ function extractPID( uri : string ) : string {
 	return uri.replace( /.*\//, '' );
 }
 
-// @ts-expect-error as Type_ProgramItem extends Record<string...> it expects a string property
 export default class GipProgramItem implements Type_ProgramItem {
 
 	[PROG_FIELD_PID]         : string;

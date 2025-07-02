@@ -53,7 +53,8 @@ export type Type_FieldMap   = Record<string, ( string | null )>;
 export type Type_FieldOrder = string[];
 
 // The program object as stored in the database
-export interface Type_DbProgramItem extends Record<string, ( string | number | null )> {
+//export interface Type_DbProgramItem extends Record<string, ( string | number | null )> {
+export interface Type_DbProgramItem {
 	[DB_FIELD_STATUS]        : string,
 	[DB_FIELD_GENRE]         : string,
 	[DB_FIELD_DAY_OF_WEEK]   : string | null,
@@ -67,12 +68,16 @@ export interface Type_DbProgramItem extends Record<string, ( string | number | n
 	[DB_FIELD_POS]           : number | null,
 }
 
+export type Type_DbProgramItemPropName = keyof Type_DbProgramItem;
+
 // The program object in database format excluding properties not required for manipulation
 type Type_DbFullProgramItem_unwanted = typeof DB_FIELD_DOWNLOAD_TIME;
 export interface Type_DbFullProgramItem extends Omit<Type_DbProgramItem,Type_DbFullProgramItem_unwanted> {
 	[DB_FIELD_MODIFY_TIME]   : string,
 	[DB_FIELD_POS]           : number,
 };
+export type Type_DbFullProgramItemPropName = keyof Type_DbFullProgramItem;
+
 // The program history object in database format, which is the program object minus some properties.
 type Type_DbFullProgramHistoryItem_unwanted = typeof DB_FIELD_DOWNLOAD_TIME | typeof DB_FIELD_POS;
 export interface Type_DbFullProgramHistoryItem extends Omit<Type_DbProgramItem,Type_DbFullProgramHistoryItem_unwanted> { // eslint-disable-line @typescript-eslint/no-empty-object-type

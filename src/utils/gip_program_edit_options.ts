@@ -1,16 +1,31 @@
+/**
+ * File:        utils/program_edit_options.ts
+ * Description: A class to manipulate the program options fields.
+ */
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Type_ProgramItem,
 	Type_ProgramEditOptions,
 } from './gip_types.ts';
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import {
 	PROG_FIELD_GENRE,
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
 } from './gip_types';
+
 import { FIELD_DEFAULT_VALUES } from '../utils/gip_prog_fields';
 
+////////////////////////////////////////////////////////////////////////////////
+// Exported definitions
+
+// Class to handle the program options fields
 export default class GipProgramEditOptions implements Type_ProgramEditOptions {
 
 	[ PROG_FIELD_GENRE ]       = '';
