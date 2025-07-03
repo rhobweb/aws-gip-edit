@@ -1297,13 +1297,9 @@ describe(MODULE_NAME + ':loadProgramsHelper', () => {
 		expectedResult = [
 			{
 				...testItem2,
-				day_of_week:   null, // day_of_week is not returned by the scan
-				download_time: '',   // download_time is not returned by the scan
 			},
 			{
 				...testItem1,
-				day_of_week:   null, // day_of_week is not returned by the scan
-				download_time: '',  // download_time is not returned by the scan
 			},
 		] as unknown as Awaited<Type_DbProgramItem[]>;
 		actualErr = null;
@@ -1944,8 +1940,6 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 		expectedResult = [
 			{
 				...testItem1,
-				day_of_week:   null, // day_of_week is not returned by the scan
-				download_time: '',  // download_time is not returned by the scan
 			},
 		] as unknown as Awaited<Type_DbProgramEditItem[]>;
 		actualErr = null;

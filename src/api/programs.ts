@@ -1,43 +1,77 @@
+/**
+ * File:        api/programs.ts
+ * Description: The REST API for this application.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import {
 	loadPrograms,
 	savePrograms,
 	updatePrograms,
 } from '../utils/gip_db_dynamodb_utils';
-//import { Context, APIGatewayEvent, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { APIGatewayEvent } from 'aws-lambda';
+
+import {
+	APIGatewayEvent,
+	APIGatewayProxyStructuredResultV2,
+	//Context,
+} from 'aws-lambda';
+
 import logger from '@rhobweb/console-logger';
 
-//import {
-//  DB_FIELD_STATUS, DB_FIELD_GENRE, DB_FIELD_DAY_OF_WEEK, DB_FIELD_QUALITY, DB_FIELD_SYNOPSIS,
-//  VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS
-//}
-//from '../../utils/gip_prog_fields';
 import { filterPrograms } from '../utils/gip_prog_filter_utils';
+
 import {
 	HttpError,
 	parseQueryParams,
 	stringifyUTF16,
 } from '../utils/gip_http_utils';
-import type { Type_RawQueryParams } from '../utils/gip_http_utils.ts';
-import type { Type_DbProgramEditItem }  from '../utils/gip_prog_fields.ts';
 
-interface Type_HandlerResponse {
-	statusCode: number,
-	headers?:   Record<string,unknown>,
-	body?:      string,
-};
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported
+
+import type { Type_RawQueryParams }    from '../utils/gip_http_utils.ts';
+import type { Type_DbProgramEditItem } from '../utils/gip_prog_fields.ts';
+
+////////////////////////////////////////
+// Exported and local
+
+export type Type_HandlerResponse = APIGatewayProxyStructuredResultV2;
+
+//export interface Type_HandlerResponse {
+//	statusCode: number,
+//	headers?:   Record<string,unknown>,
+//	body?:      string,
+//};
 
 type Type_APIGatewayEventHandler = ( event: APIGatewayEvent ) => Promise<Type_HandlerResponse>;
 
+export type Type_handler_args = APIGatewayEvent;
+export type Type_handler_ret  = Promise<Type_HandlerResponse>;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
 
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 /**
- * @param {*} req : the request object, with properties:
- *                  - query : the query parameters:
- *                            - current:    return current day items;
- *                            - downloaded: include already downloaded programs.
- * @returns TODO
+ * @param {*} event : the request object, with properties:
+ *                      - queryStringParameters : object containing the query parameters;
+ *                          - all:        if set, return all programs;
+ *                          - current:    if set, include current day items;
+ *                          - downloaded: include already downloaded programs.
+ * @returns object with properties:
+ *           - statusCode: integer HTTP response code;
+ *           - headers:    object containing the HTTP headers;
+ *           - body:       stringified JSON body.
  */
 async function handleGET( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
 	const result : Type_HandlerResponse = {
@@ -72,6 +106,14 @@ async function handleGET( event: APIGatewayEvent ) : Promise<Type_HandlerRespons
 	return result;
 }
 
+/**
+ * @param {*} event : the request object, with properties:
+ *                      - body : stringified JSON object.
+ * @returns object with properties:
+ *           - statusCode: integer HTTP response code;
+ *           - headers:    object containing the HTTP headers;
+ *           - body:       stringified JSON body.
+ */
 async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
 	const result : Type_HandlerResponse = {
 		statusCode: 200,
@@ -85,7 +127,7 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
 		const strPrograms = stringifyUTF16( programs );
 		logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
 		const headers = {
-			'Content-Type':  CONTENT_TYPE_JSON,
+			'Content-Type':   CONTENT_TYPE_JSON,
 			'Content-Length': strPrograms.length,
 			//'Access-Control-Allow-Origin': '*',
 			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
@@ -107,6 +149,17 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
 	return result;
 }
 
+/**
+ * Updates the program status of one or more programs and creates a program history object for each update.
+ * @param {*} event : the request object, with properties:
+ *                      - body : stringified JSON array of objects with properties:
+ *                                - pid:    identifies the program;
+ *                                - status: the new status, one of: 'Success', 'Error', 'Already'
+ * @returns object with properties:
+ *           - statusCode: integer HTTP response code;
+ *           - headers:    object containing the HTTP headers;
+ *           - body:       stringified JSON body.
+ */
 async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
 	const result = {
 		statusCode: 200,
@@ -128,6 +181,11 @@ async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerRespo
 	return result;
 }
 
+/**
+ * Process any unsupported method calls.
+ * @returns object with property:
+ *            - statusCode: 404
+ */
 async function handleUnsupported( /* event: APIGatewayEvent */ ) : Promise<Type_HandlerResponse> { // eslint-disable-line @typescript-eslint/require-await
 	//const headers = {
 	//  'Content-Type': 'text/plain',
@@ -139,7 +197,18 @@ async function handleUnsupported( /* event: APIGatewayEvent */ ) : Promise<Type_
 	};
 }
 
-export async function handler( event: APIGatewayEvent /*, _context: Context */ ): Promise<Type_HandlerResponse> { // APIGatewayProxyResultV2
+/**
+ * Lambda handler function for the GIP programs API.
+ * @param event : the API Gateway event, expect one of the following methods:
+ *                 - GET   : return the program list;
+ *                 - POST  : replace the program list;
+ *                 - PATCH : update the program status and the program history.
+ * @returns object with properties:
+ *            - statusCode: numerical HTTP status code;
+ *            - headers:    optional HTTP headers object;
+ *            - body:       optional stringified JSON object.
+ */
+export async function handler( event: Type_handler_args /*, _context: Context */ ): Type_handler_ret {
 	logger.log( 'info',  `handler:BEGIN: `, { httpMethod: event.httpMethod, path: event.path } );
 	logger.log( 'debug', `handler:programs: `, { event } );
 
@@ -150,8 +219,7 @@ export async function handler( event: APIGatewayEvent /*, _context: Context */ )
 		'default': handleUnsupported,
 	};
 
-	const method    = event.httpMethod ?? 'default';                      // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-	const fnHandler = METHOD_HANDLER[ method ] || METHOD_HANDLER.default; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+	const fnHandler = METHOD_HANDLER[ event.httpMethod ] ?? METHOD_HANDLER.default;
 
 	const result = await fnHandler( event );
 

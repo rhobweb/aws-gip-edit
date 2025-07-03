@@ -101,8 +101,8 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 }
 
 /**
- * @param programItem : a Program Item object;
- * @returns a DB Program Item object.
+ * @param programItem : a Program item display object;
+ * @returns a DB Program Item object suitable for manipulation.
  */
 export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret {
 	const dbProg : Type_DbProgramEditItem = {
@@ -126,8 +126,6 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
 		if ( dbField ) {
 			if ( dbField !== DB_FIELD_POS ) {
 				dbProg[ dbField ] = value;
-			} else {
-				dbProg[ dbField ] = value as unknown as number | null;
 			}
 		}
 	}
