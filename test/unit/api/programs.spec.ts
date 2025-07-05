@@ -25,6 +25,8 @@ import type {
 	DynamoDBDocumentClient,
 	//ScanCommandInput,
 	ScanCommandOutput,
+	TransactWriteCommand,
+	TransactWriteCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
 
 import libDynamodb from '@aws-sdk/lib-dynamodb';
@@ -77,7 +79,8 @@ const HANDLER_REQ_TEMPLATE : Type_handler_args = {
 	requestContext: {} as APIGatewayEvent['requestContext'],
 };
 
-const EXPECTED_PROGRAM_TABLE_NAME = 'dev_test-aws-gip-edit_Program';
+const EXPECTED_PROGRAM_TABLE_NAME         = 'dev_test-aws-gip-edit_Program';
+const EXPECTED_PROGRAM_HISTORY_TABLE_NAME = 'dev_test-aws-gip-edit_ProgramHistory';
 
 function formatBody( rawObject : object ) : string {
 	const rawString = JSON.stringify( rawObject );
@@ -227,6 +230,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 		// Provide the required input for ScanCommand, e.g., TableName
 		sendExpectedArgs = {
 			// @ts-expect-error TODO fix type
+			objType: 'ScanCommand',
 			args: {
 				TableName: EXPECTED_PROGRAM_TABLE_NAME,
 			},
@@ -295,6 +299,9 @@ describe(MODULE_NAME + ':handler POST', () => {
 	let sendErrArr          : (Error | null)[];
 	let sendRetArr          : [ ScanCommandOutput, BatchWriteCommandOutput, BatchWriteCommandOutput ];
 	let sendExpectedArgsArr : [ ScanCommand, BatchWriteCommand, BatchWriteCommand ];
+	let expectedItemsArr    : Record<string,string|number>[];
+	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
+	const testDtSystemTime  = new Date( testStrSystemTime );
 	const testItems = [
 		{
 			pid:         'pid1',
@@ -303,7 +310,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			genre:       'Comedy',
 			quality:     'High',
 			status:      'Pending',
-			modify_time: '2025-06-01T01:02:03.456Z',
+			//modify_time: '2025-06-01T01:02:03.456Z',
 			image_uri:   'myimageuri1',
 		},
 		{
@@ -313,13 +320,15 @@ describe(MODULE_NAME + ':handler POST', () => {
 			genre:       'Books&Spoken',
 			quality:     'Normal',
 			status:      'Pending',
-			modify_time: '2025-06-01T02:03:04.567Z',
+			//modify_time: '2025-06-01T02:03:04.567Z',
 			image_uri:   'myimageuri2',
 		},
 	];
 
 	beforeEach( () => {
 		commonBeforeEach();
+		jest.useFakeTimers();
+		jest.setSystemTime( testDtSystemTime );
 		testModuleObj = testModule.default;
 		testArgs = {
 			...HANDLER_REQ_TEMPLATE,
@@ -344,6 +353,18 @@ describe(MODULE_NAME + ':handler POST', () => {
 			new Error( 'BatchWrite Err 1' ),
 			new Error( 'BatchWrite Err 2' ),
 		];
+		expectedItemsArr = [
+			{
+				...testItems[ 0 ],
+				pos: 1,
+				modify_time: testStrSystemTime,
+			},
+			{
+				...testItems[ 1 ],
+				pos: 2,
+				modify_time: testStrSystemTime,
+			},
+		];
 		sendRetArr = [
 			{
 				'$metadata':      {},
@@ -361,8 +382,49 @@ describe(MODULE_NAME + ':handler POST', () => {
 		sendExpectedArgsArr = [
 			{
 				// @ts-expect-error TODO fix type
+				objType: 'ScanCommand',
 				args: {
 					TableName: EXPECTED_PROGRAM_TABLE_NAME,
+				},
+			},
+			{
+				// @ts-expect-error TODO fix type
+				objType: 'BatchWriteCommand',
+				args: {
+					RequestItems: {
+						[EXPECTED_PROGRAM_TABLE_NAME]: [
+							{
+								DeleteRequest: {
+									Key: { pid: 'pid1' },
+								},
+							},
+							{
+								DeleteRequest: {
+									Key: { pid: 'pid2' },
+								},
+							},
+						],
+					},
+				},
+			},
+			{
+				// @ts-expect-error TODO fix type
+				objType: 'BatchWriteCommand',
+				args: {
+					RequestItems: {
+						[EXPECTED_PROGRAM_TABLE_NAME]: [
+							{
+								PutRequest: {
+									Item: expectedItemsArr[ 0 ],
+								},
+							},
+							{
+								PutRequest: {
+									Item: expectedItemsArr[ 1 ],
+								},
+							},
+						],
+					},
 				},
 			},
 		];
@@ -370,6 +432,24 @@ describe(MODULE_NAME + ':handler POST', () => {
 
 	afterEach( () => {
 		commonAfterEach();
+		jest.useRealTimers();
+	});
+
+	test( 'No body', async () => {
+		// @ts-expect-error body is not optional
+		delete testArgs.body;
+		expectedBody   = JSON.stringify( { message: 'No programs' } );
+		expectedResult = {
+			statusCode: 400,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 0 );
 	});
 
 	test( 'scan error', async () => {
@@ -388,22 +468,279 @@ describe(MODULE_NAME + ':handler POST', () => {
 		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
 	});
 
-	/*
-	test( 'success', async () => {
-		sendErr = null;
-		expectedBody = formatBody( [ testItems[ 1 ], testItems[ 0 ] ] );
+	test( 'delete error', async () => {
+		sendErrArr[ 0 ] = null;
+		expectedBody = JSON.stringify( { message: 'BatchWrite Err 1' } );
 		expectedResult = {
-			statusCode: 200,
-			headers:    {
+			statusCode: 500,
+			body:       expectedBody,
+			headers: {
 				'Content-Type':   'application/json; charset=UTF-16',
 				'Content-Length': expectedBody.length,
 			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 2 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
+
+	test( 'write error', async () => {
+		sendErrArr[ 0 ] = null;
+		sendErrArr[ 1 ] = null;
+		expectedBody = JSON.stringify( { message: 'BatchWrite Err 2' } );
+		expectedResult = {
+			statusCode: 500,
 			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 3 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
+
+	test( 'OK', async () => {
+		sendErrArr[ 0 ] = null;
+		sendErrArr[ 1 ] = null;
+		sendErrArr[ 2 ] = null;
+		expectedBody = formatBody( [
+			{ ...testItems[ 0 ] },
+			{ ...testItems[ 1 ] },
+		] );
+		expectedResult = {
+			statusCode: 200,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
 		};
 		actualResult = await testModuleObj.handler( testArgs );
 		expect( actualResult.statusCode ).toEqual( expectedResult.statusCode );
-		expect( actualResult.headers ).toEqual( expectedResult.headers );
 		expect( JSON.parse(actualResult.body!) ).toEqual( JSON.parse(expectedResult.body!) ); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-	})
-	*/;
+		expect( actualResult.headers ).toEqual( expectedResult.headers );
+		expect( sendMock ).toHaveBeenCalledTimes( 3 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
+});
+
+describe(MODULE_NAME + ':handler PATCH', () => {
+	let testModuleObj       : Type_TestModuleDefaultDefs;
+	let actualResult        : Awaited<Type_handler_ret>;
+	let expectedResult      : Awaited<Type_handler_ret>;
+	let expectedBody        : string;
+	let testArgs            : Type_handler_args;
+	let sendMock            : typeof jest.fn;
+	let sendErrArr          : (Error | null)[];
+	let sendRetArr          : [ ScanCommandOutput, TransactWriteCommandOutput ];
+	let sendExpectedArgsArr : [ ScanCommand, TransactWriteCommand ];
+	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
+	const testDtSystemTime  = new Date( testStrSystemTime );
+	const testItems = [
+		{
+			pid:    'pid1',
+			status: 'Success',
+		},
+		{
+			pid:    'pid2',
+			status: 'Already',
+		},
+	];
+
+	beforeEach( () => {
+		commonBeforeEach();
+		jest.useFakeTimers();
+		jest.setSystemTime( testDtSystemTime );
+		testModuleObj = testModule.default;
+		testArgs = {
+			...HANDLER_REQ_TEMPLATE,
+			httpMethod: 'PATCH',
+			body: formatBody( testItems ),
+		};
+		sendMock = jest.fn();
+		// @ts-expect-error don't bother trying to type this
+		dynamoDBDocumentClientMock.send = sendMock;
+		// @ts-expect-error don't bother trying to type this
+		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await,@typescript-eslint/no-unsafe-call
+			const sendErr = sendErrArr.shift();
+			const sendRet = sendRetArr.shift();
+			if ( ! sendErr ) {
+				return sendRet;
+			} else {
+				throw sendErr;
+			}
+		} );
+		sendErrArr = [
+			new Error( 'scan Err' ),
+			new Error( 'TransactWrite Err' ),
+		];
+		sendRetArr = [
+			{
+				'$metadata':      {},
+				LastEvaluatedKey: undefined,
+				Items:            testItems,
+			},
+			{
+				'$metadata': {},
+			},
+		];
+		// Provide the required input for ScanCommand, e.g., TableName
+		sendExpectedArgsArr = [
+			{
+				// @ts-expect-error TODO fix type
+				objType: 'ScanCommand',
+				args: {
+					TableName: EXPECTED_PROGRAM_TABLE_NAME,
+				},
+			},
+			{
+				// @ts-expect-error TODO fix type
+				objType: 'TransactWriteCommand',
+				args: {
+					TransactItems: [
+						{
+							Update: {
+								TableName:                 EXPECTED_PROGRAM_TABLE_NAME,
+								Key:                       { pid: 'pid1' },
+								ExpressionAttributeNames:  { '#S': 'status' },
+								ExpressionAttributeValues: { ':s': 'Success' },
+								UpdateExpression:          'SET #S = :s',
+							},
+						},
+						{
+							Update: {
+								TableName:                 EXPECTED_PROGRAM_TABLE_NAME,
+								Key:                       { pid: 'pid2' },
+								ExpressionAttributeNames:  { '#S': 'status' },
+								ExpressionAttributeValues: { ':s': 'Already' },
+								UpdateExpression:          'SET #S = :s',
+							},
+						},
+						{
+							Put: {
+								TableName: EXPECTED_PROGRAM_HISTORY_TABLE_NAME,
+								Item: {
+									...testItems[ 0 ],
+									modify_time:   testStrSystemTime,
+									download_time: testStrSystemTime,
+								},
+							},
+						},
+						{
+							Put: {
+								TableName: EXPECTED_PROGRAM_HISTORY_TABLE_NAME,
+								Item: {
+									...testItems[ 1 ],
+									modify_time:   testStrSystemTime,
+									download_time: testStrSystemTime,
+								},
+							},
+						},
+					],
+				},
+			},
+		];
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+		jest.useRealTimers();
+	});
+
+	test( 'No body', async () => {
+		// @ts-expect-error body is not specified as optional
+		delete testArgs.body;
+		expectedBody = JSON.stringify( { message: 'No programs' } );
+		expectedResult = {
+			statusCode: 400,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 0 );
+	});
+
+	test( 'No programs', async () => {
+		testArgs.body = '[]';
+		expectedBody = JSON.stringify( { message: 'No programs' } );
+		expectedResult = {
+			statusCode: 400,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 0 );
+	});
+
+	test( 'scan error', async () => {
+		expectedBody = JSON.stringify( { message: 'scan Err' } );
+		expectedResult = {
+			statusCode: 500,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 1 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
+
+	test( 'transact error', async () => {
+		sendErrArr[ 0 ] = null;
+		expectedBody = JSON.stringify( { message: 'TransactWrite Err' } );
+		expectedResult = {
+			statusCode: 500,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( sendMock ).toHaveBeenCalledTimes( 2 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
+
+	test( 'OK', async () => {
+		sendErrArr[ 0 ] = null;
+		sendErrArr[ 1 ] = null;
+		expectedBody = formatBody( {} );
+		expectedResult = {
+			statusCode: 200,
+			body:       expectedBody,
+			headers: {
+				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Length': expectedBody.length,
+			},
+		};
+		actualResult = await testModuleObj.handler( testArgs );
+		expect( actualResult.statusCode ).toEqual( expectedResult.statusCode );
+		expect( JSON.parse(actualResult.body!) ).toEqual( JSON.parse(expectedResult.body!) ); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		expect( actualResult.headers ).toEqual( expectedResult.headers );
+		expect( sendMock ).toHaveBeenCalledTimes( 2 );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+		expect( sendMock ).toHaveBeenCalledWith( sendExpectedArgsArr.shift() );
+	});
 });

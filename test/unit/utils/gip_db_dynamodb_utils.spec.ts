@@ -411,9 +411,11 @@ describe(MODULE_NAME + ':loadTable', () => {
 		} );
 		testDbDocClient.send = sendMock;
 		sendExpectedArgs1 = {
+			objType: 'ScanCommand',
 			args: { TableName: testTableName },
 		};
 		sendExpectedArgs2 = {
+			objType: 'ScanCommand',
 			args: { TableName: testTableName, ExclusiveStartKey: testLastEvaluatedKey },
 		};
 		sendExpectedArgsArr = [ sendExpectedArgs1, sendExpectedArgs2 ];
@@ -679,12 +681,17 @@ describe(MODULE_NAME + ':deletePrograms', () => {
 		const sendExpectedDeleteArgs = {
 			RequestItems: {
 				[EXPECTED_TABLE_NAME_PROGRAM]: [
-					{ DeleteRequest: { Key: { pid: testItem1.pid } } },
+					{
+						DeleteRequest: {
+							Key: { pid: testItem1.pid },
+						},
+					},
 				],
 			},
 		};
 		sendExpectedArgs = {
-			args: sendExpectedDeleteArgs,
+			objType: 'BatchWriteCommand',
+			args:    sendExpectedDeleteArgs,
 		};
 		actualErr = null;
 	});
@@ -1292,7 +1299,8 @@ describe(MODULE_NAME + ':loadProgramsHelper', () => {
 		} );
 		testDbDocClient.send = sendMock;
 		sendExpectedArgs = {
-			args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
+			objType: 'ScanCommand',
+			args:    { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 		};
 		expectedResult = [
 			{
@@ -1392,9 +1400,11 @@ describe(MODULE_NAME + ':clearProgramsHelper', () => {
 		};
 		sendExpectedArgsArr = [
 			{
+				objType: 'ScanCommand',
 				args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 			},
 			{
+				objType: 'BatchWriteCommand',
 				args: sendExpectedDeleteArgs,
 			}
 		];
@@ -1548,9 +1558,11 @@ describe(MODULE_NAME + ':saveProgramsHelper', () => {
 		};
 		sendExpectedArgsArr = [
 			{
+				objType: 'ScanCommand',
 				args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 			},
 			{
+				objType: 'BatchWriteCommand',
 				args: sendExpectedWriteArgs,
 			}
 		];
@@ -1747,9 +1759,11 @@ describe(MODULE_NAME + ':updateProgramsHelper', () => {
 		};
 		sendExpectedArgsArr = [
 			{
+				objType: 'ScanCommand',
 				args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 			},
 			{
+				objType: 'TransactWriteCommand',
 				args: sendExpectedUpdateArgs,
 			}
 		];
@@ -1935,7 +1949,8 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 			}
 		} );
 		sendExpectedArgs = {
-			args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
+			objType: 'ScanCommand',
+			args:    { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 		};
 		expectedResult = [
 			{
@@ -2050,10 +2065,12 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		};
 		sendExpectedArgsArr = [
 			{
-				args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
+				objType: 'ScanCommand',
+				args:    { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 			},
 			{
-				args: sendExpectedWriteArgs,
+				objType: 'BatchWriteCommand',
+				args:     sendExpectedWriteArgs,
 			}
 		];
 		actualErr = null;
@@ -2177,10 +2194,12 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 		};
 		sendExpectedArgsArr = [
 			{
-				args: { TableName: EXPECTED_TABLE_NAME_PROGRAM },
+				objType: 'ScanCommand',
+				args:    { TableName: EXPECTED_TABLE_NAME_PROGRAM },
 			},
 			{
-				args: sendExpectedUpdateArgs,
+				objType: 'TransactWriteCommand',
+				args:    sendExpectedUpdateArgs,
 			}
 		];
 		actualErr = null;

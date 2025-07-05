@@ -378,7 +378,7 @@ function genWriteCommandParams( programs : Type_genWriteCommandParams_args ) : T
 	const arrRequest   : WriteRequest[] = [];
 	const commandParams: BatchWriteCommandInput = {
 		RequestItems: {
-			[TABLE_PROGRAM]: arrRequest
+			[TABLE_PROGRAM]: arrRequest,
 		}
 	};
 

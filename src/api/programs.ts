@@ -118,33 +118,34 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
 	const result : Type_HandlerResponse = {
 		statusCode: 200,
 	};
+	let strBody = '';
 	try {
-		const rawBody = event.body ?? '[]';
-		const programs = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
-		logger.log( 'debug', 'handlePOST: START: ', { programs } );
-		await savePrograms( { programs } );
-		logger.log( 'debug', 'handlePOST: savePrograms: success: ' );
-		const strPrograms = stringifyUTF16( programs );
-		logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strPrograms );
-		const headers = {
-			'Content-Type':   CONTENT_TYPE_JSON,
-			'Content-Length': strPrograms.length,
-			//'Access-Control-Allow-Origin': '*',
-			//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
-			//'Access-Control-Allow-Headers': '*',
-		};
-		result.headers = headers;
-		result.body    = strPrograms;
+		if ( event.body ) {
+			const rawBody = event.body;
+			const programs = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
+			logger.log( 'debug', 'handlePOST: START: ', { programs } );
+			await savePrograms( { programs } );
+			logger.log( 'debug', 'handlePOST: savePrograms: success: ' );
+			strBody = stringifyUTF16( programs );
+			logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strBody );
+		} else {
+			result.statusCode = 400;
+			strBody = JSON.stringify( { message: 'No programs' } );
+		}
 	}
 	catch ( err ) {
 		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-		const retMessage  = JSON.stringify( { message: ( err as HttpError ).message || '' } );
-		result.body       = retMessage;
-		result.headers = {
-			'Content-Type':   CONTENT_TYPE_JSON,
-			'Content-Length': retMessage.length,
-		};
+		strBody = JSON.stringify( { message: ( err as HttpError ).message } );
 	}
+
+	result.body    = strBody;
+	result.headers = {
+		'Content-Type':   CONTENT_TYPE_JSON,
+		'Content-Length': strBody.length,
+		//'Access-Control-Allow-Origin': '*',
+		//'Access-Control-Allow-Methods': [ 'GET', 'POST', 'OPTIONS' ],
+		//'Access-Control-Allow-Headers': '*',
+	};
 
 	return result;
 }
@@ -157,27 +158,34 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
  *                                - status: the new status, one of: 'Success', 'Error', 'Already'
  * @returns object with properties:
  *           - statusCode: integer HTTP response code;
- *           - headers:    object containing the HTTP headers;
- *           - body:       stringified JSON body.
  */
 async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerResponse> {
-	const result = {
+	const result : Type_HandlerResponse = {
 		statusCode: 200,
 	};
+	let rawResultBody = {};
 	try {
-		const rawBody = event.body ?? '[]';
-		if ( rawBody.length > 0 ) {
-			const newPrograms = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
+		const rawBody     = event.body ?? '[]';
+		const newPrograms = JSON.parse( rawBody ) as Type_DbProgramEditItem[];
+		if ( newPrograms.length > 0 ) {
 			logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
 			await updatePrograms( { programs: newPrograms } );
 		} else {
 			logger.log( 'info', 'handlePATCH: called with no programs' );
 			result.statusCode = 400;
+			rawResultBody = { message: 'No programs' };
 		}
 	}
 	catch ( err ) {
 		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+		rawResultBody = { message: ( err as HttpError ).message };
 	}
+
+	result.body    = stringifyUTF16( rawResultBody );
+	result.headers = {
+		'Content-Type':   CONTENT_TYPE_JSON,
+		'Content-Length': result.body.length,
+	};
 	return result;
 }
 

@@ -73,21 +73,30 @@ export class DynamoDBDocumentClient {
 
 export class ScanCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
 	constructor ( args : ScanCommandInput ) {
-		const scanCommandRet = { args: copyObject( args ) as ScanCommandInput };
+		const scanCommandRet = {
+			objType: 'ScanCommand',
+			args:    copyObject( args ) as ScanCommandInput,
+		};
 		return scanCommandRet;
 	}
 }
 
 export class BatchWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
 	constructor ( args : BatchWriteCommandInput ) {
-		const batchWriteCommandRet = { args: copyObject( args ) as BatchWriteCommandInput };
+		const batchWriteCommandRet = {
+			objType: 'BatchWriteCommand',
+			args:    copyObject( args ) as BatchWriteCommandInput,
+		};
 		return batchWriteCommandRet;
 	}
 }
 
 export class TransactWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
 	constructor ( args : TransactWriteCommandInput ) {
-		const transactWriteCommandRet = { args: copyObject( args ) as TransactWriteCommandInput };
+		const transactWriteCommandRet = {
+			objType: 'TransactWriteCommand',
+			args:    copyObject( args ) as TransactWriteCommandInput,
+		};
 		return transactWriteCommandRet;
 	}
 }
