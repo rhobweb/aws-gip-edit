@@ -1,8 +1,8 @@
 /**
- * File: utils/gip_browser_utils.ts
- *
- * Client side utilities to determine the client browser type.
+ * File:        utils/gip_browser_utils.ts
+ * Description: Client side utilities to determine the client browser type.
  */
+'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
@@ -11,7 +11,7 @@
 // Types
 
 ////////////////////////////////////////
-// Exported Types
+// Exported and local types
 
 export interface Type_BrowserInfo {
 	os:    string,
@@ -19,25 +19,28 @@ export interface Type_BrowserInfo {
 }
 
 type Type_UserAgentRestMap = [
-	string,                  // The default OS
-	Record<string, string>,  // Another map to
+	string,                  // Search string
+	Record<string, string>,  // Object with keys being the search string and values being the OS
 ];
 
+// Object with keys being the search string and values being the OS or a further search map
 export type Type_UserAgentMap = Record<string, string | Type_UserAgentRestMap>;
 
 export type Type_parseUserAgent_args = string;
-export type Type_parseUserAgent_ret  = [ string, string];
-export type Type_searchMap_ret  = string | Type_UserAgentRestMap | null;
-export type Type_determineOS_args = string;
-export type Type_determineOS_ret  = string;
-export type Type_os_is_IOS_args = string;
-export type Type_os_is_IOS_ret  = boolean;
+export type Type_parseUserAgent_ret  = [ string, string ];
+
+export type Type_searchMap_ret       = string | Type_UserAgentRestMap | null;
+
+export type Type_determineOS_args    = string;
+export type Type_determineOS_ret     = string;
+
+export type Type_os_is_IOS_args      = string;
+export type Type_os_is_IOS_ret       = boolean;
+
 export type Type_getBrowserInfoFromUserAgent_args = string;
 export type Type_getBrowserInfoFromUserAgent_ret  = Type_BrowserInfo;
-export type Type_BrowserInfo_ret = Type_BrowserInfo;
 
-////////////////////////////////////////
-// Local Types
+export type Type_BrowserInfo_ret = Type_BrowserInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -55,33 +58,36 @@ const UA_REST_MAP_MACINTOSH = {
 //   - the first element being the default OS name.
 const USER_AGENT_MAP : Type_UserAgentMap = {
 	'windows nt 10(\\.[0-9]|)': 'Windows 10',
-	'windows nt 6.3':          'Windows 8.1',
-	'windows nt 6.2':          'Windows 8',
-	'windows nt 6.1':          'Windows 7',
-	'windows nt 6.0':          'Windows Vista',
-	'windows nt 5.2':          'Windows Server 2003/XP x64',
-	'windows nt 5.1':          'Windows XP',
-	'windows xp':              'Windows XP',
-	'windows nt 5.0':          'Windows 2000',
-	'windows me':              'Windows ME',
-	'win98':                   'Windows 98',
-	'win95':                   'Windows 95',
-	'win16':                   'Windows 3.11',
-	'macintosh':               [ 'Mac OS X', UA_REST_MAP_MACINTOSH ],
-	'mac os x':                'Mac OS X',
-	'mac_powerpc':             'Mac OS 9',
-	'linux':                   'Linux',
-	'ubuntu':                  'Ubuntu',
-	'iphone':                  'iPhone',
-	'ipod':                    'iPod',
-	'ipad':                    'iPad',
-	'android':                 'Android',
-	'blackberry':              'BlackBerry',
-	'webos':                   'Mobile',
-	[UNKNOWN_OS]:              'Unknown OS Platform',
+	'windows nt 6.3':           'Windows 8.1',
+	'windows nt 6.2':           'Windows 8',
+	'windows nt 6.1':           'Windows 7',
+	'windows nt 6.0':           'Windows Vista',
+	'windows nt 5.2':           'Windows Server 2003/XP x64',
+	'windows nt 5.1':           'Windows XP',
+	'windows xp':               'Windows XP',
+	'windows nt 5.0':           'Windows 2000',
+	'windows me':               'Windows ME',
+	'win98':                    'Windows 98',
+	'win95':                    'Windows 95',
+	'win16':                    'Windows 3.11',
+	'macintosh':                [ 'Mac OS X', UA_REST_MAP_MACINTOSH ],
+	'mac os x':                 'Mac OS X',
+	'mac_powerpc':              'Mac OS 9',
+	'linux':                    'Linux',
+	'ubuntu':                   'Ubuntu',
+	'iphone':                   'iPhone',
+	'ipod':                     'iPod',
+	'ipad':                     'iPad',
+	'android':                  'Android',
+	'blackberry':               'BlackBerry',
+	'webos':                    'Mobile',
+	[UNKNOWN_OS]:               'Unknown OS Platform',
 };
 
 const IOS_OS = [ 'iOS', 'iPhone', 'iPod', 'iPad' ]; // The OS that are part of the iOS family
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
 ////////////////////////////////////////////////////////////////////////////////
 // Local definitions

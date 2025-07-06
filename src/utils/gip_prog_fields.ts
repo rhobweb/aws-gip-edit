@@ -48,7 +48,18 @@ import {
 // Types
 
 ////////////////////////////////////////
-// Exported Types
+// Local types
+
+type Type_RawFieldMapItem       = Record<string, ( string | null )>;
+type Type_RawFieldMap           = Type_RawFieldMapItem[];
+type Type_RawFieldMapCollection = Record<string, Type_RawFieldMap>;
+type Type_FieldMapCollection    = Record<string, Type_FieldMap>;
+type Type_DefaultValueFieldMap  = Record<string, string>;
+type Type_FieldOrderCollection  = Record<string, Type_FieldOrder>;
+
+////////////////////////////////////////
+// Exported types
+
 export type Type_FieldMap   = Record<string, ( string | null )>;
 export type Type_FieldOrder = string[];
 
@@ -84,16 +95,6 @@ type Type_DbProgramHistoryItem_unwanted = typeof DB_FIELD_POS | typeof DB_FIELD_
 export interface Type_DbProgramHistoryItem extends Omit<Type_DbProgramItem,Type_DbProgramHistoryItem_unwanted> {
 	[DB_FIELD_DOWNLOAD_TIME]? : string,
 };
-
-////////////////////////////////////////
-// Local Types
-
-type Type_RawFieldMapItem       = Record<string, ( string | null )>;
-type Type_RawFieldMap           = Type_RawFieldMapItem[];
-type Type_RawFieldMapCollection = Record<string, Type_RawFieldMap>;
-type Type_FieldMapCollection    = Record<string, Type_FieldMap>;
-type Type_DefaultValueFieldMap  = Record<string, string>;
-type Type_FieldOrderCollection  = Record<string, Type_FieldOrder>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -250,6 +251,9 @@ const RAW_FIELD_MAP_COLLECTION : Type_RawFieldMapCollection = {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
 // Local definitions
 
 /**
@@ -362,3 +366,6 @@ export const REVERSE_FIELD_MAP_COLLECTION = genReverseFieldMapCollection( RAW_FI
 export const FIELD_MAP_COLLECTION         = genFieldMapCollection( RAW_FIELD_MAP_COLLECTION );
 export const FIELD_ORDER_COLLECTION       = genFieldOrderCollection( RAW_FIELD_MAP_COLLECTION );
 export const FIELD_DEFAULT_VALUES         = genDefaultFieldValue( FIELD_MAP_COLLECTION, REVERSE_FIELD_MAP_COLLECTION );
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

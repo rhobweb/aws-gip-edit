@@ -2,11 +2,24 @@
  * File:        utils/gip_http_utils_priv.ts
  * Description: Utilities for use by gip_http_utils.
  */
+'use strict';
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import Url         from 'url-parse';
-import queryString from 'query-string';
+import queryString from 'query-string'; // Use v7.1.3 as could not get ESM rewrite to work
 //import queryString from 'node:querystring'; // Cannot use this as node modules are server-side only
 
+import type UrlParse from 'url-parse';
+
 import logger from '@rhobweb/console-logger';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
 
 import type {
 	Nullable,
@@ -16,6 +29,9 @@ import type {
 	Type_EndpointDef,
 } from './gip_types.ts';
 
+////////////////////////////////////////
+// Exported and local types
+
 export interface Type_genParams_args {
 	endpointDef: Type_EndpointDef,
 	params?:     Type_RawHttpParams,
@@ -24,6 +40,7 @@ export interface Type_genParams_ret {
 	uri:    string,
 	params: Type_HttpParams,
 };
+
 export interface Type_genContent_args {
 	endpointDef: Type_EndpointDef,
 	headers?:    Type_HttpHeaders,
@@ -33,6 +50,7 @@ export interface Type_genContent_ret {
 	headers: Type_HttpHeaders,
 	body:    Nullable<Type_HttpParams>,
 };
+
 export interface Type_genURI_args {
 	uri:     string, method: string,
 	params?: Nullable<Type_HttpParams>,
@@ -52,13 +70,6 @@ type Type_RawQueryParamScalarValue    = string | null | undefined;
 type Type_RawQueryParamValue          = Type_RawQueryParamScalarValue | string[];
 export type Type_RawQueryParams       = Partial<Record<string, Type_RawQueryParamValue>>;
 
-const METHOD_GET                     = 'GET';
-const HEADER_PROP_CONTENT_TYPE       = 'Content-Type';
-const HEADER_CONTENT_TYPE_PLAIN_TEXT = 'text/plain; charset=UTF-8';
-const HEADER_CONTENT_TYPE_JSON       = 'application/json; charset=UTF-8';
-
-import type UrlParse from 'url-parse';
-
 // Type to make the properties of the returned UrlParse object mutable
 type Type_MutableUrlParse = {
 	-readonly [P in keyof UrlParse<string>]+?: UrlParse<string>[P];
@@ -66,6 +77,23 @@ type Type_MutableUrlParse = {
 
 // The queryString parser allows undefined for property values, but the caller expects null.
 type Type_QueryParser<T = Record<string, string | undefined | null>> = (query: string) => T;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const METHOD_GET                     = 'GET';
+const HEADER_PROP_CONTENT_TYPE       = 'Content-Type';
+const HEADER_CONTENT_TYPE_PLAIN_TEXT = 'text/plain; charset=UTF-8';
+const HEADER_CONTENT_TYPE_JSON       = 'application/json; charset=UTF-8';
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
 
 /**
  * @param object with properties:
@@ -195,6 +223,7 @@ export function genContent( { endpointDef, headers = {}, params = null } : Type_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 const privateDefs = {};
 

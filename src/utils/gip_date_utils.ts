@@ -1,14 +1,14 @@
 /**
- * File: utils/gip_date_utils.ts
- * @description Day of the week utility functions.
+ * File:       utils/gip_date_utils.ts
+ * Description Day of the week utility functions.
  */
 'use strict';
 
-const ARR_DAY_OF_WEEK        = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-const NUM_DAYS_IN_WEEK       = ARR_DAY_OF_WEEK.length;
-// Number of days to regard a day of the week as being in the past and available.
-// e.g., if today is Mon and the threshold is 2, then Sat and Sun are available, but Fri is not.
-const DEFAULT_DAYS_THRESHOLD = 2;
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Exported and local types
 
 export type Type_DayOfWeek = typeof ARR_DAY_OF_WEEK[number];
 
@@ -27,6 +27,22 @@ export interface Type_isDayOfWeekAvailable_args {
 };
 export type Type_isDayOfWeekAvailable_ret = boolean;
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const ARR_DAY_OF_WEEK  = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+const NUM_DAYS_IN_WEEK = ARR_DAY_OF_WEEK.length;
+
+// Number of days to regard a day of the week as being in the past and available.
+// e.g., if today is Mon and the threshold is 2, then Sat and Sun are available, but Fri is not.
+const DEFAULT_DAYS_THRESHOLD = 2;
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
 /**
  * @param d - capitalised three character day of week, e.g., 'Mon';
  * @returns the associated day index 0 = Sun, 6 = Sat, -1 = invalid.
@@ -34,22 +50,6 @@ export type Type_isDayOfWeekAvailable_ret = boolean;
 function dayOfWeekToIndex( d : Type_dayOfWeekToIndex_args ) : Type_dayOfWeekToIndex_ret {
 	const iDay = ARR_DAY_OF_WEEK.indexOf( d );
 	return iDay;
-}
-
-/**
- * @param {Object} - with properties:
- *                    - iOffset: offset in days, defaults to zero;
- *                    - dt:      optional DateTime object, if not specified defaults to the current date;
- * @returns capitalised three character day of week, e.g., 'Mon';
- */
-export function getCurrentDayOfWeek( { iOffset = 0, dt } : Type_getCurrentDayOfWeek_args = {} ) : Type_getCurrentDayOfWeek_ret {
-	dt = dt ?? new Date();
-
-	iOffset = ( ( iOffset % NUM_DAYS_IN_WEEK ) + NUM_DAYS_IN_WEEK ) % NUM_DAYS_IN_WEEK; // Convert negative offsets to positive
-
-	const iDay = ( dt.getDay() + iOffset ) % NUM_DAYS_IN_WEEK;
-
-	return ARR_DAY_OF_WEEK[ iDay ];
 }
 
 /**
@@ -66,6 +66,25 @@ function dayOfWeekDiff( d1 : Type_DayOfWeek, d2 : Type_DayOfWeek ) : Type_dayOfW
 	}
 
 	return iVal2 - iVal1;
+}
+
+////////////////////////////////////////
+// Exported definitions
+
+/**
+ * @param {Object} - with properties:
+ *                    - iOffset: offset in days, defaults to zero;
+ *                    - dt:      optional DateTime object, if not specified defaults to the current date;
+ * @returns capitalised three character day of week, e.g., 'Mon';
+ */
+export function getCurrentDayOfWeek( { iOffset = 0, dt } : Type_getCurrentDayOfWeek_args = {} ) : Type_getCurrentDayOfWeek_ret {
+	dt = dt ?? new Date();
+
+	iOffset = ( ( iOffset % NUM_DAYS_IN_WEEK ) + NUM_DAYS_IN_WEEK ) % NUM_DAYS_IN_WEEK; // Convert negative offsets to positive
+
+	const iDay = ( dt.getDay() + iOffset ) % NUM_DAYS_IN_WEEK;
+
+	return ARR_DAY_OF_WEEK[ iDay ];
 }
 
 /**
@@ -85,6 +104,7 @@ export function isDayOfWeekAvailable( { checkDay, currDay, numDaysThreshold = DE
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 const privateDefs = {};
 

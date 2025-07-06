@@ -7,14 +7,10 @@
  *   Type_ProgramEditInput: contains the editable and display text fields, URI, title, description, image.
  *   Type_DisplayProgramItem:      contains all program fields including display options (e.g., selected).
  */
+'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
-
-import type {
-	Type_DisplayProgramItem,
-	Type_ProgramEditInput,
-} from './gip_types.ts';
 
 import {
 	PROG_FIELD_URI,
@@ -24,10 +20,32 @@ import {
 	PROG_FIELD_IMAGE_URI,
 } from './gip_types'; // Not just types, so need to include these here
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_DisplayProgramItem,
+	Type_ProgramEditInput,
+} from './gip_types.ts';
+
+////////////////////////////////////////
+// Exported and local types
 
 type Type_ProgramEditInputPropName = keyof Type_ProgramEditInput;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
 // Exported definitions
 
 // Class to handle the program editing fields
@@ -83,3 +101,6 @@ export default class GipProgramEditInput implements Type_ProgramEditInput {
 		this[ PROG_FIELD_IMAGE_URI ] = programItem[ PROG_FIELD_IMAGE_URI ];
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

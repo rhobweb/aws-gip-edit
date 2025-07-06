@@ -58,9 +58,11 @@ export type Type_handler_ret  = Promise<Type_HandlerResponse>;
 
 const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 /**
  * @param {*} event : the request object, with properties:
@@ -205,6 +207,9 @@ async function handleUnsupported( /* event: APIGatewayEvent */ ) : Promise<Type_
 	};
 }
 
+////////////////////////////////////////
+// Exported definitions
+
 /**
  * Lambda handler function for the GIP programs API.
  * @param event : the API Gateway event, expect one of the following methods:
@@ -237,3 +242,6 @@ export async function handler( event: Type_handler_args /*, _context: Context */
 }
 
 export default { handler };
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

@@ -9,6 +9,9 @@
  */
 'use strict';
 
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import {
 	DynamoDBClient,
 	DynamoDBClientConfig,
@@ -26,49 +29,9 @@ import {
 	TransactWriteCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 
-// @aws-sdk/lib-dynamodb defines TransactWriteCommandInput as either:
-//   - array of TransactWriteItems (from @aws-sdk/client-dynamodb), modified so that the DB type property is not required, e,g,. { S: 'val' } => 'val';
-//   - undefined.
-// The package does not export the modified TransactWriteItems type, so need to extract it.
-type TransactWriteItemArr        = TransactWriteCommandInput['TransactItems']; // TransactItems is the property name used by the lib package
-type TransactWriteItemArrDefined = Extract<TransactWriteItemArr, unknown[]>;   // Extract the array part, ignoring the undefined part of the union.
-type TransactWriteItem           = TransactWriteItemArrDefined[number];        // Extract the array element type
-
-import process    from 'node:process';
-import assert     from 'node:assert';
-import logger     from '@rhobweb/console-logger';
-
-import type {
-	Nullable,
-} from './gip_types.ts';
-
-const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';         // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-const STAGE                    = process.env.STAGE        || 'dev';               // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-const SERVICE_NAME             = process.env.SERVICE_NAME || 'gip-edit-react';    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-const IS_LOCAL                 = ( process.env.IS_LOCAL ? true : false );
-const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-const GIP_MAX_PROGRAMS         = parseInt( process.env.GIP_MAX_PROGRAMS || '0' ); // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-
-assert( GIP_MAX_PROGRAMS > 0, 'GIP_MAX_PROGRAMS not defined' );
-
-const MODULE_NAME = 'gip_db_dynamodb_utils';
-
-const DEFAULT_DB_CLIENT_CONFIG : DynamoDBClientConfig = {
-	region: AWS_REGION,
-};
-
-logger.log( 'debug', `gip_db_dynamodb_utils: `, { IS_LOCAL, LOCAL_DYNAMO_DB_ENDPOINT } );
-
-if ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) {
-	DEFAULT_DB_CLIENT_CONFIG.endpoint = LOCAL_DYNAMO_DB_ENDPOINT;
-}
-
-import type {
-	Type_DbProgramEditItem,
-	Type_DbProgramItem,
-	Type_DbProgramHistoryItem,
-	Type_DbProgramItemPropName,
-} from './gip_prog_fields.ts';
+import process from 'node:process';
+import assert  from 'node:assert';
+import logger  from '@rhobweb/console-logger';
 
 import {
 	DB_FIELD_STATUS,
@@ -91,25 +54,35 @@ import {
 	HttpError,
 } from './gip_http_utils';
 
-const PROGRAM_FIELDS = [
-	DB_FIELD_POS,
-	DB_FIELD_PID,
-	DB_FIELD_STATUS,
-	DB_FIELD_GENRE,
-	DB_FIELD_DAY_OF_WEEK,
-	DB_FIELD_QUALITY,
-	DB_FIELD_TITLE,
-	DB_FIELD_SYNOPSIS,
-	DB_FIELD_MODIFY_TIME,
-	DB_FIELD_IMAGE_URI,
-	DB_FIELD_DOWNLOAD_TIME,
-] as Type_DbProgramItemPropName[];
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+// @aws-sdk/lib-dynamodb defines TransactWriteCommandInput as either:
+//   - array of TransactWriteItems (from @aws-sdk/client-dynamodb), modified so that the DB type property is not required, e,g,. { S: 'val' } => 'val';
+//   - undefined.
+// The package does not export the modified TransactWriteItems type, so need to extract it.
+type TransactWriteItemArr        = TransactWriteCommandInput['TransactItems']; // TransactItems is the property name used by the lib package
+type TransactWriteItemArrDefined = Extract<TransactWriteItemArr, unknown[]>;   // Extract the array part, ignoring the undefined part of the union.
+type TransactWriteItem           = TransactWriteItemArrDefined[number];        // Extract the array element type
+
+import type {
+	Nullable,
+} from './gip_types.ts';
+
+import type {
+	Type_DbProgramEditItem,
+	Type_DbProgramItem,
+	Type_DbProgramHistoryItem,
+	Type_DbProgramItemPropName,
+} from './gip_prog_fields.ts';
+
+////////////////////////////////////////
+// Exported and local types
 
 export type Type_ProgramField = typeof PROGRAM_FIELDS[number];
-
-const TABLE_PROGRAM         = [ STAGE, SERVICE_NAME, 'Program' ].join( '_' );
-const TABLE_PROGRAM_HISTORY = [ STAGE, SERVICE_NAME, 'ProgramHistory' ].join( '_' );
-const ARR_HISTORY_STATUSES  = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ERROR, VALUE_STATUS_ALREADY ];
 
 export interface Type_genDbRecord_args {
 	program:    Type_DbProgramEditItem,
@@ -172,7 +145,7 @@ export interface Type_updateProgramsHelper_args {
 	dbDocClient: DynamoDBDocumentClient,
 	programs:    Type_DbProgramItem[],
 };
-export type Type_updateProgramsHelper_ret  = Promise<void>;
+export type Type_updateProgramsHelper_ret = Promise<void>;
 
 export type Type_sortPrograms_args = Type_DbProgramItem[];
 export type Type_sortPrograms_ret  = Type_DbProgramItem[];
@@ -187,18 +160,62 @@ export interface Type_saveProgramsHelper_args {
 	dbDocClient: DynamoDBDocumentClient,
 	programs:    Type_DbProgramEditItem[],
 };
-export type Type_saveProgramsHelper_ret  = Promise<void>;
+export type Type_saveProgramsHelper_ret = Promise<void>;
 
 export type Type_resetDb_args = GipDynamoDB | null;
 
-export type Type_loadPrograms_ret =Promise<Type_DbProgramEditItem[]>;
+export type Type_loadPrograms_ret = Promise<Type_DbProgramEditItem[]>;
 
 export interface Type_savePrograms_args { programs: Type_DbProgramEditItem[] };
-export type Type_savePrograms_ret  = Promise<void>;
+export type Type_savePrograms_ret = Promise<void>;
 
 export interface Type_updatePrograms_args { programs: Type_DbProgramEditItem[] };
-export type Type_updatePrograms_ret  = Promise<void>;
+export type Type_updatePrograms_ret = Promise<void>;
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const MODULE_NAME = 'gip_db_dynamodb_utils';
+
+const AWS_REGION               = process.env.AWS_REGION   || 'eu-west-1';         // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const STAGE                    = process.env.STAGE        || 'dev';               // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const SERVICE_NAME             = process.env.SERVICE_NAME || 'gip-edit-react';    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const IS_LOCAL                 = ( process.env.IS_LOCAL ? true : false );
+const LOCAL_DYNAMO_DB_ENDPOINT = process.env.LOCAL_DYNAMO_DB_ENDPOINT || null;    // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+const GIP_MAX_PROGRAMS         = parseInt( process.env.GIP_MAX_PROGRAMS || '0' ); // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+
+assert( GIP_MAX_PROGRAMS > 0, 'GIP_MAX_PROGRAMS not defined' );
+
+logger.log( 'debug', `${MODULE_NAME}: `, { IS_LOCAL, LOCAL_DYNAMO_DB_ENDPOINT } );
+
+const DEFAULT_DB_CLIENT_CONFIG : DynamoDBClientConfig = {
+	region:   AWS_REGION,
+	endpoint: ( IS_LOCAL && LOCAL_DYNAMO_DB_ENDPOINT ) ? LOCAL_DYNAMO_DB_ENDPOINT : undefined,
+};
+
+const PROGRAM_FIELDS = [
+	DB_FIELD_POS,
+	DB_FIELD_PID,
+	DB_FIELD_STATUS,
+	DB_FIELD_GENRE,
+	DB_FIELD_DAY_OF_WEEK,
+	DB_FIELD_QUALITY,
+	DB_FIELD_TITLE,
+	DB_FIELD_SYNOPSIS,
+	DB_FIELD_MODIFY_TIME,
+	DB_FIELD_IMAGE_URI,
+	DB_FIELD_DOWNLOAD_TIME,
+] as Type_DbProgramItemPropName[];
+
+const TABLE_PROGRAM         = [ STAGE, SERVICE_NAME, 'Program' ].join( '_' );
+const TABLE_PROGRAM_HISTORY = [ STAGE, SERVICE_NAME, 'ProgramHistory' ].join( '_' );
+const ARR_HISTORY_STATUSES  = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ERROR, VALUE_STATUS_ALREADY ];
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 /**
  * @param object with properties:
@@ -700,6 +717,9 @@ function resetDb( objDb : Type_resetDb_args ) : void {
 		logger.log( 'debug', `${MODULE_NAME}: resetDB: END` );
 	}
 }
+
+////////////////////////////////////////
+// Exported definitions
 
 /**
  * @returns array of program objects.

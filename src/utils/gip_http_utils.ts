@@ -2,9 +2,20 @@
  * File:        utils/gip_http_utils.ts
  * Description: Utilities for processing HTTP data
  */
+'use strict';
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import logger        from '@rhobweb/console-logger';
 import queryString   from 'query-string';
 import * as privDefs from './gip_http_utils_priv';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
 
 import type {
 	Falsy,
@@ -14,6 +25,9 @@ import type {
 	Type_HttpHeaders,
 	Type_RawHttpParams,
 } from './gip_types.ts';
+
+////////////////////////////////////////
+// Exported and local types
 
 type Type_RawQueryParamScalarValue    = string | null | undefined;
 type Type_RawQueryParamValue          = Type_RawQueryParamScalarValue | string[];
@@ -29,9 +43,6 @@ export interface Type_processEndpointDef_args {
 	headers?:    Type_HttpHeaders,
 }
 export type Type_processEndpointDef_ret = Type_Endpoint;
-
-//export type Type_extractStringFromStream_args = ReadableStream<Uint8Array>;
-//export type Type_extractStringFromStream_ret  = Promise<string>;
 
 export type Type_extractJsonResponse_args = Response; // fetch API response
 export type Type_extractJsonResponse_ret  = Promise<object>;
@@ -51,6 +62,18 @@ export type Type_genURI_ret = string;
 export type Type_stripQueryParams_args = string;
 export type Type_stripQueryParams_ret  = string;
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
 export class HttpError extends Error {
 	statusCode : number | undefined;
 
@@ -67,8 +90,11 @@ export class HttpError extends Error {
  *         - headers:     object with properties being the header name and values the header value;
  *         - params:      either an object, a string or null.
  * @returns object with properties:
- *           - uri;
- *           - options.
+ *           - uri:     URI of the endpoint, including optional query parameter string if this is a GET;
+ *           - options: object with properties:
+ *                       - method:  the HTTP method, e.g. 'GET';
+ *                       - headers: object containing the request headers;
+ *                       - body:    optional stringified request body;
  */
 export function processEndpointDef( { endpointDef, params = {}, headers = {} } : Type_processEndpointDef_args ) : Type_processEndpointDef_ret {
 	const method                                       = endpointDef.method.toUpperCase();
@@ -84,74 +110,15 @@ export function processEndpointDef( { endpointDef, params = {}, headers = {} } :
 	return { uri: cookedURI, options };
 }
 
-//fnHeaders: ( len ) => ( {
-//  'Content-Type':   'application/json; charset=UTF-8',
-//  'Content-Length': len,
-//} ),
-
-//async function extractTextResponse( response ) {
-//  const buffer       = await response.arrayBuffer();
-//  const decoder      = new TextDecoder( 'iso-8859-1' );
-//  const textResponse = decoder.decode( buffer );
-//  return textResponse;
-//}
-
 /**
- * @param rawObject
- * @returns
+ * @param response : JSON object returned by the fetch API.
+ * @returns the response as an array or object.
  */
-//export async function extractJsonResponse( response : { json: () => object, type: string } ) {
-//  let body : object = [];
-//  //logger.info( `extractJsonResponse: `, response.type );
-//  try {
-//    body = await response.json();
-//    //logger.info( `JSON response extracted: `, body );
-//  }
-//  catch ( err ) {
-//    logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: err.message, rawResponse: response } ) );
-//  }
-//
-//  return body;
-//}
-
-//export async function extractStringFromStream( stream : Type_extractStringFromStream_args ) : Type_extractStringFromStream_ret {
-//	const arrChunk = [];
-//	const reader   = stream.getReader();
-//
-//	let bDone = false;
-//
-//	while ( ! bDone ) {
-//		const { done, value } = await reader.read();
-//		if ( ! done ) {
-//			arrChunk.push( value );
-//		} else {
-//			bDone = true;
-//		}
-//	}
-//	const str = Buffer.concat( arrChunk ).toString();
-//	return str;
-//
-////  return new Promise( ( resolve, reject ) => {
-////    stream.setEncoding('utf8');
-////    stream.on( 'data', chunk => {
-////      str += chunk;
-////    })
-////    stream.on('end', () {
-////      resolve( str );
-////    });
-////    stream.on('error', () {
-////      reject( new Error('Stream error') );
-////    });
-////  } );
-//}
-
 export async function extractJsonResponse( response : Type_extractJsonResponse_args ) : Type_extractJsonResponse_ret {
 	let body : object = [];
 	try {
 		body = await response.json() as object;
-		logger.info( `extractJsonResponse: `, { body } );
-		//body = JSON.parse( strBody );
-		//logger.info( `JSON response extracted: `, body );
+		logger( 'info', `extractJsonResponse: `, { body } );
 	}
 	catch ( err ) {
 		logger( 'error', `extractJsonResponse: `, JSON.stringify( { error: ( err as Error ).message } ) );
@@ -160,13 +127,17 @@ export async function extractJsonResponse( response : Type_extractJsonResponse_a
 	return body;
 }
 
+/**
+ * @param response : text object returned by the fetch API.
+ * @returns the response as an array or object.
+ */
 export async function extractJsonResponseStream( response : Type_extractJsonResponseStream_args ) : Type_extractJsonResponse_ret {
 	let body : Awaited<Type_extractJsonResponse_ret> = [];
 	try {
 		const strBody = await response.text();
-		logger.log( 'info', `extractJsonResponseStream: `, { strBody } );
+		logger( 'info', `extractJsonResponseStream: `, { strBody } );
 		body = JSON.parse( strBody ) as typeof body;
-		//logger.info( `JSON response extracted: `, body );
+		//logger( 'info',`JSON response extracted: `, body );
 	}
 	catch ( err ) {
 		logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: (err as Error).message } ) );

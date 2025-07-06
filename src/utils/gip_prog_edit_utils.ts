@@ -3,6 +3,7 @@
  * File:        utils/gip_prog_edit_utils.ts
  * Description: Utilities for manipulating the contents of HTML elements.
  */
+'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
@@ -19,7 +20,7 @@ import { convertKnownTitle } from './gip_prog_title_utils';
 // Types
 
 ////////////////////////////////////////
-// Local Types
+// Local types
 
 type Type_HtmlElement = Element;
 
@@ -42,7 +43,7 @@ type Type_TextConversionList = Type_TextConversionItem[];
 type Type_FoundElement = Record<string,Type_HtmlElement | Type_HtmlElement[]>;
 
 ////////////////////////////////////////
-// Exported Types
+// Exported types
 
 export type Type_convertToCamelCase_args = string;
 export type Type_convertToCamelCase_ret  = string;
@@ -105,7 +106,10 @@ const ARR_COMMON_TEXT_CONVERSIONS : Type_TextConversionList = [
 ];
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local functions
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 /**
  * Convert the specified string to camelcase, with first letter capitalised.
@@ -314,26 +318,6 @@ function convertText( { arrConversion, rawText } : Type_convertText_args ) : Typ
 }
 
 /**
- * Change known program names into favourite names, e.g., "Clue".
- * Remove special characters from the name.
- * @param name - the program name to change.
- * @return the cooked name.
- */
-export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
-{
-	const arrConversion : Type_TextConversionList = [
-		...ARR_COMMON_TEXT_CONVERSIONS,
-		[ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
-		[ /[\u007F-\uFFFF]/g, '-' ], // Replace all non-ASCII characters with a dash
-	];
-
-	const knownTitle     = convertKnownTitle( rawTitle );
-	const convertedTitle = convertText( { arrConversion, rawText: knownTitle } );
-
-	return convertedTitle;
-}
-
-/**
  * @param {string} strNumber: an integer as string, e.g., '2';
  * @param {number} iLen :     the required length of the string.
  * @returns strNumber padded with leading zeroes, or unchanged if strNumber is already that length or longer.
@@ -483,8 +467,28 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 	return cookedEpisode;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Exported functions
+////////////////////////////////////////
+// Exported definitions
+
+/**
+ * Change known program names into favourite names, e.g., "Clue".
+ * Remove special characters from the name.
+ * @param name - the program name to change.
+ * @return the cooked name.
+ */
+export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
+{
+	const arrConversion : Type_TextConversionList = [
+		...ARR_COMMON_TEXT_CONVERSIONS,
+		[ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
+		[ /[\u007F-\uFFFF]/g, '-' ], // Replace all non-ASCII characters with a dash
+	];
+
+	const knownTitle     = convertKnownTitle( rawTitle );
+	const convertedTitle = convertText( { arrConversion, rawText: knownTitle } );
+
+	return convertedTitle;
+}
 
 /**
  * @param object with properties:
@@ -553,7 +557,7 @@ export function getProgDetailsFromLink( strHTML : Type_getProgDetailsFromLink_ar
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Unit test exports
+// Unit test definitions
 
 export const privateDefs = {};
 

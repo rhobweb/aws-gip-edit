@@ -1,14 +1,15 @@
+/**
+ * File:        utils/gip_program_item.ts
+ * Description: TODO.
+ */
+'use strict';
 
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import {
 	VALUE_STATUS_PENDING,
 } from '../utils/gip_prog_fields';
-
-import type {
-	Type_DisplayProgramItem,
-	Type_ProgramEditInput,
-	Type_ProgramEditOptions,
-} from '../utils/gip_types';
 
 import {
 	PROG_FIELD_PID,
@@ -23,10 +24,34 @@ import {
 	PROG_FIELD_SELECTED,
 } from '../utils/gip_types';
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_DisplayProgramItem,
+	Type_ProgramEditInput,
+	Type_ProgramEditOptions,
+} from '../utils/gip_types';
+
+////////////////////////////////////////
+// Exported and local types
+
 export type Type_getTrimmedField_args = string | null;
 export type Type_getTrimmedField_ret  = string;
 export type Type_extractPID_args      = string;
 export type Type_extractPID_ret       = string;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 /**
  * @param strValue : optional string value, may be null.
@@ -43,6 +68,9 @@ function getTrimmedField( strValue? : Type_getTrimmedField_args ) : Type_getTrim
 function extractPID( uri : Type_extractPID_args ) : Type_extractPID_ret {
 	return uri.replace( /.*\//, '' );
 }
+
+////////////////////////////////////////
+// Exported definitions
 
 // Class to handle the program display fields
 export default class GipProgramItem implements Type_DisplayProgramItem {

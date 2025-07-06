@@ -6,15 +6,10 @@
  *   DB Program Item: a program object in DB format;
  *   Program Item:    a program object in display format.
  */
+'use strict';
 
-import type {
-	Type_DisplayProgramItemPropName,
-} from './gip_types.ts';
-
-import type {
-	Type_DbProgramEditItem,
-	Type_DbProgramEditItemPropName,
-} from './gip_prog_fields.ts';
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import {
 	FIELD_MAP_COLLECTION,
@@ -34,11 +29,6 @@ import {
 	DB_FIELD_POS,
 } from './gip_prog_fields';
 
-import type {
-	Type_DisplayProgramItem,
-	Type_DisplayProgramItemStringPropName,
-} from './gip_types';
-
 import {
 	PROG_FIELD_PID,
 	PROG_FIELD_STATUS,
@@ -52,8 +42,28 @@ import {
 	PROG_FIELD_URI,
 } from './gip_types';
 
-const PROG_TO_DB_FIELD_MAP = FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
-const DB_TO_PROG_FIELD_MAP = REVERSE_FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_DisplayProgramItemPropName,
+} from './gip_types.ts';
+
+import type {
+	Type_DbProgramEditItem,
+	Type_DbProgramEditItemPropName,
+} from './gip_prog_fields.ts';
+
+import type {
+	Type_DisplayProgramItem,
+	Type_DisplayProgramItemStringPropName,
+} from './gip_types';
+
+////////////////////////////////////////
+// Exported and local types
 
 export type Type_dbToProg_args = Type_DbProgramEditItem;
 export type Type_dbToProg_ret  = Type_DisplayProgramItem;
@@ -64,6 +74,20 @@ export type Type_progToDb_ret  = Type_DbProgramEditItem;
 export type Type_dbToProgArray_args = Type_DbProgramEditItem[];
 export type Type_dbToProgArray_ret  = Type_DisplayProgramItem[];
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const PROG_TO_DB_FIELD_MAP = FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
+const DB_TO_PROG_FIELD_MAP = REVERSE_FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
 
 /**
  * @param prog : a DB Program Item object;
@@ -143,3 +167,6 @@ export function dbToProgArray( rawPrograms: Type_DbProgramEditItem[] ) : Type_Di
 	const programs = rawPrograms.map( prog => dbToProg( prog ) );
 	return programs;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

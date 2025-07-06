@@ -2,16 +2,10 @@
  * File:        utils/gip_prog_filter_utils.ts
  * Description: Utilities to filter the program list to determine the programs to download.
  */
+'use strict';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
-
-import type {
-	Type_ProgramDownloadOptions,
-	Nullable,
-} from './gip_types.ts';
-
-import type { Type_DbProgramEditItem }                    from './gip_prog_fields';
 
 import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
 import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
@@ -21,7 +15,17 @@ import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils';
 // Types
 
 ////////////////////////////////////////
-// Exported Types
+// Imported types
+
+import type {
+	Type_ProgramDownloadOptions,
+	Nullable,
+} from './gip_types.ts';
+
+import type { Type_DbProgramEditItem } from './gip_prog_fields';
+
+////////////////////////////////////////
+// Exported and local types
 
 export interface Type_isDayActive_args {
 	current:      boolean,
@@ -41,6 +45,9 @@ export type Type_filterPrograms_ret = Type_DbProgramEditItem[];
 const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
 
 ////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
 // Local definitions
 
 /**
