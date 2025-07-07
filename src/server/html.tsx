@@ -1,11 +1,26 @@
+/**
+ * File:        server/html.tsx
+ * Description: Generates the HTML template for the application.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
 import type { Config } from './config';
 import type { Stats }  from './types';
 
-/**
- * This HTML file acts as a template that we insert all our generated
- * application code into before sending it to the client as regular HTML.
- * Note we're returning a template string from this function.
- */
+////////////////////////////////////////
+// Exported and local types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 const html = ({
 	stats,
 	content,
@@ -37,4 +52,22 @@ const html = ({
 		</body>
 	</html>`;
 
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+/**
+ * This HTML file acts as a template that we insert all our generated
+ * application code into before sending it to the client as regular HTML.
+ * Note we're returning a template string from this function.
+ */
+
 export default html;
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

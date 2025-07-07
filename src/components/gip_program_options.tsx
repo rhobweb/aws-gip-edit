@@ -1,33 +1,74 @@
+/**
+ * File:        components/gip_program_options.tsx
+ * Description: This file defines the GipProgramOptions component, which is used to display the options for a program in the GIP program editor.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 import React from 'react';
-import type {
-	Type_EventHandlerKeyboard,
-} from '../browser_event.ts';
+
 import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
 } from '../utils/gip_prog_fields';
-//import type {
-//	Type_FieldMap
-//} from '../utils/gip_prog_fields';
-import type {
-	Type_EventChangeSelect,
-	Type_ProgramEditOptions,
-	Type_EventHandlerSelectKey,
-} from '../utils/gip_types.ts';
+
 import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_GENRE,
 	PROG_FIELD_QUALITY,
 } from '../utils/gip_types';
 
-interface TypeProgramOptionSelectProps {
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_EventHandlerKeyboard,
+} from '../browser_event.ts';
+
+//import type {
+//	Type_FieldMap
+//} from '../utils/gip_prog_fields';
+
+import type {
+	Type_EventChangeSelect,
+	Type_ProgramEditOptions,
+	Type_EventHandlerSelectKey,
+} from '../utils/gip_types.ts';
+
+////////////////////////////////////////
+// Exported and local types
+
+interface Type_ProgramOptionSelectProps {
 	onChange:     ( newOptions : Type_ProgramEditOptions ) => void,
 	onKeyDown:    Type_EventHandlerSelectKey,
 	optionFields: Type_ProgramEditOptions,
 	fieldName:    keyof Type_ProgramEditOptions,
 }
 
-function ProgramOptionSelect( props : TypeProgramOptionSelectProps ) : React.JSX.Element {
+interface Type_GipProgramOptionsProps {
+	onChange:     ( newOptions: Type_ProgramEditOptions ) => void,
+	onKeyDown:    Type_EventHandlerKeyboard,
+	optionFields: Type_ProgramEditOptions,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+/**
+ * @param props - The properties for the component.
+ * @param props.fieldName - The name of the field to display.
+ * @returns React Element to display a program option select element.
+ */
+function ProgramOptionSelect( props : Type_ProgramOptionSelectProps ) : React.JSX.Element {
 	const { fieldName } = props;
 	const fieldMap      = FIELD_MAP_COLLECTION[ fieldName ]; // TODO: check if fieldName is in fieldMap
 	const fieldValue    = ( props.optionFields[ fieldName ]   ?? 'UNK' ); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
@@ -38,7 +79,6 @@ function ProgramOptionSelect( props : TypeProgramOptionSelectProps ) : React.JSX
 		props.onChange( newOptions );
 	};
 
-	// TODO ${key} may be a number and is regarded as unsafe
 	/* eslint-disable @typescript-eslint/restrict-template-expressions */
 	return (
 		<select
@@ -55,17 +95,18 @@ function ProgramOptionSelect( props : TypeProgramOptionSelectProps ) : React.JSX
 	/* eslint-enable @typescript-eslint/restrict-template-expressions */
 }
 
-interface TypeGipProgramOptionsProps {
-	onChange:     ( newOptions: Type_ProgramEditOptions ) => void,
-	onKeyDown:    Type_EventHandlerKeyboard,
-	optionFields: Type_ProgramEditOptions,
-}
+////////////////////////////////////////
+// Exported definitions
 
-export function GipProgramOptions( props: TypeGipProgramOptionsProps ) : React.JSX.Element {
+/**
+ * @param props - The properties for the component.
+ * @returns React Element to display the program options select dropdowns, e.g., genre, day of week, quality.
+ */
+export function GipProgramOptions( props: Type_GipProgramOptionsProps ) : React.JSX.Element {
 	const arrField = [ PROG_FIELD_GENRE, PROG_FIELD_DAY_OF_WEEK, PROG_FIELD_QUALITY ];
 
-	function genProps ( fieldName: string ) : TypeProgramOptionSelectProps {
-		const cookedProps : TypeProgramOptionSelectProps = {} as TypeProgramOptionSelectProps;
+	function genProps ( fieldName: string ) : Type_ProgramOptionSelectProps {
+		const cookedProps : Type_ProgramOptionSelectProps = {} as Type_ProgramOptionSelectProps;
 		Object.assign( cookedProps, props, { fieldName } );
 		return cookedProps;
 	}
@@ -78,3 +119,6 @@ export function GipProgramOptions( props: TypeGipProgramOptionsProps ) : React.J
 		</div>
 	);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

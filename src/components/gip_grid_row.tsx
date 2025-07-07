@@ -1,6 +1,23 @@
+/**
+ * File:        components/gip_grid_row.tsx
+ * Description: This file defines the GipGridRow component, which is used to create a row in a grid layout for displaying GIP program details.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import React, { ReactElement } from 'react';
 
-interface TypeGipGridRowProps {
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
+
+interface Type_GipGridRowProps {
 	fieldID?:              string,
 	paramName?:            string | null,
 	labelText:             string,
@@ -8,14 +25,33 @@ interface TypeGipGridRowProps {
 	additionalClassNames?: string[],
 }
 
-interface TypeLabelProps {
+interface Type_LabelProps {
 	htmlFor?: string,
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
 
-export function GipGridRow( props : TypeGipGridRowProps ) : ReactElement  {
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+/**
+ * @param props - The properties for the GipGridRow component.
+ * @param props.paramName            - Optional name for the parameter associated with the row, used for form elements.
+ * @param props.labelText            - The text to display in the label for the row.
+ * @param props.gipComponent         - A function that returns a ReactElement representing the GIP component to be displayed in the row.
+ * @param props.additionalClassNames - An optional array of additional class names to apply to the element.
+ * @returns A ReactElement representing the grid row.
+ */
+export function GipGridRow( props : Type_GipGridRowProps ) : ReactElement  {
 	const { paramName = null, labelText, gipComponent, additionalClassNames = [] } = props;
-	const labelProps : TypeLabelProps = {};
+	const labelProps : Type_LabelProps = {};
 	const classNames  = [ 'col-md-11', 'gip-col', ...additionalClassNames ];
 
 	if ( paramName ) {
@@ -31,3 +67,6 @@ export function GipGridRow( props : TypeGipGridRowProps ) : ReactElement  {
 		</div>
 	);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

@@ -1,20 +1,21 @@
-import type {
-	//Type_Ref,
-	//Type_Refs,
-	//Type_EventKeyboardAny,
-	Type_EventHandlerKeyboard,
-} from '../browser_event.ts';
+/**
+ * File:        components/gip_program_table.tsx
+ * Description: React element to display a table of GIP programs.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import React, { ReactNode } from 'react';
-import type {
-	Type_FieldOrder,
-	Type_FieldMap,
-} from '../utils/gip_prog_fields.ts';
+
 import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
 	DUMMY_HEADER_FIELD,
 } from '../utils/gip_prog_fields';
+
 import { GipGridRow } from './gip_grid_row';
+
 import {
 	PROG_FIELD_SELECTED,
 	Type_DisplayProgramItem,
@@ -24,8 +25,72 @@ import {
 	Type_EventMouse,
 } from '../utils/gip_types';
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	//Type_Ref,
+	//Type_Refs,
+	//Type_EventKeyboardAny,
+	Type_EventHandlerKeyboard,
+} from '../browser_event.ts';
+
+import type {
+	Type_FieldOrder,
+	Type_FieldMap,
+} from '../utils/gip_prog_fields.ts';
+
+////////////////////////////////////////
+// Exported and local types
+
+interface Type_ProgHeadersProps {
+	arrFieldOrder:    Type_FieldOrder,
+	headerDisplayMap: Type_FieldMap,
+}
+
+interface Type_ProgInputFieldProps {
+	fieldName:  string,
+	fieldValue: string,
+	onClick:    Type_EventHandlerMouse,
+	onKeyDown:  Type_EventHandlerKeyboard,
+	selected:   boolean,
+}
+
+interface Type_ProgInputFieldsProps {
+	programs:        Type_DisplayProgramItem[],
+	arrFieldOrder:   Type_FieldOrder,
+	onKeyDown:       Type_EventHandlerKeyboard,
+	onProgramChange: Type_HandlerProgramChange,
+}
+
+interface Type_ProgramTableProps {
+	programs:         Type_DisplayProgramItem[],
+	onProgramChange:  Type_HandlerProgramChange,
+	onKeyDown:        Type_EventHandlerKeyboard,
+	arrFieldOrder:    Type_FieldOrder,
+	headerDisplayMap: Type_FieldMap,
+}
+
+interface Type_GipProgramTableProps {
+	programs:        Type_DisplayProgramItem[],
+	onProgramChange: Type_HandlerProgramChange,
+	onKeyDown:       Type_EventHandlerKeyboard,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 const LABEL_PROGRAM_TABLE     = 'Programs';
 const SELECTED_PROGRAM_COLOUR = 'rgb(100, 210, 255)';
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 // Can include this as a style property
 //style={ genWidthStyle( { minWidths, fieldName } ) }
@@ -34,16 +99,22 @@ const SELECTED_PROGRAM_COLOUR = 'rgb(100, 210, 255)';
 //  return ( minWidths[fieldName] ? { width: `${minWidths[fieldName]}em` } : {} );
 //};
 
+/**
+ * Generate the style for a selected program row.
+ * @param isSelected - Whether the program is selected.
+ * @returns The style object for the selected program row.
+ */
 const genSelectedStyle = ( isSelected: boolean ) : { background?: string } => {
 	return ( isSelected ? { background: SELECTED_PROGRAM_COLOUR } : {} );
 };
 
-interface TypeProgHeadersProps {
-	arrFieldOrder:    Type_FieldOrder,
-	headerDisplayMap: Type_FieldMap,
-}
-
-function ProgHeaders( props: TypeProgHeadersProps ) : React.JSX.Element {
+/**
+ * @param props                  - The properties for the ProgHeaders component.
+ * @param props.arrFieldOrder    - The order of fields to display in the header.
+ * @param props.headerDisplayMap - The mapping of field names to their display values.
+ * @returns The rendered program headers element.
+ */
+function ProgHeaders( props: Type_ProgHeadersProps ) : React.JSX.Element {
 	const { arrFieldOrder, headerDisplayMap } = props;
 
 	return (
@@ -58,14 +129,12 @@ function ProgHeaders( props: TypeProgHeadersProps ) : React.JSX.Element {
 	);
 }
 
-interface TypeProgInputFieldProps {
-	fieldName:  string,
-	fieldValue: string,
-	onClick:    Type_EventHandlerMouse,
-	onKeyDown:  Type_EventHandlerKeyboard,
-	selected:   boolean,
-}
-
+/**
+ * @param param0 - An object containing the field name and value.
+ * @param param0.fieldName  - The name of the field to display.
+ * @param param0.fieldValue - The raw value of the field.
+ * @returns The display value for the program field.
+ */
 function progToDisplayValue( { fieldName, fieldValue } : { fieldName: string, fieldValue: string | number | null } ) : string {
 	const valueMap = FIELD_MAP_COLLECTION[ fieldName ] ?? null;
 	let   retValue = '';
@@ -79,7 +148,12 @@ function progToDisplayValue( { fieldName, fieldValue } : { fieldName: string, fi
 	return retValue;
 }
 
-function ProgInputField( props: TypeProgInputFieldProps ) : React.JSX.Element {
+/**
+ * @param props - The properties for the ProgInputField component.
+ * @param props.fieldName  - The name of the field to display.
+ * @returns The rendered ProgInputField component.
+ */
+function ProgInputField( props: Type_ProgInputFieldProps ) : React.JSX.Element {
 	const { fieldName, fieldValue, selected, onClick, onKeyDown } = props;
 
 	return (
@@ -94,15 +168,15 @@ function ProgInputField( props: TypeProgInputFieldProps ) : React.JSX.Element {
 	);
 }
 
-interface TypeProgInputFieldsProps {
-	programs:        Type_DisplayProgramItem[],
-	arrFieldOrder:   Type_FieldOrder,
-	onKeyDown:       Type_EventHandlerKeyboard,
-	onProgramChange: Type_HandlerProgramChange,
-}
-
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element {
+/**
+ * Render the input fields for each program.
+ * @param props               - The properties for the ProgInputFields component.
+ * @param props.programs      - The list of programs to display.
+ * @param props.arrFieldOrder - The order of fields to display.
+ * @param props.onKeyDown     - The keydown event handler.
+ * @returns The rendered ProgInputFields component.
+ */
+function ProgInputFields( props: Type_ProgInputFieldsProps ) : React.JSX.Element {
 	const { programs, arrFieldOrder, onKeyDown } = props;
 
 	const arrCookedFieldOrder = [ ...arrFieldOrder ];
@@ -121,6 +195,7 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 
 	//console.log( "ProgInputFields: ", { programs, arrCookedFieldOrder } ); // TODO: Remove
 
+	/* eslint-disable @typescript-eslint/restrict-template-expressions */
 	return (
 		<>
 			{ programs.map( ( thisProgram, programIndex ) => (
@@ -141,18 +216,20 @@ function ProgInputFields( props: TypeProgInputFieldsProps ) : React.JSX.Element 
 			) ) }
 		</>
 	);
-}
-/* eslint-enable @typescript-eslint/restrict-template-expressions */
-
-interface TypeProgramTableProps {
-	programs:         Type_DisplayProgramItem[],
-	onProgramChange:  Type_HandlerProgramChange,
-	onKeyDown:        Type_EventHandlerKeyboard,
-	arrFieldOrder:    Type_FieldOrder,
-	headerDisplayMap: Type_FieldMap,
+	/* eslint-enable @typescript-eslint/restrict-template-expressions */
 }
 
-function ProgramTable( props: TypeProgramTableProps ) : React.JSX.Element {
+/**
+ * Render the program table.
+ * @param props                  - The properties for the ProgramTable element.
+ * @param props.arrFieldOrder    - The order of fields to display.
+ * @param props.headerDisplayMap - The mapping of field names to their display values.
+ * @param props.programs         - The list of programs to display.
+ * @param props.onProgramChange  - The handler for program changes.
+ * @param props.onKeyDown        - The keydown event handler.
+ * @returns The rendered ProgramTable element.
+ */
+function ProgramTable( props: Type_ProgramTableProps ) : React.JSX.Element {
 	const { arrFieldOrder, headerDisplayMap, programs, onProgramChange, onKeyDown } = props;
 	return (
 		<div className="gip-table-wrapper">
@@ -170,13 +247,18 @@ function ProgramTable( props: TypeProgramTableProps ) : React.JSX.Element {
 	);
 }
 
-interface TypeGipProgramTableProps {
-	programs:        Type_DisplayProgramItem[],
-	onProgramChange: Type_HandlerProgramChange,
-	onKeyDown:       Type_EventHandlerKeyboard,
-}
+////////////////////////////////////////
+// Exported definitions
 
-export function GipProgramTable( props: TypeGipProgramTableProps ) : React.JSX.Element {
+/**
+ * Render the GIP program table.
+ * @param props - The properties for the GipProgramTable element.
+ * @param props.onProgramChange - The handler for program changes.
+ * @param props.onKeyDown       - The keydown event handler.
+ * @param props.programs        - The list of programs to display.
+ * @returns The rendered GipProgramTable element.
+ */
+export function GipProgramTable( props: Type_GipProgramTableProps ) : React.JSX.Element {
 	const { onProgramChange, onKeyDown, programs = [] } = props;
 	//console.log( 'Programs: ', programs );
 	const headerDisplayMap = FIELD_MAP_COLLECTION[ DUMMY_HEADER_FIELD ] || null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
@@ -197,3 +279,6 @@ export function GipProgramTable( props: TypeGipProgramTableProps ) : React.JSX.E
 		<GipGridRow fieldID="program-label" labelText={ LABEL_PROGRAM_TABLE } additionalClassNames={ additionalClassNames } gipComponent={ () => <ProgramTable { ...tableProps }/> }/>
 	);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

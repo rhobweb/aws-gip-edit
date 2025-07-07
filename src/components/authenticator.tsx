@@ -1,4 +1,11 @@
-//import React from 'react';
+/**
+ * File:        components/authenticator.tsx
+ * Description: Initial attempt to add authentication.
+ */
+'use strict';
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import React, { useState, useEffect, /* useRef, ForwardedRef */ } from 'react';
 //import Cookies             from 'js-cookie';
@@ -9,6 +16,18 @@ import React, { useState, useEffect, /* useRef, ForwardedRef */ } from 'react';
 //import { Type_EndpointDef } from '../utils/gip_types';
 //import * as httpUtils      from '../utils/gip_http_utils';
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 //const AUTH_URI = 'http://localhost:3013/sso';
 //const AUTH_URI = process.env.AUTH_URI ?? 'undefined';
 //logger.log( 'info', 'authenticator: ', { env: process.env } );
@@ -18,6 +37,12 @@ import React, { useState, useEffect, /* useRef, ForwardedRef */ } from 'react';
 //	uri:    '/gip_edit/api/programs',
 //	params: { all: true },
 //};
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
 
 //function getAuthFromEvent( event: APIGatewayEvent | undefined ) : string {
 //	logger.log( 'info', 'getAuthFromEvent: ', { event } );
@@ -69,6 +94,9 @@ import React, { useState, useEffect, /* useRef, ForwardedRef */ } from 'react';
 //  return programs;
 //}
 
+////////////////////////////////////////
+// Exported definitions
+
 export default function Authenticator( { children } : { children: React.JSX.Element } ) : React.JSX.Element {
 	const [ authenticated, setAuthenticated ] = useState( false );
 
@@ -93,3 +121,6 @@ export default function Authenticator( { children } : { children: React.JSX.Elem
 	</>
 	);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

@@ -1,14 +1,42 @@
+/**
+ * File:        components/gip_action_buttons.tsx
+ * Description: Renders action buttons for the GIP program table.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import React, { ReactElement } from 'react';
-import { FIELD_DEFAULT_VALUES, VALUE_STATUS_PENDING, VALUE_STATUS_ERROR, VALUE_STATUS_SUCCESS } from '../utils/gip_prog_fields';
-import { GipGridRow }          from './gip_grid_row';
+
+import {
+	FIELD_DEFAULT_VALUES,
+	VALUE_STATUS_PENDING,
+	VALUE_STATUS_ERROR,
+	VALUE_STATUS_SUCCESS
+} from '../utils/gip_prog_fields';
+
+import { GipGridRow } from './gip_grid_row';
+
 import {
 	PROG_FIELD_STATUS,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_DAY_OF_WEEK,
+} from '../utils/gip_types';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
 	Type_DisplayProgramItem,
 	Type_DisplayProgramItemStringPropName,
 	Type_HandlerProgramChange,
 } from '../utils/gip_types';
+
+////////////////////////////////////////
+// Exported and local types
 
 type Type_ProgramList = Type_DisplayProgramItem[];
 
@@ -19,6 +47,32 @@ interface Type_ActionButtonsProps {
 	savePrograms:    ( params: Type_ProgramList ) => Promise<Type_ProgramList>,
 }
 
+interface Type_GipActionButtonsProps {
+	programs:        Type_ProgramList,
+	onProgramChange: Type_HandlerProgramChange,
+	savePrograms:    ( programs : Type_ProgramList ) => Promise<Type_ProgramList>,
+	programsSaved:   () => void,
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+/**
+ * Action buttons for the program table.
+ * Provides buttons to reset errors, clear days, select OK, delete selected programs, and save programs.
+ * @param props - The properties for the ActionButtons component.
+ * @param props.programs        - The list of programs to display.
+ * @param props.onProgramChange - The handler for program changes.
+ * @param props.programsSaved   - Callback when programs are saved.
+ * @param props.savePrograms    - Function to save the programs.
+ * @returns The rendered ActionButtons component.
+ */
 function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 	const { programs, onProgramChange, programsSaved, savePrograms } = props;
 
@@ -94,13 +148,15 @@ function ActionButtons( props : Type_ActionButtonsProps ) : ReactElement {
 	);
 }
 
-interface Type_GipActionButtonsProps {
-	programs:        Type_ProgramList,
-	onProgramChange: Type_HandlerProgramChange,
-	savePrograms:    ( programs : Type_ProgramList ) => Promise<Type_ProgramList>,
-	programsSaved:   () => void,
-}
+////////////////////////////////////////
+// Exported definitions
 
+/**
+ * Action buttons for the program table.
+ * Provides buttons to reset errors, clear days, select OK, delete selected programs, and save programs.
+ * @param props - The properties for the ActionButtons component.
+ * @returns The rendered ActionButtons component.
+ */
 export function GipActionButtons( props : Type_GipActionButtonsProps ) : ReactElement {
 	const labelText            = 'Actions';
 	const fieldID              = 'action-buttons';
@@ -109,3 +165,6 @@ export function GipActionButtons( props : Type_GipActionButtonsProps ) : ReactEl
 		<GipGridRow fieldID={ fieldID } labelText={ labelText } additionalClassNames={ additionalClassNames } gipComponent={ () => <ActionButtons { ...props }/> }/>
 	);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

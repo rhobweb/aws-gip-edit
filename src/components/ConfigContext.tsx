@@ -1,4 +1,9 @@
 /**
+ * File:        components/ConfigContext.tsx
+ * Description: Provides a context for configuration settings.
+ */
+
+/**
  * Provide configuration settings
  */
 import { createContext } from 'react';
