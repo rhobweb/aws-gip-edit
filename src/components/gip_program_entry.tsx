@@ -5,7 +5,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
-import React, { forwardRef, ForwardedRef } from 'react';
+import React, { ForwardedRef } from 'react';
 
 import { GipGridRow } from './gip_grid_row';
 
@@ -49,6 +49,7 @@ interface Type_RowProgramInputProps {
 	//refCallback?: MutableRefObject<HTMLInputElement> | null,
 	onChange:     ( { paramName, newValue } : { paramName: string, newValue: string } ) => void,
 	onKeyDown:    Type_EventHandlerKeyboard,
+	ref:          ForwardedRef<HTMLInputElement>,
 }
 
 interface Type_ProgramSynopsis_args {
@@ -80,6 +81,7 @@ interface Type_GipProgramEntryProps {
 	onKeyDown:          ( event: Type_EventKeyboardAny ) => void,
 	onOptionChange:     ( newOptions: Type_ProgramEditOptions ) => void,
 	//ref:                Type_Refs,
+	ref: ForwardedRef<HTMLInputElement>,
 }
 
 interface Type_UriAndTitleRefs {
@@ -115,10 +117,9 @@ const PROGRAM_IMAGE_HEIGHT      = '160';
 // Local definitions
 
 /**
- * TODO: remove forwardRef https://react.dev/blog/2024/12/05/react-19#ref-as-a-prop
  * @return React Element to display a program in the program table.
  */
-const RowProgramInput = forwardRef( function RowProgramInput( props : Type_RowProgramInputProps, ref : ForwardedRef<HTMLInputElement> )
+function RowProgramInput( props : Type_RowProgramInputProps ) : React.JSX.Element
 {
 	const { paramName, labelText, onKeyDown } = props;
 
@@ -132,14 +133,14 @@ const RowProgramInput = forwardRef( function RowProgramInput( props : Type_RowPr
 			value={ props.value }
 			onKeyDown={ onKeyDown }
 			onInput={ onChange }
-			ref={ ref }
+			ref={ props.ref }
 		/>
 	);
 
 	return (
 		<GipGridRow paramName={paramName} labelText={labelText} gipComponent={ gipComponent }/>
 	);
-});
+}
 
 /**
  * ProgramSynopsis component displays the synopsis of a program.
@@ -227,15 +228,13 @@ function RowProgramOptions( props: Type_RowProgramOptions_args ) : React.JSX.Ele
  * Element to display the program input/editing fields.
  * It includes fields for the program URL, title, synopsis, image, and options.
  * @returns React Element to display the program input fields.
- * TODO: remove forwardRef https://react.dev/blog/2024/12/05/react-19#ref-as-a-prop
  */
-export const GipProgramEntry = forwardRef( function GipProgramEntry( props: Type_GipProgramEntryProps, ref: ForwardedRef<HTMLInputElement> ) : React.JSX.Element
-{
+export function GipProgramEntry( props: Type_GipProgramEntryProps ) : React.JSX.Element {
 	//console.log( 'GipProgramEntry: ', props.programEditInput );
 	const {
 		[PROG_FIELD_URI]:   uriRef,
 		[PROG_FIELD_TITLE]: titleRef,
-	} = ref as unknown as Type_UriAndTitleRefs;
+	} = props.ref as unknown as Type_UriAndTitleRefs;
 
 	return (
 		<>
@@ -269,7 +268,7 @@ export const GipProgramEntry = forwardRef( function GipProgramEntry( props: Type
 			/>
 		</>
 	);
-});
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unit test definitions
