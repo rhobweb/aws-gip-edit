@@ -364,6 +364,9 @@ export default function GipEdit() : React.JSX.Element {
 	};
 
 	const onKeyDown = ( event: Type_EventKeyboardAny ) : void => {
+		//const arrIgnore = [ 'stateNode' ];
+		//const arrProp = Object.keys( event ).filter( k => !arrIgnore.includes( k ) );
+		//console.log( 'onKeyDown', JSON.stringify( event, arrProp ) );
 		logger.log( 'silly', 'onKeyDown' );
 		if ( event.key === 'Enter' ) {
 			const newPrograms = processProgram( { programEditInput, programEditOptions, programs } );

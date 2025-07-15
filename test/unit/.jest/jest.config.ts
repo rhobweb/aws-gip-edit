@@ -2,7 +2,7 @@
 import parentConfigFn from '../../../jest.config'
 
 /**
- * Jest configuration file for the ums-console-logger unit tests
+ * Jest configuration file for the unit tests
  */
 import type { JestConfigWithTsJest } from 'ts-jest/dist/types'
 
