@@ -32,9 +32,6 @@ import {
 // Imported types
 
 import type {
-	//Type_Ref,
-	//Type_Refs,
-	//Type_EventKeyboardAny,
 	Type_EventHandlerKeyboard,
 } from '../browser_event.ts';
 
@@ -46,39 +43,55 @@ import type {
 ////////////////////////////////////////
 // Exported and local types
 
-interface Type_ProgHeadersProps {
+export type Type_genSelectedStyle_args = boolean;
+export interface Type_genSelectedStyle_ret {
+	background?: string,
+};
+
+export interface Type_ProgHeaders_args {
 	arrFieldOrder:    Type_FieldOrder,
 	headerDisplayMap: Type_FieldMap,
 }
+export type Type_ProgHeaders_ret = React.JSX.Element;
 
-interface Type_ProgInputFieldProps {
+export interface Type_progToDisplayValue_args {
+	fieldName:  string,
+	fieldValue: string | number | null,
+};
+export type Type_progToDisplayValue_ret = string;
+
+export interface Type_ProgInputField_args {
 	fieldName:  string,
 	fieldValue: string,
 	onClick:    Type_EventHandlerMouse,
 	onKeyDown:  Type_EventHandlerKeyboard,
 	selected:   boolean,
 }
+export type Type_ProgInputField_ret = React.JSX.Element;
 
-interface Type_ProgInputFieldsProps {
+export interface Type_ProgInputFields_args {
 	programs:        Type_DisplayProgramItem[],
 	arrFieldOrder:   Type_FieldOrder,
 	onKeyDown:       Type_EventHandlerKeyboard,
 	onProgramChange: Type_HandlerProgramChange,
 }
+export type Type_ProgInputFields_ret = React.JSX.Element;
 
-interface Type_ProgramTableProps {
+export interface Type_ProgramTable_args {
 	programs:         Type_DisplayProgramItem[],
 	onProgramChange:  Type_HandlerProgramChange,
 	onKeyDown:        Type_EventHandlerKeyboard,
 	arrFieldOrder:    Type_FieldOrder,
 	headerDisplayMap: Type_FieldMap,
 }
+export type Type_ProgramTable_ret = React.JSX.Element;
 
-interface Type_GipProgramTableProps {
+export interface Type_GipProgramTable_args {
 	programs:        Type_DisplayProgramItem[],
 	onProgramChange: Type_HandlerProgramChange,
 	onKeyDown:       Type_EventHandlerKeyboard,
 }
+export type Type_GipProgramTable_ret = React.JSX.Element;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -100,11 +113,11 @@ const SELECTED_PROGRAM_COLOUR = 'rgb(100, 210, 255)';
 //};
 
 /**
- * Generate the style for a selected program row.
+ * @description Generate the style for a selected program row.
  * @param isSelected - Whether the program is selected.
  * @returns The style object for the selected program row.
  */
-const genSelectedStyle = ( isSelected: boolean ) : { background?: string } => {
+const genSelectedStyle = ( isSelected: Type_genSelectedStyle_args ) : Type_genSelectedStyle_ret => {
 	return ( isSelected ? { background: SELECTED_PROGRAM_COLOUR } : {} );
 };
 
@@ -114,7 +127,7 @@ const genSelectedStyle = ( isSelected: boolean ) : { background?: string } => {
  * @param props.headerDisplayMap - The mapping of field names to their display values.
  * @returns The rendered program headers element.
  */
-function ProgHeaders( props: Type_ProgHeadersProps ) : React.JSX.Element {
+function ProgHeaders( props: Type_ProgHeaders_args ) : Type_ProgHeaders_ret {
 	const { arrFieldOrder, headerDisplayMap } = props;
 
 	return (
@@ -135,7 +148,7 @@ function ProgHeaders( props: Type_ProgHeadersProps ) : React.JSX.Element {
  * @param param0.fieldValue - The raw value of the field.
  * @returns The display value for the program field.
  */
-function progToDisplayValue( { fieldName, fieldValue } : { fieldName: string, fieldValue: string | number | null } ) : string {
+function progToDisplayValue( { fieldName, fieldValue } : Type_progToDisplayValue_args ) : Type_progToDisplayValue_ret {
 	const valueMap = FIELD_MAP_COLLECTION[ fieldName ] ?? null;
 	let   retValue = '';
 
@@ -150,10 +163,14 @@ function progToDisplayValue( { fieldName, fieldValue } : { fieldName: string, fi
 
 /**
  * @param props - The properties for the ProgInputField component.
- * @param props.fieldName  - The name of the field to display.
+ * @param props.fieldName  - the name of the field to display;
+ * @param props.fieldValue - the raw value of the field;
+ * @param props.selected   - boolean indicating whether the field is selected;
+ * @param props.onClick    - event handler for a left mouse click;
+ * @param props.onKeyDown  - event handler for a key down event;
  * @returns The rendered ProgInputField component.
  */
-function ProgInputField( props: Type_ProgInputFieldProps ) : React.JSX.Element {
+function ProgInputField( props: Type_ProgInputField_args ) : Type_ProgInputField_ret {
 	const { fieldName, fieldValue, selected, onClick, onKeyDown } = props;
 
 	return (
@@ -169,18 +186,19 @@ function ProgInputField( props: Type_ProgInputFieldProps ) : React.JSX.Element {
 }
 
 /**
- * Render the input fields for each program.
+ * @description Render the input fields for each program.
  * @param props               - The properties for the ProgInputFields component.
  * @param props.programs      - The list of programs to display.
  * @param props.arrFieldOrder - The order of fields to display.
  * @param props.onKeyDown     - The keydown event handler.
  * @returns The rendered ProgInputFields component.
  */
-function ProgInputFields( props: Type_ProgInputFieldsProps ) : React.JSX.Element {
+function ProgInputFields( props: Type_ProgInputFields_args ) : Type_ProgInputFields_ret {
 	const { programs, arrFieldOrder, onKeyDown } = props;
 
+	// Strip off the 'pos' field as this shall be generated from the order of the programs
 	const arrCookedFieldOrder = [ ...arrFieldOrder ];
-	const counterFieldName = arrCookedFieldOrder.shift();
+	const counterFieldName    = arrCookedFieldOrder.shift();
 
 	const onClick = ( event: Type_EventMouse, program: Type_DisplayProgramItem ) : void => {
 		if ( ! event.ctrlKey ) {
@@ -229,7 +247,7 @@ function ProgInputFields( props: Type_ProgInputFieldsProps ) : React.JSX.Element
  * @param props.onKeyDown        - The keydown event handler.
  * @returns The rendered ProgramTable element.
  */
-function ProgramTable( props: Type_ProgramTableProps ) : React.JSX.Element {
+function ProgramTable( props: Type_ProgramTable_args ) : Type_ProgramTable_ret {
 	const { arrFieldOrder, headerDisplayMap, programs, onProgramChange, onKeyDown } = props;
 	return (
 		<div className="gip-table-wrapper">
@@ -258,7 +276,7 @@ function ProgramTable( props: Type_ProgramTableProps ) : React.JSX.Element {
  * @param props.programs        - The list of programs to display.
  * @returns The rendered GipProgramTable element.
  */
-export function GipProgramTable( props: Type_GipProgramTableProps ) : React.JSX.Element {
+export function GipProgramTable( props: Type_GipProgramTable_args ) : Type_GipProgramTable_ret {
 	const { onProgramChange, onKeyDown, programs = [] } = props;
 	//console.log( 'Programs: ', programs );
 	const headerDisplayMap = FIELD_MAP_COLLECTION[ DUMMY_HEADER_FIELD ] || null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
@@ -282,3 +300,15 @@ export function GipProgramTable( props: Type_GipProgramTableProps ) : React.JSX.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unit test definitions
+
+const privateDefs = {};
+
+if ( process.env.NODE_ENV === 'test-unit' ) {
+	Object.assign( privateDefs, {
+		genSelectedStyle,
+		ProgHeaders,
+		progToDisplayValue,
+	} );
+}
+
+export { privateDefs };

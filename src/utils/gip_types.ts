@@ -25,6 +25,7 @@ export type Type_HttpHeaders   = Record<string, string>;
 export type Type_RawHttpParams = Record<string, string | string[] | boolean>;
 export type Type_HttpParams    = Type_RawHttpParams | string;
 
+export const PROG_FIELD_POS         = 'pos';
 export const PROG_FIELD_URI         = 'uri';
 export const PROG_FIELD_PID         = 'pid';
 export const PROG_FIELD_STATUS      = 'status';

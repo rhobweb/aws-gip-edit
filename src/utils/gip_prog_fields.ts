@@ -33,6 +33,7 @@
 // Imports
 
 import {
+	PROG_FIELD_POS,
 	PROG_FIELD_STATUS,
 	PROG_FIELD_PID,
 	PROG_FIELD_TITLE,
@@ -114,8 +115,6 @@ export const DB_FIELD_POS           = 'pos';
 
 // Dummy field
 export const DUMMY_HEADER_FIELD  = 'field_headers';
-// The counter field is taken from the first element in the array, use a dummy field as the first element
-const DUMMY_PROG_FIELD_POS       = 'pos';
 export const DUMMY_FIELD_DB      = 'db';
 
 // Display fields
@@ -179,6 +178,7 @@ const DISPLAY_QUALITY_NORMAL = 'Normal';
 
 // Map the program object property to the database property
 const PROG_TO_DB_FIELD_MAP : Type_RawFieldMap = [
+	//{ [PROG_FIELD_POS]:          DB_FIELD_POS         }, // Program object does not have a "pos" property as it is derived from the array order
 	{ [PROG_FIELD_STATUS]:       DB_FIELD_STATUS      },
 	{ [PROG_FIELD_PID]:          DB_FIELD_PID         },
 	{ [PROG_FIELD_TITLE]:        DB_FIELD_TITLE       },
@@ -192,7 +192,7 @@ const PROG_TO_DB_FIELD_MAP : Type_RawFieldMap = [
 
 // Map program object property to the header to display above the program list
 const HEADER_FIELD_MAP : Type_RawFieldMap = [
-	{ [DUMMY_PROG_FIELD_POS]:   DISPLAY_FIELD_POS,         },
+	{ [PROG_FIELD_POS]:         DISPLAY_FIELD_POS,         },
 	{ [PROG_FIELD_STATUS]:      DISPLAY_FIELD_STATUS,      },
 	{ [PROG_FIELD_PID]:         DISPLAY_FIELD_PID,         },
 	{ [PROG_FIELD_TITLE]:       DISPLAY_FIELD_TITLE,       },
