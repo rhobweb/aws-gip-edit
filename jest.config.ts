@@ -101,6 +101,10 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 //		'/node_modules/(?!query-string).+\\.js$'
 //		//'/node_modules/(?!query-string/.*)'
 //	],
+	// See https://www.npmjs.com/package/identity-obj-proxy
+	//moduleNameMapper: {
+	//	'\\.(jpg|jpeg|png)$': 'identity-obj-proxy',
+	//},
 	modulePathIgnorePatterns: [
 		'<rootDir>/dist',
 	],
@@ -110,5 +114,9 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 			outputDirectory: 'output',
 			outputName:      'build-test-result.xml',
 		} ]
-	]
+	],
+	transform: {
+		'\\.tsx?$':           'ts-jest',
+		'\\.(jpg|jpeg|png)$': '<rootDir>/test/jestFileTransform.mjs',
+	},
 });

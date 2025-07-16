@@ -18,8 +18,6 @@ import {
 	PROG_FIELD_QUALITY,
 } from '../utils/gip_types';
 
-import assert  from 'node:assert';
-
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
@@ -82,9 +80,9 @@ export type Type_GipProgramOptions_ret = React.JSX.Element;
 function ProgramOptionSelect( props : Type_ProgramOptionsSelect_args ) : Type_ProgramOptionsSelect_ret {
 	const { fieldName } = props;
 
-	assert( fieldName in props.optionFields );
-	assert( fieldName in FIELD_MAP_COLLECTION );
-	assert( fieldName in FIELD_ORDER_COLLECTION );
+	console.assert( fieldName in props.optionFields );
+	console.assert( fieldName in FIELD_MAP_COLLECTION );
+	console.assert( fieldName in FIELD_ORDER_COLLECTION );
 
 	const fieldValue = props.optionFields[ fieldName ];
 	const fieldMap   = FIELD_MAP_COLLECTION[ fieldName ];

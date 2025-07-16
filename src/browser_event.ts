@@ -21,7 +21,6 @@ import React from 'react';
 // Exported and local types
 
 export type Type_Ref  = React.RefObject<HTMLInputElement|null>;
-export type Type_Refs = Record<string,Type_Ref>;
 
 export type Type_EventKeyboardAny     = React.KeyboardEvent<HTMLElement>;
 export type Type_EventHandlerKeyboard = (event: Type_EventKeyboardAny) => void;

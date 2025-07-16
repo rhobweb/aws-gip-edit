@@ -49,8 +49,6 @@ import ourPackage                  from '../../package.json'; // with { type: "j
 import type {
 	Type_EventKeyboardAny,
 	Type_EventDragAny,
-	//Type_EventTouchAny,
-	Type_Refs,
 } from '../browser_event.ts';
 
 import type {
@@ -61,6 +59,10 @@ import type {
 	Type_ProgramEditOptions,
 	Type_RawHttpParams,
 } from '../utils/gip_types.ts';
+
+import type {
+	Type_UriAndTitleRefs,
+} from './gip_program_entry';
 
 ////////////////////////////////////////
 // Exported and local types
@@ -284,13 +286,15 @@ export default function GipEdit() : React.JSX.Element {
 	const [ programs,           setPrograms ]           = useState( [] as Type_ProgramList );
 
 	// References to elements in the sub-elements
-	const refs : Type_Refs = {
+	const refs : Type_UriAndTitleRefs = {
 		[PROG_FIELD_URI]:   useRef(null),
 		[PROG_FIELD_TITLE]: useRef(null),
 	};
 
+	type Type_RefFieldName = keyof Type_UriAndTitleRefs;
+
 	// Set the focus to the element identified by name
-	function setFocus( inputFieldName : string ) : void {
+	function setFocus( inputFieldName : Type_RefFieldName ) : void {
 		logger.log( 'debug', 'setFocus: Requested: ', inputFieldName );
 		// Focus the text input using the raw DOM API
 		if ( refs[ inputFieldName ]?.current ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
@@ -451,7 +455,8 @@ export default function GipEdit() : React.JSX.Element {
 					onOptionChange={ ( newOptions : Type_ProgramEditOptions ) => { onOptionChange( newOptions ); } }
 					onKeyDown={ ( event : Type_EventKeyboardAny ) => { onKeyDown( event ); } }
 					//refCallback={ inputFieldName => setRef( inputFieldName ) }
-					ref={ refs as unknown as React.ForwardedRef<HTMLInputElement> } // Expects 'ref' to be a simple reference, even though it can handle objects
+					//refs={ refs as unknown as React.ForwardedRef<HTMLInputElement> } // Expects 'refs' to be a simple reference, even though it can handle objects
+					refs={ refs } // Expects 'refs' to be a simple reference, even though it can handle objects
 				/>
 				<GipActionButtons
 					programs={ programs }
