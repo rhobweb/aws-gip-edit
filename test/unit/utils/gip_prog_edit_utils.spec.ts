@@ -33,6 +33,8 @@ import type {
 	Type_preProcessEpisode_ret,
 	Type_cookEpisode_args,
 	Type_cookEpisode_ret,
+	Type_cookRawEpisode_args,
+	Type_cookRawEpisode_ret,
 	Type_cookSynopsis_args,
 	Type_cookSynopsis_ret,
 } from '../../../src/utils/gip_prog_edit_utils';
@@ -47,6 +49,7 @@ interface Type_TestModulePrivateDefs {
 	extractElementImageURI:            ( args: Type_extractElementImageURI_args )            => Type_extractElementImageURI_ret,
 	preProcessEpisode:                 ( args: Type_preProcessEpisode_args )                 => Type_preProcessEpisode_ret,
 	cookEpisode:                       ( args: Type_cookEpisode_args )                       => Type_cookEpisode_ret,
+	cookRawEpisode:                    ( args: Type_cookRawEpisode_args )                    => Type_cookRawEpisode_ret,
 };
 
 interface Type_TestModule {
@@ -181,6 +184,22 @@ const TEST_PROG_ARCHERS_1 = `
 </a>
 `;
 
+const TEST_PROG_SHARDLAKE_1 = `
+<a href="https://www.bbc.co.uk/sounds/play/m002fv6k" aria-label="03:50, Shardlake (Omnibus), Lamentation, Episode 2, 1546. Catholic and Protestant factions vie for power at the court of Henry VIII." data-bbc-container="schedule_items" data-bbc-content-label="content" data-bbc-event-type="select" data-bbc-metadata="{&quot;APP&quot;:&quot;responsive::sounds&quot;,&quot;BID&quot;:&quot;m000y1yn&quot;,&quot;POS&quot;:&quot;3::1&quot;,&quot;SIS&quot;:&quot;on-demand&quot;}" data-bbc-source="bbc_radio_four_extra" class="sw-group sw-block sw-w-full">
+	<picture>
+		<source type="image/webp" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p09kwpfd.jpg.webp 160w,https://ichef.bbci.co.uk/images/ic/192x192/p09kwpfd.jpg.webp 192w,https://ichef.bbci.co.uk/images/ic/224x224/p09kwpfd.jpg.webp 224w,https://ichef.bbci.co.uk/images/ic/288x288/p09kwpfd.jpg.webp 288w,https://ichef.bbci.co.uk/images/ic/368x368/p09kwpfd.jpg.webp 368w,https://ichef.bbci.co.uk/images/ic/400x400/p09kwpfd.jpg.webp 400w,https://ichef.bbci.co.uk/images/ic/448x448/p09kwpfd.jpg.webp 448w,https://ichef.bbci.co.uk/images/ic/496x496/p09kwpfd.jpg.webp 496w,https://ichef.bbci.co.uk/images/ic/512x512/p09kwpfd.jpg.webp 512w,https://ichef.bbci.co.uk/images/ic/576x576/p09kwpfd.jpg.webp 576w,https://ichef.bbci.co.uk/images/ic/624x624/p09kwpfd.jpg.webp 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
+		<source type="image/jpg" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p09kwpfd.jpg 160w,https://ichef.bbci.co.uk/images/ic/192x192/p09kwpfd.jpg 192w,https://ichef.bbci.co.uk/images/ic/224x224/p09kwpfd.jpg 224w,https://ichef.bbci.co.uk/images/ic/288x288/p09kwpfd.jpg 288w,https://ichef.bbci.co.uk/images/ic/368x368/p09kwpfd.jpg 368w,https://ichef.bbci.co.uk/images/ic/400x400/p09kwpfd.jpg 400w,https://ichef.bbci.co.uk/images/ic/448x448/p09kwpfd.jpg 448w,https://ichef.bbci.co.uk/images/ic/496x496/p09kwpfd.jpg 496w,https://ichef.bbci.co.uk/images/ic/512x512/p09kwpfd.jpg 512w,https://ichef.bbci.co.uk/images/ic/576x576/p09kwpfd.jpg 576w,https://ichef.bbci.co.uk/images/ic/624x624/p09kwpfd.jpg 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
+		<img src="https://ichef.bbci.co.uk/images/ic/400x400/p09kwpfd.jpg" width="100" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover">
+	</picture>
+	<div class="sw-text-primary">
+		<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-colors sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus-visible:sw-text-accent group-focus-visible:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Shardlake (Omnibus)</span>
+		<p class="sw-text-long-primer sw-mt-1">Lamentation</p>
+		<p class="sw-text-long-primer sw-mt-1">Episode 2</p>
+		<p class="sw-text-secondary sw-text-brevier sw-mt-1 sw-hidden m:sw-block">1546. Catholic and Protestant factions vie for power at the court of Henry VIII.</p>
+	</div>
+</a>
+`;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Local test functions
 
@@ -267,8 +286,22 @@ describe(MODULE_NAME + ':convertToCamelCase', () => {
 		commonAfterEach();
 	});
 
-	test( 'All properties specified', () => {
+	test( 'Empty string', () => {
 		actualResult = testModuleObj.convertToCamelCase( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Uppercase acronym', () => {
+		testArgs       = 'The story of HS2';
+		expectedResult = 'TheStoryOfHS2';
+		actualResult   = testModuleObj.convertToCamelCase( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Episode 2', () => {
+		testArgs       = 'Episode 2';
+		expectedResult = 'Episode2';
+		actualResult   = testModuleObj.convertToCamelCase( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
 });
@@ -721,6 +754,50 @@ describe(MODULE_NAME + ':cookEpisode', () => {
 	});
 });
 
+describe(MODULE_NAME + ':cookRawEpisode', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_cookRawEpisode_args;
+	let actualResult   : Type_cookRawEpisode_ret;
+	let expectedResult : Type_cookRawEpisode_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj  = testModule.privateDefs;
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'No preprocessing"', () => {
+		testArgs       = [ 'Nothing', 'to preprocess'];
+		expectedResult = 'Nothing-to preprocess';
+		actualResult   = testModuleObj.cookRawEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'First element ends with "Series XX"', () => {
+		testArgs       = [ 'Series 16', `3. 'Gen Ed'.`];
+		expectedResult = 'S16E03-GenEd';
+		actualResult   = testModuleObj.cookRawEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'First element ends with an acronym with a number', () => {
+		testArgs       = [ 'Understanding HS2', `Some more text`];
+		expectedResult = 'Understanding HS2;-Some more text'; // Extra punctuation added so that first elemenet does not end with a number
+		actualResult   = testModuleObj.cookRawEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Second element ends with a number', () => {
+		testArgs       = [ 'Lamentation', `Episode 2`];
+		expectedResult = '02-Lamentation';
+		actualResult   = testModuleObj.cookRawEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
 
 describe(MODULE_NAME + ':cookSynopsis', () => {
 	let testModuleObj  : Type_TestModule;
@@ -820,6 +897,17 @@ describe(MODULE_NAME + ':getProgDetailsFromLink', () => {
 			title:     'Archers-2025-06-16',
 			synopsis:  "16/06/2025.\nJakob questions his abilities.",
 			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p0bzj12m.jpg',
+		};
+		actualResult = testModuleObj.getProgDetailsFromLink( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Parse cut down program item - Shardlake', () => {
+		testArgs = TEST_PROG_SHARDLAKE_1;
+		expectedResult = {
+			title:     'ShardlakeOmnibus-02-Lamentation',
+			synopsis:  "Lamentation-Episode 2.\n1546. Catholic and Protestant factions vie for power at the court of Henry VIII.",
+			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p09kwpfd.jpg',
 		};
 		actualResult = testModuleObj.getProgDetailsFromLink( testArgs );
 		expect( actualResult ).toEqual( expectedResult );

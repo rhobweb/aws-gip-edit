@@ -25,10 +25,11 @@ import { convertKnownTitle } from './gip_prog_title_utils';
 type Type_HtmlElement = Element;
 
 interface Type_ProgramAttributes {
-	title:     string,
-	episode:   string,
-	synopsis:  string,
-	image_uri: string,
+	title:      string,
+	episode:    string,
+	rawEpisode: string[],
+	synopsis:   string,
+	image_uri:  string,
 };
 
 interface Type_ElementTagNameAndClassTag {
@@ -77,11 +78,17 @@ export type Type_preProcessEpisode_ret  = string;
 export type Type_cookEpisode_args = string;
 export type Type_cookEpisode_ret  = string;
 
+export type Type_cookRawEpisode_args = string[];
+export type Type_cookRawEpisode_ret  = string;
+
 export interface Type_cookSynopsis_args {
 	rawText : string,
 	episode?: string,
 };
 export type Type_cookSynopsis_ret = string;
+
+export type Type_extractRawElementText_args = Element | Element[];
+export type Type_extractRawElementText_ret  = string[];
 
 export type Type_extractElementText_args = Element | Element[];
 export type Type_extractElementText_ret  = string;
@@ -105,6 +112,9 @@ const ARR_COMMON_TEXT_CONVERSIONS : Type_TextConversionList = [
 	[ '&amp;',    '&'  ], // Escaped ampersand
 ];
 
+// Separator to use when joining program attributes, e.g., episode
+const ELEMENT_SEPARATOR = '-';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
@@ -122,6 +132,25 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 
 	if ( /\s/g.test(str) ) // Only camelcase if the string contains whitespace
 	{
+		const preCookedStr = str
+			.replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space
+			.replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters
+			.replace( /\s+/g, ' ' )        // Shrink multiple spaces
+		;
+
+		const arrWord = preCookedStr.split( ' ' )
+			.map( el => {
+				const m = /^([a-z])(.*)$/.exec( el );
+				if ( m ) {
+					return m[1].toUpperCase() + m[2].toLowerCase();
+				} else {
+					return el;
+				}
+			} );
+
+		cookedStr = arrWord.join( '' );
+
+		/*
 		cookedStr = str.toLowerCase()    // Lower cases the string
 			.replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space
 			.replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters
@@ -129,6 +158,7 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 			.replace( / (.)/g, ( ...args ) => { return ( args[1] as string ).toUpperCase(); })  // Uppercases first char in each group after a space
 			.replace( / /g, '' )           // Removes spaces
 			.replace( /^(.)/g, ( ...args ) => { return ( args[1] as string ).toUpperCase(); }); // Uppercases the first character
+		*/
 	}
 
 	return cookedStr;
@@ -235,12 +265,19 @@ function getDecendentsByTagNameAndClassTag( { elem, arrTagNameAndClassTag } : Ty
 
 /**
  * @param el : either an Element object containing text or an array of such objects.
+ * @returns an array of zero or more strings.
+ */
+function extractRawElementText( el : Type_extractRawElementText_args ) : Type_extractRawElementText_ret {
+	const arrEl = ( Array.isArray( el ) ? el : [ el ] );
+	return arrEl.map( e => e.innerHTML );
+}
+
+/**
+ * @param el : either an Element object containing text or an array of such objects.
  * @returns the text from the elements concatenated with a dash.
  */
 function extractElementText( el : Type_extractElementText_args ) : Type_extractElementText_ret {
-	const arrEl = ( Array.isArray( el ) ? el : [ el ] );
-	const text  = arrEl.map( e => e.innerHTML ).join( '-' );
-	return text;
+	return extractRawElementText( el ).join( ELEMENT_SEPARATOR );
 }
 
 /**
@@ -274,17 +311,19 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 	const objFoundItem = getDecendentsByTagNameAndClassTag( { elem: linkElem, arrTagNameAndClassTag: arrSearchItem } );
 
 	const objProgAttributes : Type_ProgramAttributes = {
-		title:     '',
-		episode:   '',
-		synopsis:  '',
-		image_uri: '',
+		title:      '',
+		episode:    '',
+		rawEpisode: [],
+		synopsis:   '',
+		image_uri:  '',
 	};
 
 	if ( objFoundItem.title ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-		objProgAttributes.title  = extractElementText( objFoundItem.title );
+		objProgAttributes.title = extractElementText( objFoundItem.title );
 	}
 	if ( objFoundItem.primary ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-		objProgAttributes.episode  = extractElementText( objFoundItem.primary );
+		objProgAttributes.episode    = extractElementText( objFoundItem.primary );
+		objProgAttributes.rawEpisode = extractRawElementText( objFoundItem.primary );
 	}
 	if ( objFoundItem.image ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 		objProgAttributes.image_uri = extractElementImageURI(objFoundItem.image );
@@ -453,7 +492,7 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 
 		const additionalText = [ arrFoundItem[ I_PRE ], arrFoundItem[ I_POST ] ]
 			.filter( e => e )
-			.map( e => e.replace( /[.;:?!]$/, '') ) // Replace any trailing punctuation
+			.map( e => e.replace( /[.;:?!-_]$/, '') ) // Replace any trailing punctuation
 			.map( e => convertToCamelCase( e ) )
 			.join( '-' );
 
@@ -467,6 +506,26 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 	return cookedEpisode;
 }
 
+/**
+ * @param arrRawText : array of text items to process.
+ * @returns the processed text with series and episode data extracted and date format standardised, see cookEpisode.
+ */
+function cookRawEpisode( arrRawText : Type_cookRawEpisode_args ) : Type_cookRawEpisode_ret
+{
+	for ( let i = 0; i < arrRawText.length - 1; ++i ) {
+		if ( /[^\s0-9][0-9]+$/.exec( arrRawText[ i ] ) ) {
+			arrRawText[ i ] += ';';
+		}
+	}
+
+	const precookedText = arrRawText.join( ELEMENT_SEPARATOR );
+
+	//console.log( `cookeRawEpisode: precooked: "${precookedText}"` );
+	//console.log( `cookeRawEpisode: cooked: "${cookEpisode( precookedText )}"` );
+
+	return cookEpisode( precookedText );
+}
+
 ////////////////////////////////////////
 // Exported definitions
 
@@ -478,6 +537,7 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
  */
 export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
 {
+	//console.log( `rawTitle: "${rawTitle}"` );
 	const arrConversion : Type_TextConversionList = [
 		...ARR_COMMON_TEXT_CONVERSIONS,
 		[ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
@@ -540,7 +600,7 @@ export function getProgDetailsFromLink( strHTML : Type_getProgDetailsFromLink_ar
 	const linkElem       = linkElemList[ 0 ];
 	const objAttributes  = getProgAttributes( linkElem );
 	console.log( 'Program attributes: ' + JSON.stringify( objAttributes, null, 2 ) );
-	const episode        = cookEpisode( objAttributes.episode );
+	const episode        = cookRawEpisode( objAttributes.rawEpisode );
 	const rawTitle       = [ objAttributes.title, episode ]
 		.map( el => convertToCamelCase( el ) )
 		.filter( val => ( val.length > 0 ) )
@@ -572,5 +632,6 @@ if ( process.env.NODE_ENV === 'test-unit' ) {
 		convertText,
 		preProcessEpisode,
 		cookEpisode,
+		cookRawEpisode,
 	} );
 }
