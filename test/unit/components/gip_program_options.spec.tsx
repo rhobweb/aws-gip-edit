@@ -86,16 +86,19 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 });
 
 describe(MODULE_NAME + ':ProgramOptionSelect', () => {
-	let testModuleObj  : Type_TestModulePrivateDefs;
-	let actualResult   : Type_ProgramOptionsSelect_ret;
-	let expectedResult : Type_ProgramOptionsSelect_ret;
-	let testArgs       : Type_ProgramOptionsSelect_args;
+	let testModuleObj       : Type_TestModulePrivateDefs;
+	let actualResult        : HTMLElement;
+	let expectedResult      : HTMLElement;
+	let expectedJSX         : React.JSX.Element;
+	let testArgs            : Type_ProgramOptionsSelect_args;
 	let ProgramOptionSelect : (args: Type_ProgramOptionsSelect_args) => Type_ProgramOptionsSelect_ret;
-	let onChangeMock	: jest.Mock;
-	let onKeyDownMock	: jest.Mock;
-	let testGenre	    : string;
-	let testQuality	  : string;
-	let testDayOfWeek : string;
+	let onChangeMock	      : jest.Mock;
+	let onKeyDownMock	      : jest.Mock;
+	let testGenre	          : string;
+	let testQuality	        : string;
+	let testDayOfWeek       : string;
+	let component           : RenderResult;
+	let expectedRendered    : RenderResult;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -123,64 +126,70 @@ describe(MODULE_NAME + ':ProgramOptionSelect', () => {
 	});
 
 	test('Genre', () => {
-		expectedResult = (
+		expectedJSX = (
 			<select
 				className={ `gip-prog-option-field gip-prog-option-field-genre` }
 				id={ `select-genre` }
-				onChange={ expect.any(Function) } // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+				onChange={ () => { expect.any(Function); } }
 				onKeyDown={ onKeyDownMock }
 				value={ testGenre }
-				key={ `gip-genre-option-select` }
 			>
-				<option key={ `gip-genre-option-0` } value={ 'Books & Spoken' }>{ 'Books&Spoken' }</option>
-				<option key={ `gip-genre-option-1` } value={ 'Comedy' }>{ 'Comedy' }</option>
+				<option value={ 'Books & Spoken' }>{ 'Books&Spoken' }</option>
+				<option value={ 'Comedy' }>{ 'Comedy' }</option>
 			</select>
 		);
-		actualResult = ProgramOptionSelect( testArgs );
-		expect( actualResult ).toEqual( expectedResult);
+		expectedRendered = render( expectedJSX );
+		expectedResult   = expectedRendered.container;
+		component        = render( <ProgramOptionSelect { ...testArgs } /> );
+		actualResult     = component.container;
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
 	test('Quality', () => {
 		testArgs.fieldName = 'quality';
-		expectedResult = (
+		expectedJSX = (
 			<select
 				className={ `gip-prog-option-field gip-prog-option-field-quality` }
 				id={ `select-quality` }
-				onChange={ expect.any(Function) } // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+				onChange={ () => { expect.any(Function); } }
 				onKeyDown={ onKeyDownMock }
 				value={ testQuality }
-				key={ `gip-quality-option-select` }
 			>
-				<option key={ `gip-quality-option-0` } value={ 'Normal' }>{ 'Normal' }</option>
-				<option key={ `gip-quality-option-1` } value={ 'High' }>{ 'HIGH' }</option>
+				<option value={ 'Normal' }>{ 'Normal' }</option>
+				<option value={ 'High' }>{ 'HIGH' }</option>
 			</select>
 		);
-		actualResult = ProgramOptionSelect( testArgs );
-		expect( actualResult ).toEqual( expectedResult);
+		expectedRendered = render( expectedJSX );
+		expectedResult   = expectedRendered.container;
+		component        = render( <ProgramOptionSelect { ...testArgs } /> );
+		actualResult     = component.container;
+		expect( actualResult ).toEqual( expectedResult );
 	});
 
 	test('Day of week', () => {
 		testArgs.fieldName = 'day_of_week';
-		expectedResult = (
+		expectedJSX = (
 			<select
 				className={ `gip-prog-option-field gip-prog-option-field-day_of_week` }
 				id={ `select-day_of_week` }
-				onChange={ expect.any(Function) } // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+				onChange={ () => { expect.any(Function); } }
 				onKeyDown={ onKeyDownMock }
 				value={ testDayOfWeek }
-				key={ `gip-day_of_week-option-select` }
 			>
-				<option key={ `gip-day_of_week-option-0` } value={ 'Any' }>{ 'ANY' }</option>
-				<option key={ `gip-day_of_week-option-1` } value={ 'Mon' }>{ 'Mon' }</option>
-				<option key={ `gip-day_of_week-option-2` } value={ 'Tue' }>{ 'Tue' }</option>
-				<option key={ `gip-day_of_week-option-3` } value={ 'Wed' }>{ 'Wed' }</option>
-				<option key={ `gip-day_of_week-option-4` } value={ 'Thu' }>{ 'Thu' }</option>
-				<option key={ `gip-day_of_week-option-5` } value={ 'Fri' }>{ 'Fri' }</option>
-				<option key={ `gip-day_of_week-option-6` } value={ 'Sat' }>{ 'Sat' }</option>
-				<option key={ `gip-day_of_week-option-7` } value={ 'Sun' }>{ 'Sun' }</option>
+				<option value={ 'Any' }>{ 'ANY' }</option>
+				<option value={ 'Mon' }>{ 'Mon' }</option>
+				<option value={ 'Tue' }>{ 'Tue' }</option>
+				<option value={ 'Wed' }>{ 'Wed' }</option>
+				<option value={ 'Thu' }>{ 'Thu' }</option>
+				<option value={ 'Fri' }>{ 'Fri' }</option>
+				<option value={ 'Sat' }>{ 'Sat' }</option>
+				<option value={ 'Sun' }>{ 'Sun' }</option>
 			</select>
 		);
-		actualResult = ProgramOptionSelect( testArgs );
+		expectedRendered = render( expectedJSX );
+		expectedResult   = expectedRendered.container;
+		component        = render( <ProgramOptionSelect { ...testArgs } /> );
+		actualResult     = component.container;
 		expect( actualResult ).toEqual( expectedResult );
 	});
 });

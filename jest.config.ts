@@ -57,8 +57,8 @@ export default async (): Promise<JestConfigWithTsJest> => ({
     "./src/**/*.{tsx,ts}"
   ],
 
-		// The directory where Jest should output its coverage files
-		coverageDirectory: "<rootDir>coverage",
+	// The directory where Jest should output its coverage files
+	coverageDirectory: "<rootDir>/output",
 
 	//projects: ['<rootDir>/test/unit/'],
 	// TODO: Add custom setup file - setupFiles: ['./setupJest.js'],
@@ -110,8 +110,9 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 	],
 	reporters: [
 		'default',
+		'jest-html-reporters',
 		[ 'jest-junit', {
-			outputDirectory: 'output',
+			outputDirectory: '<rootDir>/output',
 			outputName:      'build-test-result.xml',
 		} ]
 	],

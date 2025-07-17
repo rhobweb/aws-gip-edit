@@ -187,14 +187,20 @@ function ProgInputField( props: Type_ProgInputField_args ) : Type_ProgInputField
 
 /**
  * @description Render the input fields for each program.
- * @param props               - The properties for the ProgInputFields component.
- * @param props.programs      - The list of programs to display.
- * @param props.arrFieldOrder - The order of fields to display.
- * @param props.onKeyDown     - The keydown event handler.
+ * @param props                 - The properties for the ProgInputFields component.
+ * @param props.programs        - The list of programs to display.
+ * @param props.arrFieldOrder   - The order of fields to display.
+ * @param props.onKeyDown       - The keydown event handler.
+ * @param props.onProgramChange - event handler to be called if a program selection changes.
  * @returns The rendered ProgInputFields component.
  */
 function ProgInputFields( props: Type_ProgInputFields_args ) : Type_ProgInputFields_ret {
-	const { programs, arrFieldOrder, onKeyDown } = props;
+	const {
+		programs,
+		arrFieldOrder,
+		onKeyDown,
+		onProgramChange,
+	} = props;
 
 	// Strip off the 'pos' field as this shall be generated from the order of the programs
 	const arrCookedFieldOrder = [ ...arrFieldOrder ];
@@ -207,12 +213,10 @@ function ProgInputFields( props: Type_ProgInputFields_args ) : Type_ProgInputFie
 		} else {
 			program[ PROG_FIELD_SELECTED ] = ( program[ PROG_FIELD_SELECTED ] ? false : true );
 		}
-		//programs[ programIndex ][ fieldName ] = event.target.value;
-		props.onProgramChange( programs );
+		onProgramChange( programs );
 	};
 
-	//console.log( "ProgInputFields: ", { programs, arrCookedFieldOrder } ); // TODO: Remove
-
+	// Note: the key property is just for use by React; it does not get generated into HTML, see https://react.dev/learn/rendering-lists
 	/* eslint-disable @typescript-eslint/restrict-template-expressions */
 	return (
 		<>
@@ -258,7 +262,7 @@ function ProgramTable( props: Type_ProgramTable_args ) : Type_ProgramTable_ret {
 			<ProgInputFields key="progInputFields"
 				arrFieldOrder={ arrFieldOrder }
 				programs={ programs }
-				onProgramChange={ newPrograms => { onProgramChange( newPrograms ); } }
+				onProgramChange={ onProgramChange }
 				onKeyDown={ onKeyDown }
 			/>
 		</div>
@@ -278,8 +282,9 @@ function ProgramTable( props: Type_ProgramTable_args ) : Type_ProgramTable_ret {
  */
 export function GipProgramTable( props: Type_GipProgramTable_args ) : Type_GipProgramTable_ret {
 	const { onProgramChange, onKeyDown, programs = [] } = props;
-	//console.log( 'Programs: ', programs );
-	const headerDisplayMap = FIELD_MAP_COLLECTION[ DUMMY_HEADER_FIELD ] || null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+	console.assert( DUMMY_HEADER_FIELD in FIELD_MAP_COLLECTION );
+	console.assert( DUMMY_HEADER_FIELD in FIELD_ORDER_COLLECTION );
+	const headerDisplayMap = FIELD_MAP_COLLECTION[ DUMMY_HEADER_FIELD ];
 	const arrFieldOrder    = FIELD_ORDER_COLLECTION[ DUMMY_HEADER_FIELD ];
 	const tableProps       = {
 		arrFieldOrder,
@@ -301,14 +306,15 @@ export function GipProgramTable( props: Type_GipProgramTable_args ) : Type_GipPr
 ////////////////////////////////////////////////////////////////////////////////
 // Unit test definitions
 
-const privateDefs = {};
+export const privateDefs = {};
 
 if ( process.env.NODE_ENV === 'test-unit' ) {
 	Object.assign( privateDefs, {
 		genSelectedStyle,
 		ProgHeaders,
 		progToDisplayValue,
+		ProgInputField,
+		ProgInputFields,
+		ProgramTable,
 	} );
 }
-
-export { privateDefs };
