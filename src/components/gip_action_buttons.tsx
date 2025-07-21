@@ -107,7 +107,7 @@ function ActionButtons( props : Type_ActionButtons_args ) : Type_ActionButtons_r
 			} );
 			onProgramChange( newPrograms );
 		} else {
-			window.alert( 'No programs selected' );
+			window.alert( 'No programs' );
 		}
 	};
 
@@ -143,27 +143,29 @@ function ActionButtons( props : Type_ActionButtons_args ) : Type_ActionButtons_r
 	/**
 	 * @description Save the programs to the database.
 	 */
-	const saveProgs = () : void => {
-		savePrograms( programs )
-			.then( newPrograms => {
-				onProgramChange( newPrograms );
-				programsSaved();
-			})
-			.catch( ( err : unknown ) => {
-				console.error( 'saveProgs: error: ', err );
-				window.alert( 'Error saving programs: ' + ( err as Error ).message );
-			});
+	const saveProgs = async () : Promise<void> => {
+		try {
+			const newPrograms = await savePrograms( programs );
+			onProgramChange( newPrograms );
+			programsSaved();
+		}
+		catch( err ) {
+			console.error( 'saveProgs: error: ', err );
+			window.alert( 'Error saving programs: ' + ( err as Error ).message );
+		}
 	};
 
+	/* eslint-disable @typescript-eslint/no-misused-promises */
 	return (
 		<>
-			<input type="button" className="gip-action-button" name="resetErrors"    value="Reset Errors"    onClick={ resetErrors }/>
-			<input type="button" className="gip-action-button" name="clearDays"      value="Clear Days"      onClick={ () => { resetField( PROG_FIELD_DAY_OF_WEEK ); } }/>
-			<input type="button" className="gip-action-button" name="selectOK"       value="Select OK"       onClick={ selectOK }/>
-			<input type="button" className="gip-action-button" name="deleteSelected" value="Delete Selected" onClick={ deleteSelected }/>
-			<input type="button" className="gip-action-button" name="saveProgs"      value="Save"            onClick={ saveProgs }/>
+			<input type="button" className="gip-action-button gip-action-button-reset-errors"    name="resetErrors"    value="Reset Errors"    onClick={ resetErrors }/>
+			<input type="button" className="gip-action-button gip-action-button-clear-days"      name="clearDays"      value="Clear Days"      onClick={ () => { resetField( PROG_FIELD_DAY_OF_WEEK ); } }/>
+			<input type="button" className="gip-action-button gip-action-button-select-ok"       name="selectOK"       value="Select OK"       onClick={ selectOK }/>
+			<input type="button" className="gip-action-button gip-action-button-delete-selected" name="deleteSelected" value="Delete Selected" onClick={ deleteSelected }/>
+			<input type="button" className="gip-action-button gip-action-button-save-progs"      name="saveProgs"      value="Save"            onClick={ async () => { await saveProgs(); } }/>
 		</>
 	);
+	/* eslint-enable @typescript-eslint/no-misused-promises */
 }
 
 ////////////////////////////////////////

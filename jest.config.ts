@@ -110,7 +110,6 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 	],
 	reporters: [
 		'default',
-		'jest-html-reporters',
 		[ 'jest-junit', {
 			outputDirectory: '<rootDir>/output',
 			outputName:      'build-test-result.xml',
