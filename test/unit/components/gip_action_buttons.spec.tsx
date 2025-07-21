@@ -328,7 +328,7 @@ describe(MODULE_NAME + ':GipActionButtons', () => {
 	let actualResult        : HTMLElement;
 	let expectedJSX         : React.JSX.Element;
 	let expectedResult      : HTMLElement;
-	let testArgs            : Type_ActionButtons_args;
+	let testArgs            : Type_GipActionButtons_args;
 	let testPrograms        : Type_DisplayProgramItem[];
 	let GipActionButtons    : (args: Type_GipActionButtons_args) => Type_GipActionButtons_ret;
 	let onProgramChangeMock : jest.Mock;

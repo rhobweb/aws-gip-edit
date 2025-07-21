@@ -17,13 +17,15 @@ import React, { ReactElement } from 'react';
 ////////////////////////////////////////
 // Exported and local types
 
-interface Type_GipGridRowProps {
+export interface Type_GipGridRow_args {
 	fieldID?:              string,
 	paramName?:            string | null,
 	labelText:             string,
 	gipComponent:          () => ReactElement,
 	additionalClassNames?: string[],
 }
+
+export type Type_GipGridRow_ret = ReactElement;
 
 interface Type_LabelProps {
 	htmlFor?: string,
@@ -49,7 +51,7 @@ interface Type_LabelProps {
  * @param props.additionalClassNames - An optional array of additional class names to apply to the element.
  * @returns A ReactElement representing the grid row.
  */
-export function GipGridRow( props : Type_GipGridRowProps ) : ReactElement  {
+export function GipGridRow( props : Type_GipGridRow_args ) : Type_GipGridRow_ret  {
 	const { paramName = null, labelText, gipComponent, additionalClassNames = [] } = props;
 	const labelProps : Type_LabelProps = {};
 	const classNames  = [ 'col-md-11', 'gip-col', ...additionalClassNames ];
