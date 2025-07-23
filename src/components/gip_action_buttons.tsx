@@ -38,20 +38,18 @@ import type {
 ////////////////////////////////////////
 // Exported and local types
 
-export type Type_ProgramList = Type_DisplayProgramItem[];
-
 export interface Type_ActionButtons_args {
-	programs:        Type_ProgramList,
+	programs:        Type_DisplayProgramItem[],
 	onProgramChange: Type_HandlerProgramChange,
 	programsSaved:   () => void,
-	savePrograms:    ( params: Type_ProgramList ) => Promise<Type_ProgramList>,
+	savePrograms:    ( params: Type_DisplayProgramItem[] ) => Promise<Type_DisplayProgramItem[]>,
 }
 export type Type_ActionButtons_ret = ReactElement;
 
 export interface Type_GipActionButtons_args {
-	programs:        Type_ProgramList,
+	programs:        Type_DisplayProgramItem[],
 	onProgramChange: Type_HandlerProgramChange,
-	savePrograms:    ( programs : Type_ProgramList ) => Promise<Type_ProgramList>,
+	savePrograms:    ( programs : Type_DisplayProgramItem[] ) => Promise<Type_DisplayProgramItem[]>,
 	programsSaved:   () => void,
 }
 export type Type_GipActionButtons_ret = ReactElement;

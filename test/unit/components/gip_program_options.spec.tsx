@@ -197,7 +197,7 @@ describe(MODULE_NAME + ':ProgramOptionSelect', () => {
 describe(MODULE_NAME + ':GipProgramOptions', () => {
 	let testModuleObj       : Type_TestModule;
 	let testArgs            : Type_GipProgramOptions_args;
-	let GipProgramOptions   : (args: Type_GipProgramOptions_args) => Type_GipProgramOptions_ret;
+	let GipProgramOptions   : Type_TestModule['GipProgramOptions'];
 	let onChangeMock	      : jest.Mock;
 	let testGenre	          : string;
 	let testQuality	        : string;

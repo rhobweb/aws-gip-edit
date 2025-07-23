@@ -54,7 +54,6 @@ import type {
 import type {
 	Type_EndpointDef,
 	Type_DisplayProgramItem,
-	Type_ProgramList,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
 	Type_RawHttpParams,
@@ -73,17 +72,27 @@ interface Type_GipEditState {
 	programs:           Type_DisplayProgramItem[],
 }
 
-interface Type_BodyMessageError {
+export interface Type_BodyMessageError {
 	message: string,
-};
-
-interface Type_ErrorWithBody extends Error {
-	body: ( Record<string,unknown>[] | Type_BodyMessageError ),
 };
 
 type Type_ErrorBody = Record<string,unknown>[] | Type_BodyMessageError;
 
-type Type_processDrop_ret = { programEditInput : GipProgramEditInput } | null;
+export type Type_processProgramForSaving_args = Type_DisplayProgramItem;
+export type Type_processProgramForSaving_ret  = Type_DbProgramEditItem;
+
+export type Type_loadPrograms_ret = Promise<Type_DisplayProgramItem[]>;
+
+export type Type_savePrograms_args = Type_DisplayProgramItem[];
+export type Type_savePrograms_ret  = Promise<Type_DisplayProgramItem[]>;
+
+export type Type_processProgram_args = Type_GipEditState;
+export type Type_processProgram_ret  = Type_DisplayProgramItem[] | null;
+
+export type Type_processDrop_args = Type_EventDragAny;
+export type Type_processDrop_ret  = { programEditInput : GipProgramEditInput } | null;
+
+export type Type_GipEdit_ret = React.JSX.Element;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -110,7 +119,7 @@ const DOC_TITLE = `GIP Program Edit v${ourPackage.version}`;
 ////////////////////////////////////////
 // Local definitions
 
-class ErrorWithBody extends Error {
+export class ErrorWithBody extends Error {
 	body: Type_ErrorBody;
 	constructor( message: string, body: Type_ErrorBody = [] ) {
 		super( message );
@@ -131,7 +140,7 @@ class ErrorWithBody extends Error {
  * @returns the program object ready for saving to the database.
  *          The program is converted to a database format, and the title and synopsis are cooked.
  */
-function processProgramForSaving( prog : Type_DisplayProgramItem ) : Type_DbProgramEditItem {
+function processProgramForSaving( prog : Type_processProgramForSaving_args ) : Type_processProgramForSaving_ret {
 	const cookedProgram                  = JSON.parse( JSON.stringify( prog ) ) as Type_DisplayProgramItem;
 	cookedProgram[ PROG_FIELD_TITLE ]    = cookTitle( cookedProgram[ PROG_FIELD_TITLE ] );
 	cookedProgram[ PROG_FIELD_SYNOPSIS ] = cookSynopsis( { rawText: cookedProgram[ PROG_FIELD_SYNOPSIS ] } );
@@ -142,7 +151,7 @@ function processProgramForSaving( prog : Type_DisplayProgramItem ) : Type_DbProg
  * Loads the programs from the server.
  * @returns the list of programs.
  */
-async function loadPrograms() : Promise<Type_DisplayProgramItem[]> {
+async function loadPrograms() : Type_loadPrograms_ret {
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_LOAD } );
 	logger.log( 'info', `loadPrograms: URI: `, uri );
 	const response         = await fetch( uri, options as RequestInit );
@@ -157,14 +166,17 @@ async function loadPrograms() : Promise<Type_DisplayProgramItem[]> {
  * @param programs - The list of programs to save.
  * @returns the list of saved programs.
  */
-async function savePrograms( programs : Type_DisplayProgramItem[] ) : Promise<Type_DisplayProgramItem[]> {
-	let   newPrograms = [] as Type_DisplayProgramItem[];
-	const dbPrograms  = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
-	const params      = dbPrograms as Type_RawHttpParams; // Force casting to match the processEndpointDef function
+async function savePrograms( programs : Type_savePrograms_args ) : Type_savePrograms_ret {
+	const dbPrograms       = programs.map( prog => processProgramForSaving( prog ) ) as unknown;
+	const params           = dbPrograms as Type_RawHttpParams; // Force casting to match the processEndpointDef function
 	const { uri, options } = processEndpointDef( { endpointDef: ENDPOINT_SAVE, params } );
+
+	let newPrograms = [] as Type_DisplayProgramItem[];
+
 	logger.log( 'verbose', 'savePrograms: Programs: ', JSON.stringify( { uri, options, params } ) );
+
 	try {
-		const response      = await fetch( uri, options as RequestInit );
+		const response = await fetch( uri, options as RequestInit );
 		if ( response.ok ) {
 			logger.log( 'verbose', 'savePrograms: OK', );
 			const newDbPrograms = await extractJsonResponseStream( response ) as Type_DbProgramEditItem[];
@@ -176,11 +188,11 @@ async function savePrograms( programs : Type_DisplayProgramItem[] ) : Promise<Ty
 		}
 	}
 	catch ( err ) {
-		logger.log( 'error', 'savePrograms: FAILED', { err: err as Type_ErrorWithBody } );
+		logger.log( 'error', 'savePrograms: FAILED', { err: err as ErrorWithBody } );
 		newPrograms = programs; // Default to return the request programs so they are not lost
-		const body = ( err as Type_ErrorWithBody ).body;
 		let errMessage = ( err as Error ).message;
-		if ( 'message' in body ) {
+		const body = ( err as ErrorWithBody ).body as Record<'message',string> | null;
+		if ( body ) {
 			errMessage = ( 'message' in body ) ? body.message : JSON.stringify( body );
 		}
 		const alertMessage = `saveFailed! ` + errMessage;
@@ -193,13 +205,13 @@ async function savePrograms( programs : Type_DisplayProgramItem[] ) : Promise<Ty
 }
 
 /**
- * @param param0.programEditInput   - The input data for the program to be processed, e.g., pid, title, synopsis, etc.
- * @param param0.programEditOptions - The options for the program to be processed, e.g., genre, quality, etc.
- * @param param0.programs           - The current list of programs.
+ * @param param.programEditInput   - The input data for the program to be processed, e.g., pid, title, synopsis, etc.
+ * @param param.programEditOptions - The options for the program to be processed, e.g., genre, quality, etc.
+ * @param param.programs           - The current list of programs.
  * @returns the updated list of programs or null if the program list is empty.
  */
-function processProgram( { programEditInput, programEditOptions, programs } : Type_GipEditState ) : Type_ProgramList | null {
-	let newProgramList : Type_ProgramList = [];
+function processProgram( { programEditInput, programEditOptions, programs } : Type_processProgram_args ) : Type_processProgram_ret {
+	let newProgramList : Type_DisplayProgramItem[] = [];
 	const newOrUpdatedProgram = new GipProgramItem( { inputItem: programEditInput, inputOptions: programEditOptions } );
 
 	const newOrUpdatedPid = newOrUpdatedProgram[ PROG_FIELD_PID ];
@@ -207,7 +219,7 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 	if ( newOrUpdatedPid.length && newOrUpdatedProgram[ PROG_FIELD_TITLE ].length ) {
 
 		newProgramList = [];
-		newProgramList = JSON.parse( JSON.stringify( programs ) ) as Type_ProgramList;
+		newProgramList = JSON.parse( JSON.stringify( programs ) ) as Type_DisplayProgramItem[];
 
 		logger.log( 'verbose', `processProgram: `, { newOrUpdatedPid } );
 
@@ -230,9 +242,11 @@ function processProgram( { programEditInput, programEditOptions, programs } : Ty
 /**
  * @param event - The drag and drop event containing the data transfer object.
  *                The data transfer object should contain the program details in HTML format.
- * @returns the processed drop result or null if the drop was not valid.
+ * @returns if successful, object with property:
+ *           - programEditInput: the processed program data;
+ *          or null if the drop was not valid.
  */
-function processDrop( event : Type_EventDragAny ) : Type_processDrop_ret {
+function processDrop( event : Type_processDrop_args ) : Type_processDrop_ret {
 	let result = null;
 
 	logger.log( 'debug', 'processDrop', event.dataTransfer );
@@ -278,12 +292,12 @@ function processDrop( event : Type_EventDragAny ) : Type_processDrop_ret {
  *            - program display elements:
  *              - program image.
  */
-export default function GipEdit() : React.JSX.Element {
+export default function GipEdit() : Type_GipEdit_ret {
 
 	// Sub-elements of this element
 	const [ programEditInput,   setProgramEditInput ]   = useState( new GipProgramEditInput() );
 	const [ programEditOptions, setProgramEditOptions ] = useState( new GipProgramEditOptions() );
-	const [ programs,           setPrograms ]           = useState( [] as Type_ProgramList );
+	const [ programs,           setPrograms ]           = useState( [] as Type_DisplayProgramItem[] );
 
 	// References to elements in the sub-elements
 	const refs : Type_UriAndTitleRefs = {
@@ -293,7 +307,10 @@ export default function GipEdit() : React.JSX.Element {
 
 	type Type_RefFieldName = keyof Type_UriAndTitleRefs;
 
-	// Set the focus to the element identified by name
+	/**
+	 * @description Set the focus to the element identified by name
+	 * @param inputFieldName : reference to an element in the page.
+	 */
 	function setFocus( inputFieldName : Type_RefFieldName ) : void {
 		logger.log( 'debug', 'setFocus: Requested: ', inputFieldName );
 		// Focus the text input using the raw DOM API
@@ -303,19 +320,26 @@ export default function GipEdit() : React.JSX.Element {
 		}
 	}
 
-	// Set the focus to the first element on the page
+	/**
+	 * @description Set the focus to the first element on the page
+	 */
 	function setInitialFocus() : void {
 		//logger.log( 'debug', 'setInitialFocus' );
 		setFocus( PROG_FIELD_URI );
 	}
 
-	// Clear the input fields
+	/**
+	 * @description Clear the input fields
+	 */
 	const clearProgramInput = () : void => {
 		const newProgramEditInput = new GipProgramEditInput();
 		setProgramEditInput( newProgramEditInput );
 	};
 
-	//
+	/**
+	 * @param param0.paramName : the name of the field to update.
+	 * @param param0.newValue  : the new value of the field.
+	 */
 	const onInputChange = ( { paramName, newValue } : { paramName: string, newValue: string } ) : void => {
 		// logger.log( 'debug', 'onInputChange: ', { paramName, newValue } );
 		const newProgramEditInput = new GipProgramEditInput();
@@ -324,6 +348,10 @@ export default function GipEdit() : React.JSX.Element {
 		setProgramEditInput( newProgramEditInput );
 	};
 
+	/**
+	 * @description : sets the input elements from the selected program item.
+	 * @param program : a program item.
+	 */
 	const setInputFieldsFromProgram = ( program : Type_DisplayProgramItem ) : void => {
 		const newProgramEditInput   = new GipProgramEditInput();
 		const newProgramEditOptions = new GipProgramEditOptions();
@@ -333,7 +361,11 @@ export default function GipEdit() : React.JSX.Element {
 		setProgramEditOptions( newProgramEditOptions );
 	};
 
-	const setInputToSelected = ( programs : Type_ProgramList ) : void => {
+	/**
+	 * @description : if one program item is selected, set the input elements from the selected program item.
+	 * @param program : a program item.
+	 */
+	const setInputToSelected = ( programs : Type_DisplayProgramItem[] ) : void => {
 		const arrSelected = programs.filter( prog => prog[ PROG_FIELD_SELECTED ] );
 		if ( arrSelected.length === 1 ) {
 			setInputFieldsFromProgram( arrSelected[ 0 ] );
@@ -353,7 +385,7 @@ export default function GipEdit() : React.JSX.Element {
 		setProgramEditOptions( objNewProgramOptions );
 	};
 
-	const onProgramChange = ( newPrograms: Type_ProgramList ) : void => {
+	const onProgramChange = ( newPrograms: Type_DisplayProgramItem[] ) : void => {
 		logger.log( 'debug', 'Programs Changed ', newPrograms );
 		setPrograms( newPrograms );
 		setInputToSelected( newPrograms );
@@ -424,9 +456,11 @@ export default function GipEdit() : React.JSX.Element {
 	onTouchCancelCapture={ event => onTouchCancelCapture( event ) }
 	*/
 
-	// eslint moans about the empty dependencies array, but if it isn't present useEffect gets called on every load!
+	/**
+	 * @description effect function to load the programs from the database. Empty dependency list, means run once when element is loaded.
+	 */
 	useEffect( () => {
-		console.log( 'gip_edit: Use Effect' );
+		//console.log( 'gip_edit: Use Effect' );
 		//logger.log( 'debug', 'gip_edit: Use Effect' );
 		document.title = DOC_TITLE;
 		loadPrograms()
@@ -476,3 +510,15 @@ export default function GipEdit() : React.JSX.Element {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unit test definitions
+
+export const privateDefs = {};
+
+if ( process.env.NODE_ENV === 'test-unit' ) {
+	Object.assign( privateDefs, {
+		processProgramForSaving,
+		loadPrograms,
+		savePrograms,
+		processProgram,
+		processDrop,
+	} );
+}

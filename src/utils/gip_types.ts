@@ -66,9 +66,7 @@ export interface Type_DisplayProgramItem {
 export type Type_DisplayProgramItemPropName       = keyof Type_DisplayProgramItem;
 export type Type_DisplayProgramItemStringPropName = Exclude<Type_DisplayProgramItemPropName,typeof PROG_FIELD_SELECTED>;
 
-export type Type_ProgramList = Type_DisplayProgramItem[];
-
-export type Type_HandlerProgramChange = ( newPrograms: Type_ProgramList ) => void;
+export type Type_HandlerProgramChange = ( newPrograms: Type_DisplayProgramItem[] ) => void;
 
 export interface Type_ProgramDownloadOptions {
 	all?:        boolean,

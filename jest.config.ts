@@ -9,8 +9,6 @@ import type { JestConfigWithTsJest } from 'ts-jest/dist/types'
 import { createJsWithBabelPreset as createPreset } from 'ts-jest';
 //import { createJsWithBabelEsmPreset as createPreset } from 'ts-jest';
 //import { createJsWithTsPreset as createPreset } from 'ts-jest';
-
-
 //import type {Config} from 'jest';
 //import { createDefaultPreset as createPreset } from 'ts-jest';
 
@@ -59,7 +57,6 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 
 	// The directory where Jest should output its coverage files
 	coverageDirectory: "<rootDir>/output",
-
 	//projects: ['<rootDir>/test/unit/'],
 	// TODO: Add custom setup file - setupFiles: ['./setupJest.js'],
 	// TODO: Add JEST extended library - setupFilesAfterEnv: ["jest-extended"],
@@ -115,6 +112,7 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 			outputName:      'build-test-result.xml',
 		} ]
 	],
+	setupFilesAfterEnv: [ '<rootDir>/test/jestMatcherSetup.mjs' ],
 	transform: {
 		'\\.tsx?$':           'ts-jest',
 		'\\.(jpg|jpeg|png)$': '<rootDir>/test/jestFileTransform.mjs',

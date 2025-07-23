@@ -48,7 +48,7 @@ export type Type_extractJsonResponse_args = Response; // fetch API response
 export type Type_extractJsonResponse_ret  = Promise<object>;
 
 export type Type_extractJsonResponseStream_args = Response; // fetch API response
-export type Type_extractJsonResponseStream_ret  = Promise<Record<string,unknown>[]>;
+export type Type_extractJsonResponseStream_ret  = Promise<object>;
 
 export type Type_parseQueryParams_args          = Falsy<Type_RawQueryParams>;
 export type Type_parseQueryParams_ret           = Type_CookedQueryParams;
@@ -140,6 +140,9 @@ export async function extractJsonResponseStream( response : Type_extractJsonResp
 		//logger( 'info',`JSON response extracted: `, body );
 	}
 	catch ( err ) {
+		body = {
+			message: (err as Error).message,
+		};
 		logger( 'error', `extractJsonResponseStream: `, JSON.stringify( { error: (err as Error).message } ) );
 	}
 

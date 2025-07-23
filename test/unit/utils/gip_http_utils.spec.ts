@@ -239,8 +239,8 @@ describe(MODULE_NAME + ':extractJsonResponseStream', () => {
 	let testModuleObj  : Type_TestModule;
 	let testArgs       : MockArgs;
 	let testError      : Nullable<Error>;
-	let actualResult   : Awaited<Type_extractJsonResponse_ret>;
-	let expectedResult : Awaited<Type_extractJsonResponse_ret>;
+	let actualResult   : Awaited<Type_extractJsonResponseStream_ret>;
+	let expectedResult : Awaited<Type_extractJsonResponseStream_ret>;
 	let testJson       : Record<string,unknown>;
 	let testTextArgs   : string;
 
@@ -277,7 +277,9 @@ describe(MODULE_NAME + ':extractJsonResponseStream', () => {
 	});
 
 	test( 'Error', async () => {
-		expectedResult = [];
+		expectedResult = {
+			message: 'test error',
+		};
 		// Don't need a full fetch API Response object for this test, so just cast the cut down object to the expected type
 		actualResult = await testModuleObj.extractJsonResponseStream( testArgs as Type_extractJsonResponseStream_args );
 		expect( actualResult ).toEqual( expectedResult );

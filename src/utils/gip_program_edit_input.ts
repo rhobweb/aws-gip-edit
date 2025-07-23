@@ -72,8 +72,8 @@ export default class GipProgramEditInput implements Type_ProgramEditInput {
 	}
 
 	/**
-	 * @param fieldName:  the name of the field;
-	 * @param fieldValue: the new field value.
+	 * @param {string} fieldName:  the name of the field;
+	 * @param {string} fieldValue: the new field value.
 	 */
 	setField( fieldName: string, fieldValue: string ) : void {
 		if ( fieldName in this ) {
