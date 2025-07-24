@@ -438,23 +438,21 @@ export default function GipEdit() : Type_GipEdit_ret {
 		}
 	};
 
-	/*
-	const onTouchEnd = ( event : Type_EventTouchAny ) => {
-		logger.log( 'debug', 'onTouchEnd', { event: Object.keys( event ) } );
-		//event.stopPropagation();
-	}
-	const onTouchEndCapture= ( event : Type_EventTouchAny ) => {
-		logger.log( 'debug', 'onTouchEndCapture' );
-		//event.stopPropagation();
-	}
-	const onTouchCancelCapture=  ( event : Type_EventTouchAny ) => {
-		logger.log( 'debug', 'onTouchCancelCapture' );
-		//event.stopPropagation();
-	}
-	onTouchEnd={ event => onTouchEnd( event ) }
-	onTouchEndCapture={ event => onTouchEndCapture( event ) }
-	onTouchCancelCapture={ event => onTouchCancelCapture( event ) }
-	*/
+	//const onTouchEnd = ( event : Type_EventTouchAny ) => {
+	//	logger.log( 'debug', 'onTouchEnd', { event: Object.keys( event ) } );
+	//	//event.stopPropagation();
+	//}
+	//const onTouchEndCapture= ( event : Type_EventTouchAny ) => {
+	//	logger.log( 'debug', 'onTouchEndCapture' );
+	//	//event.stopPropagation();
+	//}
+	//const onTouchCancelCapture=  ( event : Type_EventTouchAny ) => {
+	//	logger.log( 'debug', 'onTouchCancelCapture' );
+	//	//event.stopPropagation();
+	//}
+	//onTouchEnd={ event => onTouchEnd( event ) }
+	//onTouchEndCapture={ event => onTouchEndCapture( event ) }
+	//onTouchCancelCapture={ event => onTouchCancelCapture( event ) }
 
 	/**
 	 * @description effect function to load the programs from the database. Empty dependency list, means run once when element is loaded.

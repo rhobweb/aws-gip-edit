@@ -61,6 +61,7 @@ export interface Type_progToDisplayValue_args {
 export type Type_progToDisplayValue_ret = string;
 
 export interface Type_ProgInputField_args {
+	id:         string,
 	fieldName:  string,
 	fieldValue: string,
 	onClick:    Type_EventHandlerMouse,
@@ -163,6 +164,7 @@ function progToDisplayValue( { fieldName, fieldValue } : Type_progToDisplayValue
 
 /**
  * @param props - The properties for the ProgInputField component.
+ * @param props.id         - the ID for the element;
  * @param props.fieldName  - the name of the field to display;
  * @param props.fieldValue - the raw value of the field;
  * @param props.selected   - boolean indicating whether the field is selected;
@@ -171,10 +173,11 @@ function progToDisplayValue( { fieldName, fieldValue } : Type_progToDisplayValue
  * @returns The rendered ProgInputField component.
  */
 function ProgInputField( props: Type_ProgInputField_args ) : Type_ProgInputField_ret {
-	const { fieldName, fieldValue, selected, onClick, onKeyDown } = props;
+	const { id, fieldName, fieldValue, selected, onClick, onKeyDown } = props;
 
 	return (
 		<input type="text"
+			id={ id }
 			className={ `gip-prog-item-field gip-prog-item-field-${fieldName}` }
 			value={ progToDisplayValue( { fieldName, fieldValue } ) }
 			onClick={ onClick }
@@ -225,7 +228,9 @@ function ProgInputFields( props: Type_ProgInputFields_args ) : Type_ProgInputFie
 					<div className={ ` gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${counterFieldName}` } id={ `prog-item-count-${programIndex + 1}` } style={ genSelectedStyle( thisProgram[ PROG_FIELD_SELECTED ] ) }>{ programIndex + 1 }</div>
 					{ arrCookedFieldOrder.map( ( fieldName : Type_DisplayProgramItemPropName, fieldIndex : number ) : ReactNode => (
 						<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-${fieldName}` } key={ `prog-item-field-${ programIndex + 1 }-${ fieldIndex + 1 }` }>
-							<ProgInputField key={ `prog-field-${programIndex + 1}-${fieldIndex + 1}` }
+							<ProgInputField
+								key={ `prog-field-${programIndex + 1}-${fieldIndex + 1}` }
+								id={ `prog-field-${programIndex + 1}-${fieldIndex + 1}` }
 								fieldName={ fieldName as string }
 								fieldValue={ thisProgram[ fieldName ] as string}
 								selected={ thisProgram[ PROG_FIELD_SELECTED ] }
