@@ -452,8 +452,8 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		initFetchRet( expectedFetchRet, false, 418, "I'm a teapot" );
 		delete testFetchRet.text; // Delete the function that returns the text
 		expectedAlertMessage = `saveFailed! response.text is not a function`;
-		expectedResult  = JSON.parse( JSON.stringify( testArgs ) ) as Type_DisplayProgramItem[]; // No change
-		actualResult = await testModuleObj.savePrograms( testArgs );
+		expectedResult = JSON.parse( JSON.stringify( testArgs ) ) as Type_DisplayProgramItem[]; // No change
+		actualResult   = await testModuleObj.savePrograms( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
 		expect( alertMock ).toHaveBeenCalledWith( expectedAlertMessage );
@@ -471,6 +471,17 @@ describe(MODULE_NAME + ':savePrograms', () => {
 	test('Fetch error with body message', async () => {
 		testFetchErr = new ErrorWithBody( 'error with body message', { message: 'error fetch body message' } );
 		expectedAlertMessage = `saveFailed! error fetch body message`;
+		expectedResult = JSON.parse( JSON.stringify( testArgs ) ) as Type_DisplayProgramItem[]; // No change
+		actualResult   = await testModuleObj.savePrograms( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
+		expect( alertMock ).toHaveBeenCalledWith( expectedAlertMessage );
+	});
+
+	test('Fetch error with body without message', async () => {
+		// @ts-expect-error body is only expecting 'message' property
+		testFetchErr = new ErrorWithBody( 'error with body message', { notmessage: 'error fetch body property' } );
+		expectedAlertMessage = `saveFailed! {"notmessage":"error fetch body property"}`;
 		expectedResult = JSON.parse( JSON.stringify( testArgs ) ) as Type_DisplayProgramItem[]; // No change
 		actualResult   = await testModuleObj.savePrograms( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
@@ -1039,5 +1050,150 @@ describe(MODULE_NAME + ':GipEdit, onProgramTableKeyDown', () => {
 		expect( elementURI.value ).toEqual( progElements.pid.value );
 		await component.user.keyboard( '{Escape}' );
 		expect( elementURI.value ).toEqual( '' );
+	});
+});
+
+describe(MODULE_NAME + ':GipEdit, drag and drop', () => {
+	let testModuleObj    : Type_TestModule;
+	let GipEdit          : Type_TestModule['default'];
+	let component        : Type_setupUserEvent_ret;
+	let elementGrid      : HTMLElement;
+	let draggableElement : HTMLElement;
+	let elementURI       : HTMLInputElement;
+	let elementTitle     : HTMLInputElement;
+	let elementDay       : HTMLSelectElement;
+	let elementQuality   : HTMLSelectElement;
+	let elementGenre     : HTMLSelectElement;
+	let elementSynopsis  : HTMLInputElement;
+	let elementImageURI  : HTMLImageElement;
+
+	function DraggableComponent() : React.JSX.Element {
+
+		return (
+			<div
+				id="draggable-component"
+				className="center-vh"
+				draggable={true}
+			>
+				Drag Me to the component
+			</div>
+		);
+	}
+
+	beforeEach( async () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
+		GipEdit       = testModuleObj.default;
+		testFetchErr  = null;  // Return dummy program data
+		render( <DraggableComponent/> );
+		draggableElement = document.getElementById( 'draggable-component' )!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		await act( async () => {
+			component = setupUserEvent( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		elementGrid     = document.getElementsByClassName( 'gip-grid' )[0] as HTMLElement;
+		elementURI      = document.getElementById( 'uri' )                 as HTMLInputElement;
+		elementTitle    = document.getElementById( 'title' )               as HTMLInputElement;
+		elementSynopsis = document.getElementById( 'synopsis' )            as HTMLInputElement;
+		elementImageURI = document.getElementById( 'image' )               as HTMLImageElement;
+		elementDay      = document.getElementById( 'select-day_of_week' )  as HTMLSelectElement;
+		elementGenre    = document.getElementById( 'select-genre' )        as HTMLSelectElement;
+		elementQuality  = document.getElementById( 'select-quality' )      as HTMLSelectElement;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test('Drag and drop over the PID element', () => {
+		expect(component).not.toBeFalsy();
+		fireEvent.dragStart( draggableElement );
+		fireEvent.dragOver( elementGrid );
+		const getData = ( format : string ) : string => {
+			if ( format === 'text/html' ) {
+				return TEST_PROG_LINK_HTML;
+			} else {
+				return 'test/pid';
+			}
+		};
+		fireEvent.drop( elementGrid, { dataTransfer: { getData } } );
+		expect( elementURI.value ).toEqual( 'test/pid' );
+		expect( elementTitle.value ).toEqual( 'MyTitle-MyEpisode' );
+		expect( elementDay.value ).toEqual( 'Any' );
+		expect( elementQuality.value ).toEqual( 'Normal' );
+		expect( elementGenre.value ).toEqual( 'Comedy' );
+		expect( elementSynopsis.value ).toEqual( `${TEST_PROG_EPISODE}.\n${TEST_PROG_SYNOPSIS}` );
+		expect( elementImageURI.src ).toEqual( TEST_PROG_IMAGE_URI );
+	});
+});
+
+describe(MODULE_NAME + ':GipEdit, select OK', () => {
+	let testModuleObj      : Type_TestModule;
+	let GipEdit            : Type_TestModule['default'];
+	let component          : RenderResult | null;
+	let elementSelectOK    : HTMLButtonElement;
+	let progElements       : Type_programItemElement;
+	let expectedBackground : string;
+
+	beforeEach( async () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
+		GipEdit       = testModuleObj.default;
+		testFetchErr  = null;  // Return dummy program data
+		await act( async () => {
+			component = render( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		elementSelectOK = document.getElementsByClassName( 'gip-action-button-select-ok' )[0] as HTMLButtonElement;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test('select OK', () => {
+		expect(component).not.toBeFalsy();
+		fireEvent.click( elementSelectOK );
+		progElements = getProgElement( 2 );
+		expectedBackground = 'rgb(100, 210, 255)';
+		expect( progElements.pid.style.background ).toEqual( expectedBackground );
+		progElements = getProgElement( 1 );
+		expectedBackground = '';
+		expect( progElements.pid.style.background ).toEqual( expectedBackground );
+	});
+});
+
+describe(MODULE_NAME + ':GipEdit, save programs', () => {
+	let testModuleObj        : Type_TestModule;
+	let GipEdit              : Type_TestModule['default'];
+	let component            : RenderResult | null;
+	let elementSavePrograms  : HTMLButtonElement;
+	let expectedAlertMessage : string;
+
+	beforeEach( async () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
+		GipEdit       = testModuleObj.default;
+		testFetchErr  = null;  // Return dummy program data
+		await act( async () => {
+			component = render( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		elementSavePrograms = document.getElementsByClassName( 'gip-action-button-save-progs' )[0] as HTMLButtonElement;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test('save programs', async () => {
+		expectedAlertMessage = 'saveFailed! Save error';
+		expect(component).not.toBeFalsy();
+		testFetchErr = new Error( 'Save error' );
+		await act( async () => {
+			fireEvent.click( elementSavePrograms );
+			await sleep( 300 );
+			expect( alertMock ).toHaveBeenCalledWith( expectedAlertMessage );
+		});
 	});
 });

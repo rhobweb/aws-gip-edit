@@ -16,6 +16,8 @@ import {
 
 import { convertKnownTitle } from './gip_prog_title_utils';
 
+import logger  from '@rhobweb/console-logger';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
@@ -257,7 +259,7 @@ function getDecendentsByTagNameAndClassTag( { elem, arrTagNameAndClassTag } : Ty
 		}
 	}
 	catch ( err ) {
-		console.log( 'getDecendentsByTagNameAndClassTag: ', (err as Error).message );
+		logger.log( 'info', 'getDecendentsByTagNameAndClassTag: ', (err as Error).message );
 	}
 
 	return objFoundElement;
@@ -300,8 +302,7 @@ function extractElementImageURI( el : Type_extractElementImageURI_args ) : Type_
  *          - image_uri: URI to the program image.
  */
 function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getProgAttributes_ret {
-	console.log('Link element');
-	console.log( linkElem );
+	logger.log( 'info', 'Link element', { linkElem } );
 	const arrSearchItem : Type_ElementTagNameAndClassTag[] = [
 		{ tagName: 'img',  classTag: 'sw-object-cover',                               retProp: 'image' },
 		{ tagName: 'span', classTag: 'sw-text-primary',                               retProp: 'title' },
@@ -599,7 +600,7 @@ export function getProgDetailsFromLink( strHTML : Type_getProgDetailsFromLink_ar
 	const linkElemList   = htmlDoc.getElementsByTagName( 'A' );
 	const linkElem       = linkElemList[ 0 ];
 	const objAttributes  = getProgAttributes( linkElem );
-	console.log( 'Program attributes: ' + JSON.stringify( objAttributes, null, 2 ) );
+	logger.log( 'verbose', 'Program attributes: ',  objAttributes );
 	const episode        = cookRawEpisode( objAttributes.rawEpisode );
 	const rawTitle       = [ objAttributes.title, episode ]
 		.map( el => convertToCamelCase( el ) )

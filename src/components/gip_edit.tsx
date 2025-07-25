@@ -363,7 +363,7 @@ export default function GipEdit() : Type_GipEdit_ret {
 
 	/**
 	 * @description : if one program item is selected, set the input elements from the selected program item.
-	 * @param program : a program item.
+	 * @param {Type_DisplayProgramItem[]} programs : array of program items.
 	 */
 	const setInputToSelected = ( programs : Type_DisplayProgramItem[] ) : void => {
 		const arrSelected = programs.filter( prog => prog[ PROG_FIELD_SELECTED ] );
@@ -374,23 +374,38 @@ export default function GipEdit() : Type_GipEdit_ret {
 		}
 	};
 
+	/**
+	 * @description deselect all prgram items
+	 */
 	const clearSelected = () : void => {
 		const newPrograms = programs.map( prog => { prog[ PROG_FIELD_SELECTED ] = false; return prog; } );
 		setPrograms( newPrograms );
 	};
 
+	/**
+	 * @description update the program options input elements, i.e., genre, day of week, quality.
+	 * @param {Type_ProgramEditOptions} newProgramEditOptions: the new values for the options.
+	 */
 	const onOptionChange = ( newProgramEditOptions : Type_ProgramEditOptions ) : void => {
 		logger.log( 'debug', 'Program Options Changed ' );
 		const objNewProgramOptions = new GipProgramEditOptions( newProgramEditOptions );
 		setProgramEditOptions( objNewProgramOptions );
 	};
 
+	/**
+	 * @description called whenever a change has been made to the program items.
+	 * @param {Type_DisplayProgramItem[]} newPrograms : array of program items.
+	 */
 	const onProgramChange = ( newPrograms: Type_DisplayProgramItem[] ) : void => {
 		logger.log( 'debug', 'Programs Changed ', newPrograms );
 		setPrograms( newPrograms );
 		setInputToSelected( newPrograms );
 	};
 
+	/**
+	 * @description if the escape key was pressed, clear the input elements and selected programs.
+	 * @param {Type_EventKeyboardAny} event : a keyboard event.
+	 */
 	const handleEscapeKey = ( event : Type_EventKeyboardAny ) : void => {
 		if ( event.key === 'Escape' ) {
 			clearProgramInput();
@@ -399,6 +414,10 @@ export default function GipEdit() : Type_GipEdit_ret {
 		}
 	};
 
+	/**
+	 * @descripton handle an enter or escape key press in one of the input elements or in the program table.
+	 * @param {Type_EventKeyboardAny} event : a keyboard event.
+	 */
 	const onKeyDown = ( event: Type_EventKeyboardAny ) : void => {
 		//const arrIgnore = [ 'stateNode' ];
 		//const arrProp = Object.keys( event ).filter( k => !arrIgnore.includes( k ) );
@@ -416,15 +435,28 @@ export default function GipEdit() : Type_GipEdit_ret {
 		}
 	};
 
+	/**
+	 * @description handle an escape key press in the program table.
+	 * @param {Type_EventKeyboardAny} event : a keyboard event
+	 */
 	const onProgramTableKeyDown = ( event : Type_EventKeyboardAny ) : void => {
 		handleEscapeKey( event );
 	};
 
-	const onDragOver = ( event: Type_EventDragAny ) : void => {
+	/**
+	 * @description override the default drag behaviour anywhere on the page container element.
+	 * @param {Type_EventDragAny} event : a drag over event.
+	 */
+	const onDragEnter = ( event: Type_EventDragAny ) : void => {
+		logger.log( 'debug', 'onDragEnter' );
 		event.preventDefault();
 		event.stopPropagation();
 	};
 
+	/**
+	 * @description attempt to populate the input elements with dropped content.
+	 * @param {Type_EventDragAny} event : a drop event.
+	 */
 	const onDrop = ( event : Type_EventDragAny ) : void => {
 		logger.log( 'debug', 'onDrop' );
 		event.preventDefault();
@@ -476,7 +508,7 @@ export default function GipEdit() : Type_GipEdit_ret {
 				<link href={BOOTSTRAP_CSS_URI} rel="stylesheet" integrity={BOOTSTRAP_CSS_HASH} crossOrigin="anonymous"/>
 			</Helmet>
 			<div className="container-fluid gip-grid"
-				onDragOver={ event => { onDragOver( event ); } }
+				onDragEnter={ event => { onDragEnter( event ); } }
 				onDrop={ event => { onDrop( event ); } }
 			>
 				<GipProgramEntry
@@ -485,8 +517,6 @@ export default function GipEdit() : Type_GipEdit_ret {
 					onInputChange={ ( { paramName, newValue } : { paramName: string, newValue: string } ) => { onInputChange( { paramName, newValue } ); } }
 					onOptionChange={ ( newOptions : Type_ProgramEditOptions ) => { onOptionChange( newOptions ); } }
 					onKeyDown={ ( event : Type_EventKeyboardAny ) => { onKeyDown( event ); } }
-					//refCallback={ inputFieldName => setRef( inputFieldName ) }
-					//refs={ refs as unknown as React.ForwardedRef<HTMLInputElement> } // Expects 'refs' to be a simple reference, even though it can handle objects
 					refs={ refs } // Expects 'refs' to be a simple reference, even though it can handle objects
 				/>
 				<GipActionButtons

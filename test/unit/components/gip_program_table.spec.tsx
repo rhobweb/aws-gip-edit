@@ -518,6 +518,7 @@ describe(MODULE_NAME + ':ProgInputField', () => {
 	let expectedJSX          : React.JSX.Element;
 	let expectedResult       : HTMLElement;
 	let testArgs             : Type_ProgInputField_args;
+	let testID               : string;
 	let testFieldName        : string;
 	let testFieldValue       : string;
 	let testSelected         : boolean;
@@ -530,12 +531,14 @@ describe(MODULE_NAME + ':ProgInputField', () => {
 		commonBeforeEach();
 		testModuleObj = testModule.privateDefs;
 		ProgInputField = testModuleObj.ProgInputField;
+		testID         = 'select-genre';
 		testFieldName  = 'genre';
 		testFieldValue = 'Books & Spoken'; // A value that changes for display
 		testSelected   = false;
 		onClickMock    = jest.fn();
 		onKeyDown      = jest.fn();
 		testArgs = {
+			id:         testID,
 			fieldName:  testFieldName,
 			fieldValue: testFieldValue,
 			selected:   testSelected,
@@ -558,6 +561,7 @@ describe(MODULE_NAME + ':ProgInputField', () => {
 		expectedJSX = (
 			<input type="text"
 				className="gip-prog-item-field gip-prog-item-field-genre"
+				id={ testID }
 				value="Books&Spoken"
 				onClick={ onClickMock }
 				onKeyDown={ onKeyDown }
@@ -633,6 +637,7 @@ describe(MODULE_NAME + ':ProgInputFields', () => {
 					<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-genre` } key={ `prog-item-field-1-1` }>
 						<input type="text"
 							className="gip-prog-item-field gip-prog-item-field-genre"
+							id="prog-field-1-1"
 							value="Comedy"
 							onClick={ () => { expect.any(Function); } }
 							onKeyDown={ onKeyDownMock }
@@ -643,6 +648,7 @@ describe(MODULE_NAME + ':ProgInputFields', () => {
 					<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-quality` } key={ `prog-item-field-1-2` }>
 						<input type="text"
 							className="gip-prog-item-field gip-prog-item-field-quality"
+							id="prog-field-1-2"
 							value="Normal"
 							onClick={ () => { expect.any(Function); } }
 							onKeyDown={ onKeyDownMock }
@@ -762,6 +768,7 @@ describe(MODULE_NAME + ':ProgramTable', () => {
 						<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-genre` } key={ `prog-item-field-1-1` }>
 							<input type="text"
 								className="gip-prog-item-field gip-prog-item-field-genre"
+								id="prog-field-1-1"
 								value="Comedy"
 								onClick={ () => { expect.any(Function); } }
 								onKeyDown={ onKeyDownMock }
@@ -772,6 +779,7 @@ describe(MODULE_NAME + ':ProgramTable', () => {
 						<div className={ `gip-prog-item-col gip-prog-item-data-col gip-prog-item-col-quality` } key={ `prog-item-field-1-2` }>
 							<input type="text"
 								className="gip-prog-item-field gip-prog-item-field-quality"
+								id="prog-field-1-2"
 								value="Normal"
 								onClick={ () => { expect.any(Function); } }
 								onKeyDown={ onKeyDownMock }
