@@ -125,7 +125,7 @@ const alertMock = jest.fn();
 global.fetch = fetchMock;
 window.alert = alertMock;
 
-const testFetchArr = [
+const TEST_FETCH_ARR_DEFAULT = [
 	{
 		pos:           1,
 		pid:           'pid1',
@@ -160,6 +160,7 @@ type Type_MutableResponse = {
 
 let testFetchRet : Type_MutableResponse;
 let testFetchErr : Error | null;
+let testFetchArr = TEST_FETCH_ARR_DEFAULT;
 
 function initFetchRet( arrProgram : Type_DbProgramEditItem[], ok = true, status = 200, statusText = 'success' ) : void {
 	testFetchRet = {
@@ -181,6 +182,7 @@ fetchMock.mockImplementation( async () => { // eslint-disable-line @typescript-e
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 	initFetchRet( testFetchArr );
+	testFetchArr = TEST_FETCH_ARR_DEFAULT; // Re-initialise to the default value
 	testFetchErr = new Error( 'test fetch err' );
 }
 
@@ -199,6 +201,11 @@ interface Type_setupUserEvent_ret extends RenderResult {
 	user: UserEvent,
 };
 
+/**
+ * @param {React.JSX.Element} jsx : the JSX element to render.
+ * @returns an object containing the RenderResult and the additional property:
+ *           - user: the @testing-library/user-event object used for sending in events.
+ */
 function setupUserEvent( jsx : React.JSX.Element ) : Type_setupUserEvent_ret {
 	return {
 		user: userEvent.setup(),
@@ -206,6 +213,24 @@ function setupUserEvent( jsx : React.JSX.Element ) : Type_setupUserEvent_ret {
 		// See https://testing-library.com/docs/dom-testing-library/install#wrappers
 		...render(jsx),
 	};
+}
+
+/**
+ * @param {number} iPos : the position of the program item, indexed from 1.
+ * @returns an object containing the input elements for each program item field:
+ *           - pid, title, day, quality, genre, synopsis
+ */
+function getProgElement( iPos : number ) : Type_programItemElement {
+	/* eslint-disable @typescript-eslint/restrict-template-expressions */
+	return {
+		pid:      document.getElementById( `prog-field-${iPos}-2` ) as HTMLInputElement,
+		title:    document.getElementById( `prog-field-${iPos}-3` ) as HTMLInputElement,
+		day:      document.getElementById( `prog-field-${iPos}-4` ) as HTMLInputElement,
+		quality:  document.getElementById( `prog-field-${iPos}-5` ) as HTMLInputElement,
+		genre:    document.getElementById( `prog-field-${iPos}-6` ) as HTMLInputElement,
+		synopsis: document.getElementById( `prog-field-${iPos}-7` ) as HTMLInputElement,
+	};
+	/* eslint-enable @typescript-eslint/restrict-template-expressions */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -418,6 +443,7 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		expect( actualResult ).toEqual( expectedResult );
 		// Stringified JSON cannot be matched directly, so match any string first, then match the stringified JSON
 		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
+		// @ts-expect-error toMatchJSON is an extension
 		expect( fetchMock.mock.calls[ 0 ][ 1 ].body ).toMatchJSON( expectedFetchBody ); // eslint-disable-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
 	});
 
@@ -621,7 +647,7 @@ describe(MODULE_NAME + ':GipEdit', () => {
 	beforeEach( () => {
 		commonBeforeEach();
 		testModuleObj = testModule;
-		GipEdit = testModuleObj.default;
+		GipEdit       = testModuleObj.default;
 	});
 
 	afterEach( () => {
@@ -636,6 +662,17 @@ describe(MODULE_NAME + ':GipEdit', () => {
 		} );
 		const containerElement = component!.container; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 		expect(containerElement).not.toBeFalsy();
+	});
+
+	test('Load programs failed', async () => {
+		await act( async () => {
+			component = render( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		const containerElement = component!.container; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		expect(containerElement).not.toBeFalsy();
+		const progElements = getProgElement( 1 );
+		expect( progElements.pid ).toEqual( null );
 	});
 });
 
@@ -757,7 +794,6 @@ describe(MODULE_NAME + ':GipEdit, clearProgramInput', () => {
 
 // onInputChange is covered by clearProgramInput
 
-
 describe(MODULE_NAME + ':GipEdit, setInputToSelected,setInputFieldsFromProgram', () => {
 	let testModuleObj       : Type_TestModule;
 	let GipEdit             : Type_TestModule['default'];
@@ -772,19 +808,6 @@ describe(MODULE_NAME + ':GipEdit, setInputToSelected,setInputFieldsFromProgram',
 	let expectedQuality     : string;
 	let expectedGenre       : string;
 	let expectedDay         : string;
-
-	function getProgElement( iPos : number ) : Type_programItemElement {
-		/* eslint-disable @typescript-eslint/restrict-template-expressions */
-		return {
-			pid:      document.getElementById( `prog-field-${iPos}-2` ) as HTMLInputElement,
-			title:    document.getElementById( `prog-field-${iPos}-3` ) as HTMLInputElement,
-			day:      document.getElementById( `prog-field-${iPos}-4` ) as HTMLInputElement,
-			quality:  document.getElementById( `prog-field-${iPos}-5` ) as HTMLInputElement,
-			genre:    document.getElementById( `prog-field-${iPos}-6` ) as HTMLInputElement,
-			synopsis: document.getElementById( `prog-field-${iPos}-7` ) as HTMLInputElement,
-		};
-		/* eslint-enable @typescript-eslint/restrict-template-expressions */
-	}
 
 	beforeEach( async () => {
 		commonBeforeEach();
@@ -868,19 +891,6 @@ describe(MODULE_NAME + ':GipEdit, onOptionChange', () => {
 	let progElements    : Type_programItemElement;
 	let expectedQuality : string;
 
-	function getProgElement( iPos : number ) : Type_programItemElement {
-		/* eslint-disable @typescript-eslint/restrict-template-expressions */
-		return {
-			pid:      document.getElementById( `prog-field-${iPos}-2` ) as HTMLInputElement,
-			title:    document.getElementById( `prog-field-${iPos}-3` ) as HTMLInputElement,
-			day:      document.getElementById( `prog-field-${iPos}-4` ) as HTMLInputElement,
-			quality:  document.getElementById( `prog-field-${iPos}-5` ) as HTMLInputElement,
-			genre:    document.getElementById( `prog-field-${iPos}-6` ) as HTMLInputElement,
-			synopsis: document.getElementById( `prog-field-${iPos}-7` ) as HTMLInputElement,
-		};
-		/* eslint-enable @typescript-eslint/restrict-template-expressions */
-	}
-
 	beforeEach( async () => {
 		commonBeforeEach();
 		testModuleObj = testModule;
@@ -912,7 +922,92 @@ describe(MODULE_NAME + ':GipEdit, onOptionChange', () => {
 	});
 });
 
-// onKeyDown : TODO
+describe(MODULE_NAME + ':GipEdit, onKeyDown, edit program', () => {
+	let testModuleObj   : Type_TestModule;
+	let GipEdit         : Type_TestModule['default'];
+	let component       : Type_setupUserEvent_ret;
+	let progElements    : Type_programItemElement;
+	let elementQuality  : HTMLSelectElement;
+	let expectedQuality : string;
+	let elementPID      : HTMLInputElement;
+	let expectedPID     : string;
+
+	beforeEach( async () => {
+		commonBeforeEach();
+		testModuleObj = testModule;
+		GipEdit       = testModuleObj.default;
+		testFetchErr  = null;  // Return dummy program data
+		await act( async () => {
+			component = setupUserEvent( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		elementQuality = document.getElementById( 'select-quality' ) as HTMLSelectElement;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test('Select a program, change the quality and update it', async () => {
+		expect(component).not.toBeFalsy();
+		progElements = getProgElement( 1 );
+		await component.user.click( progElements.quality );
+		expectedQuality = 'High';
+		expect( elementQuality.value ).toEqual( expectedQuality ); // Confirm the current value
+		await component.user.selectOptions( elementQuality, 'Normal' );
+		expectedQuality = 'Normal';
+		await component.user.keyboard( '{Enter}' );                           // Update the program
+		expect( progElements.quality.value ).toEqual( expectedQuality );      // Confirm that the program table has been updated
+		expect( elementQuality.value ).toEqual( progElements.quality.value ); // Confirm that the input select retains the same value
+	});
+
+	test('Select a program, update the PID, new program added', async () => {
+		expect(component).not.toBeFalsy();
+		progElements = getProgElement( 1 );
+		await component.user.click( progElements.pid );
+		elementPID  = document.getElementById( 'uri' ) as HTMLInputElement;
+		expectedPID = `${progElements.pid.value}a`;
+		await component.user.click( elementPID );
+		await component.user.keyboard( '{A}' );                  // Update the program PID
+		await component.user.keyboard( '{Enter}' );              // Update the program PID
+		await sleep( 1000 );
+		progElements = getProgElement( 3 );                      // Get the new program from the program table
+		expect( progElements.pid.value ).toEqual( expectedPID ); // Confirm that the program table has been updated
+	});
+});
+
+describe(MODULE_NAME + ':GipEdit, onKeyDown, no programs', () => {
+	let testModuleObj        : Type_TestModule;
+	let GipEdit              : Type_TestModule['default'];
+	let component            : Type_setupUserEvent_ret;
+	let elementQuality       : HTMLSelectElement;
+	let expectedAlertMessage : string;
+
+	beforeEach( async () => {
+		testFetchArr = [];
+		commonBeforeEach();
+		testModuleObj = testModule;
+		GipEdit       = testModuleObj.default;
+		testFetchErr  = null;  // Return dummy program data
+		await act( async () => {
+			component = setupUserEvent( <GipEdit/> );
+			await sleep( 1000 ); // useEffect asynchronously loads the programs, so need to wait for the focus to be set
+		} );
+		elementQuality = document.getElementById( 'select-quality' ) as HTMLSelectElement;
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test('Incomplete program info', async () => {
+		expect(component).not.toBeFalsy();
+		expectedAlertMessage = 'Incomplete program info';
+		await component.user.click( elementQuality );
+		await component.user.keyboard( '{Enter}' );
+		expect( alertMock ).toHaveBeenCalledWith( expectedAlertMessage );
+	});
+});
 
 describe(MODULE_NAME + ':GipEdit, onProgramTableKeyDown', () => {
 	let testModuleObj : Type_TestModule;
@@ -920,19 +1015,6 @@ describe(MODULE_NAME + ':GipEdit, onProgramTableKeyDown', () => {
 	let component     : Type_setupUserEvent_ret;
 	let progElements  : Type_programItemElement;
 	let elementURI    : HTMLInputElement;
-
-	function getProgElement( iPos : number ) : Type_programItemElement {
-		/* eslint-disable @typescript-eslint/restrict-template-expressions */
-		return {
-			pid:      document.getElementById( `prog-field-${iPos}-2` ) as HTMLInputElement,
-			title:    document.getElementById( `prog-field-${iPos}-3` ) as HTMLInputElement,
-			day:      document.getElementById( `prog-field-${iPos}-4` ) as HTMLInputElement,
-			quality:  document.getElementById( `prog-field-${iPos}-5` ) as HTMLInputElement,
-			genre:    document.getElementById( `prog-field-${iPos}-6` ) as HTMLInputElement,
-			synopsis: document.getElementById( `prog-field-${iPos}-7` ) as HTMLInputElement,
-		};
-		/* eslint-enable @typescript-eslint/restrict-template-expressions */
-	}
 
 	beforeEach( async () => {
 		commonBeforeEach();
@@ -949,9 +1031,10 @@ describe(MODULE_NAME + ':GipEdit, onProgramTableKeyDown', () => {
 	afterEach( () => {
 		commonAfterEach();
 	});
-	test('Select a program, then press Escape key', async () => {
+
+	test('Select a program, press Escape to unselect it', async () => {
 		expect(component).not.toBeFalsy();
-		progElements = getProgElement( 2 );
+		progElements = getProgElement( 1 );
 		await component.user.click( progElements.pid );
 		expect( elementURI.value ).toEqual( progElements.pid.value );
 		await component.user.keyboard( '{Escape}' );

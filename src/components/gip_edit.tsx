@@ -458,7 +458,6 @@ export default function GipEdit() : Type_GipEdit_ret {
 	 * @description effect function to load the programs from the database. Empty dependency list, means run once when element is loaded.
 	 */
 	useEffect( () => {
-		//console.log( 'gip_edit: Use Effect' );
 		//logger.log( 'debug', 'gip_edit: Use Effect' );
 		document.title = DOC_TITLE;
 		loadPrograms()
@@ -467,7 +466,7 @@ export default function GipEdit() : Type_GipEdit_ret {
 				setInitialFocus();
 			} )
 			.catch( ( err : unknown ) => {
-				console.error( 'loadPrograms: FAILED', { err } );
+				logger.log( 'error', 'loadPrograms: FAILED', { err } );
 			});
 	}, [] );
 
