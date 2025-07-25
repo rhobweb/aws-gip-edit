@@ -302,7 +302,6 @@ function extractElementImageURI( el : Type_extractElementImageURI_args ) : Type_
  *          - image_uri: URI to the program image.
  */
 function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getProgAttributes_ret {
-	logger.log( 'info', 'Link element', { linkElem } );
 	const arrSearchItem : Type_ElementTagNameAndClassTag[] = [
 		{ tagName: 'img',  classTag: 'sw-object-cover',                               retProp: 'image' },
 		{ tagName: 'span', classTag: 'sw-text-primary',                               retProp: 'title' },
