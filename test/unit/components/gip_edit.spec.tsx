@@ -1108,7 +1108,7 @@ describe(MODULE_NAME + ':GipEdit, drag and drop', () => {
 	test('Drag and drop over the PID element', () => {
 		expect(component).not.toBeFalsy();
 		fireEvent.dragStart( draggableElement );
-		fireEvent.dragOver( elementGrid );
+		fireEvent.dragEnter( elementGrid );
 		const getData = ( format : string ) : string => {
 			if ( format === 'text/html' ) {
 				return TEST_PROG_LINK_HTML;
