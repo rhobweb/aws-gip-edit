@@ -116,8 +116,8 @@ const {
 // Test utilities
 
 // Set the timeout to allow debugging. Defaults to 5000 ms
-const TEST_TIMEOUT_MS = 300 * 1000;
-jest.setTimeout( TEST_TIMEOUT_MS );
+//const TEST_TIMEOUT_MS = 300 * 1000;
+//jest.setTimeout( TEST_TIMEOUT_MS );
 
 const fetchMock = jest.fn();
 const alertMock = jest.fn();
@@ -443,7 +443,6 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		expect( actualResult ).toEqual( expectedResult );
 		// Stringified JSON cannot be matched directly, so match any string first, then match the stringified JSON
 		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
-		// @ts-expect-error toMatchJSON is an extension
 		expect( fetchMock.mock.calls[ 0 ][ 1 ].body ).toMatchJSON( expectedFetchBody ); // eslint-disable-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
 	});
 

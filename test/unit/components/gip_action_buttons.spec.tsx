@@ -71,8 +71,8 @@ function commonAfterEach() : void {
 }
 
 // Set the timeout to allow debugging. Defaults to 5000 ms
-const TEST_TIMEOUT_MS = 300 * 1000;
-jest.setTimeout( TEST_TIMEOUT_MS );
+//const TEST_TIMEOUT_MS = 300 * 1000;
+//jest.setTimeout( TEST_TIMEOUT_MS );
 
 async function sleep( ms : number ) : Promise<void> {
 	return new Promise((resolve) => {

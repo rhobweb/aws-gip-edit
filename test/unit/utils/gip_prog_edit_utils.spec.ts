@@ -200,6 +200,23 @@ const TEST_PROG_SHARDLAKE_1 = `
 </a>
 `;
 
+const TEST_PROG_PRIMARY_FRENCH = `
+<a href="https://www.bbc.co.uk/sounds/play/p04s5vfj">
+	<picture>
+		<source type="image/webp" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p04wf8xv.jpg.webp 160w,https://ichef.bbci.co.uk/images/ic/192x192/p04wf8xv.jpg.webp 192w,https://ichef.bbci.co.uk/images/ic/224x224/p04wf8xv.jpg.webp 224w,https://ichef.bbci.co.uk/images/ic/288x288/p04wf8xv.jpg.webp 288w,https://ichef.bbci.co.uk/images/ic/368x368/p04wf8xv.jpg.webp 368w,https://ichef.bbci.co.uk/images/ic/400x400/p04wf8xv.jpg.webp 400w,https://ichef.bbci.co.uk/images/ic/448x448/p04wf8xv.jpg.webp 448w,https://ichef.bbci.co.uk/images/ic/496x496/p04wf8xv.jpg.webp 496w,https://ichef.bbci.co.uk/images/ic/512x512/p04wf8xv.jpg.webp 512w,https://ichef.bbci.co.uk/images/ic/576x576/p04wf8xv.jpg.webp 576w,https://ichef.bbci.co.uk/images/ic/624x624/p04wf8xv.jpg.webp 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
+		<source type="image/jpg" srcset="https://ichef.bbci.co.uk/images/ic/160x160/p04wf8xv.jpg 160w,https://ichef.bbci.co.uk/images/ic/192x192/p04wf8xv.jpg 192w,https://ichef.bbci.co.uk/images/ic/224x224/p04wf8xv.jpg 224w,https://ichef.bbci.co.uk/images/ic/288x288/p04wf8xv.jpg 288w,https://ichef.bbci.co.uk/images/ic/368x368/p04wf8xv.jpg 368w,https://ichef.bbci.co.uk/images/ic/400x400/p04wf8xv.jpg 400w,https://ichef.bbci.co.uk/images/ic/448x448/p04wf8xv.jpg 448w,https://ichef.bbci.co.uk/images/ic/496x496/p04wf8xv.jpg 496w,https://ichef.bbci.co.uk/images/ic/512x512/p04wf8xv.jpg 512w,https://ichef.bbci.co.uk/images/ic/576x576/p04wf8xv.jpg 576w,https://ichef.bbci.co.uk/images/ic/624x624/p04wf8xv.jpg 624w" sizes="(max-width: 599px) 50vw, (max-width: 899px) 33vw, (max-width: 1279px) 17vw, 194.66px">
+		<img width="100" alt="" loading="lazy" class="sw-w-full sw-h-full sw-object-cover" src="https://ichef.bbci.co.uk/images/ic/400x400/p04wf8xv.jpg">
+	</picture
+	<div class="sw-text-primary">
+		<span class="sw-text-primary sw-font-bold sw-transition sw-ease sw-transition-colors sw-duration-350 motion-reduce:sw-transition-none group-active:sw-text-accent group-active:sw-underline group-focus-visible:sw-text-accent group-focus-visible:sw-underline group-hover:sw-text-accent group-hover:sw-underline sw-text-pica sw-antialiased sw-text-primary">Les vêtements</span>
+		<p class="sw-text-secondary sw-text-brevier sw-mt-1">The theme is clothes. Les vêtements.</p>
+		<p class="sw-text-brevier sw-whitespace-nowrap sw-text-secondary sw-pt-1 undefined">
+		<span><span aria-label="duration: 15 mins">15 mins</span></span>
+		</p>
+	</div>
+</a>
+`;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Local test functions
 
@@ -908,6 +925,17 @@ describe(MODULE_NAME + ':getProgDetailsFromLink', () => {
 			title:     'ShardlakeOmnibus-02-Lamentation',
 			synopsis:  "Lamentation-Episode 2.\n1546. Catholic and Protestant factions vie for power at the court of Henry VIII.",
 			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p09kwpfd.jpg',
+		};
+		actualResult = testModuleObj.getProgDetailsFromLink( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Parse cut down program item - Primary French', () => {
+		testArgs = TEST_PROG_PRIMARY_FRENCH;
+		expectedResult = {
+			title:     'LesVetements',
+			synopsis:  "The theme is clothes. Les vêtements.",
+			image_uri: 'https://ichef.bbci.co.uk/images/ic/400x400/p04wf8xv.jpg',
 		};
 		actualResult = testModuleObj.getProgDetailsFromLink( testArgs );
 		expect( actualResult ).toEqual( expectedResult );

@@ -11,6 +11,7 @@ const ignores = defineConfig( [
 		'.webpack/',
 		'__mocks__/',
 		'**/jest.config.ts',
+		'**/jest.common.config.ts',
 		'**/jest.setEnvVars.ts',
 		'**/eslint.config.mjs',
 		'**/dist/',
@@ -53,7 +54,7 @@ export default tseslint.config(
 			ecmaVersion: 2022,
 			sourceType: 'module',
 			parserOptions: {
-				project: './tsconfig-unittest.json', // Run eslint on both unit test and source code
+				project: './tsconfig-test.json', // Run eslint on both test and source code
 				//projectService:  true,
 				tsconfigRootDir: import.meta.dirname,
 			},

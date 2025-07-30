@@ -59,7 +59,7 @@ custom:
   serviceName: ${self:service}
   stage: ${env:STAGE, "${self:provider.stage}"}
   apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
-  baseDomain: "rhobweb.com"
+  baseDomain: ${env:GIP_DOMAIN}
   envIsOffline: ${env:IS_OFFLINE, "default"}
   isOfflineMap:
     true:    "true"

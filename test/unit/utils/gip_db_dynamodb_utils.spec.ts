@@ -150,8 +150,9 @@ interface Type_TestModule {
 	updatePrograms: (args: Type_updatePrograms_args) => Type_updatePrograms_ret,
 };
 
-const TEST_TIMEOUT_MS = 60 * 1000;
-jest.setTimeout( TEST_TIMEOUT_MS );
+// Set the timeout to allow debugging. Defaults to 5000 ms
+//const TEST_TIMEOUT_MS = 60 * 1000;
+//jest.setTimeout( TEST_TIMEOUT_MS );
 
 import * as TEST_MODULE from '../../../src/utils/gip_db_dynamodb_utils';
 const testModule = TEST_MODULE as unknown as Type_TestModule;

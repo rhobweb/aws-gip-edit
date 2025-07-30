@@ -1,5 +1,5 @@
 /**
- * Node utility to create the AWS DynamoDB tables for local testing
+ * Node utility to delete the AWS DynamoDB tables for local testing
  */
 const dynCommon = require( "./dynCommon" );
 

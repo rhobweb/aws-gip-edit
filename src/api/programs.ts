@@ -25,7 +25,7 @@ import { filterPrograms } from '../utils/gip_prog_filter_utils';
 import {
 	HttpError,
 	parseQueryParams,
-	stringifyUTF16,
+	stringify,
 } from '../utils/gip_http_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ export type Type_handler_ret  = Promise<Type_HandlerResponse>;
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 
-const CONTENT_TYPE_JSON = 'application/json; charset=UTF-16';
+const CONTENT_TYPE_JSON = 'application/json; charset=UTF-8';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
@@ -87,8 +87,8 @@ async function handleGET( event: APIGatewayEvent ) : Promise<Type_HandlerRespons
 		logger.log( 'debug', 'handleGET: filterPrograms: START' );
 		const cookedPrograms = filterPrograms( { programs, params } );
 		logger.log( 'debug', 'handleGET: filterPrograms: success: ', cookedPrograms );
-		const body           = stringifyUTF16( cookedPrograms );
-		logger.log( 'debug', 'handleGET: stringifyUTF16: success: ', body );
+		const body           = stringify( cookedPrograms );
+		logger.log( 'debug', 'handleGET: stringify: success: ', body );
 
 		//console.log( 'handleGET: ', { result: cookedPrograms } );
 		const headers        = {
@@ -128,16 +128,18 @@ async function handlePOST( event: APIGatewayEvent ) : Promise<Type_HandlerRespon
 			logger.log( 'debug', 'handlePOST: START: ', { programs } );
 			await savePrograms( { programs } );
 			logger.log( 'debug', 'handlePOST: savePrograms: success: ' );
-			strBody = stringifyUTF16( programs );
-			logger.log( 'debug', 'handlePOST: stringifyUTF16: success: ', strBody );
+			strBody = stringify( programs );
+			logger.log( 'debug', 'handlePOST: stringify: success: ', strBody );
 		} else {
 			result.statusCode = 400;
-			strBody = JSON.stringify( { message: 'No programs' } );
+			//strBody = JSON.stringify( { message: 'No programs' } );
+			strBody = stringify( { message: 'No programs' } );
 		}
 	}
 	catch ( err ) {
 		result.statusCode = ( err as HttpError ).statusCode || 500; // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
-		strBody = JSON.stringify( { message: ( err as HttpError ).message } );
+		//strBody = JSON.stringify( { message: ( err as HttpError ).message } );
+		strBody = stringify( { message: ( err as HttpError ).message } );
 	}
 
 	result.body    = strBody;
@@ -183,7 +185,7 @@ async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerRespo
 		rawResultBody = { message: ( err as HttpError ).message };
 	}
 
-	result.body    = stringifyUTF16( rawResultBody );
+	result.body    = stringify( rawResultBody );
 	result.headers = {
 		'Content-Type':   CONTENT_TYPE_JSON,
 		'Content-Length': result.body.length,
@@ -236,7 +238,8 @@ export async function handler( event: Type_handler_args /*, _context: Context */
 
 	const result = await fnHandler( event );
 
-	logger.log( 'info: handler: END ', { httpMethod: event.httpMethod, path: event.path, statusCode: result.statusCode } );
+	logger.log( 'debug', 'handler:result ', { body: result.body } );
+	logger.log( 'info', 'handler: END ', { httpMethod: event.httpMethod, path: event.path, statusCode: result.statusCode } );
 
 	return result;
 }

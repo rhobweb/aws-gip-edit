@@ -98,6 +98,9 @@ export type Type_extractElementText_ret  = string;
 export type Type_extractElementImageURI_args = Element | Element[];
 export type Type_extractElementImageURI_ret  = string;
 
+export type Type_filterOutHTML_args = Element | Element[];
+export type Type_filterOutHTML_ret  = Element | Element[];
+
 export type Type_getProgDetailsFromLink_args = string;
 export interface Type_getProgDetailsFromLink_ret {
 	[PROG_FIELD_TITLE]:     string,
@@ -135,9 +138,10 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 	if ( /\s/g.test(str) ) // Only camelcase if the string contains whitespace
 	{
 		const preCookedStr = str
-			.replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space
-			.replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters
-			.replace( /\s+/g, ' ' )        // Shrink multiple spaces
+			.normalize( 'NFD' ).replace(/\p{Diacritic}/gu, '')  // Replace accented characters with the unaccented equivalent
+			.replace( /[-_]+/g, ' ')                            // Replaces any - or _ characters with a space
+			.replace( /[^\w\s]/g, '')                           // Removes any non alphanumeric characters
+			.replace( /\s+/g, ' ' )                             // Shrink multiple spaces
 		;
 
 		const arrWord = preCookedStr.split( ' ' )
@@ -151,16 +155,6 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 			} );
 
 		cookedStr = arrWord.join( '' );
-
-		/*
-		cookedStr = str.toLowerCase()    // Lower cases the string
-			.replace( /[-_]+/g, ' ')       // Replaces any - or _ characters with a space
-			.replace( /[^\w\s]/g, '')      // Removes any non alphanumeric characters
-			.replace( /\s+/g, ' ' )        // Shrink multiple spaces
-			.replace( / (.)/g, ( ...args ) => { return ( args[1] as string ).toUpperCase(); })  // Uppercases first char in each group after a space
-			.replace( / /g, '' )           // Removes spaces
-			.replace( /^(.)/g, ( ...args ) => { return ( args[1] as string ).toUpperCase(); }); // Uppercases the first character
-		*/
 	}
 
 	return cookedStr;
@@ -293,6 +287,21 @@ function extractElementImageURI( el : Type_extractElementImageURI_args ) : Type_
 }
 
 /**
+ * @param el : either an Element object containing text or an array of such objects.
+ * @returns an array of Elements with any elements containing HTML removed
+ */
+function filterOutHTML( el : Type_filterOutHTML_args ) : Type_filterOutHTML_ret {
+	const arrEl = ( Array.isArray( el ) ? el : [ el ] );
+	const arrRet : Type_extractElementText_args = [];
+	for ( const elItem of arrEl ) {
+		if ( ! /<\S+>/i.test( elItem.innerHTML ) ) {
+			arrRet.push( elItem );
+		}
+	}
+	return arrRet;
+}
+
+/**
  * Get the program attributes from a dragged and dropped iPlayer link.
  * @param linkElem - the <a> HTML element containing the link data.
  * @return object with attributes, any of which may be the null string:
@@ -326,10 +335,11 @@ function getProgAttributes( linkElem: Type_getProgAttributes_args ) : Type_getPr
 		objProgAttributes.rawEpisode = extractRawElementText( objFoundItem.primary );
 	}
 	if ( objFoundItem.image ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-		objProgAttributes.image_uri = extractElementImageURI(objFoundItem.image );
+		objProgAttributes.image_uri = extractElementImageURI( objFoundItem.image );
 	}
 	if ( objFoundItem.secondary ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-		objProgAttributes.synopsis = extractElementText( objFoundItem.secondary );
+		const filteredElements     = filterOutHTML( objFoundItem.secondary );
+		objProgAttributes.synopsis = extractElementText( filteredElements );
 	}
 
 	return objProgAttributes;
@@ -544,8 +554,9 @@ export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
 		[ /[\u007F-\uFFFF]/g, '-' ], // Replace all non-ASCII characters with a dash
 	];
 
-	const knownTitle     = convertKnownTitle( rawTitle );
-	const convertedTitle = convertText( { arrConversion, rawText: knownTitle } );
+	//const normalisedTitle = rawTitle.normalize( 'NFD' ).replace(/\p{Diacritic}/gu, '');
+	const knownTitle      = convertKnownTitle( rawTitle );
+	const convertedTitle  = convertText( { arrConversion, rawText: knownTitle } );
 
 	return convertedTitle;
 }

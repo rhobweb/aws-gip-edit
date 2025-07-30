@@ -53,8 +53,8 @@ export type Type_extractJsonResponseStream_ret  = Promise<object>;
 export type Type_parseQueryParams_args          = Falsy<Type_RawQueryParams>;
 export type Type_parseQueryParams_ret           = Type_CookedQueryParams;
 
-export type Type_stringifyUTF16_args            = object;
-export type Type_stringifyUTF16_ret             = string;
+export type Type_stringify_args            = object;
+export type Type_stringify_ret             = string;
 
 export interface Type_genURI_args { uri : string, queryParams: Record<string,string> };
 export type Type_genURI_ret = string;
@@ -181,14 +181,16 @@ export function parseQueryParams( rawParams : Type_parseQueryParams_args ) : Typ
 
 	return cookedParams;
 }
-
 /**
+
  * @param rawObject : an object
- * @returns object in UTF-16 format, with all characters 0x7F and above replaced with escaped character codes
+ * @returns object in UTF-8 format, with all characters 0x7F and above replaced with escaped character codes
  */
-export function stringifyUTF16( rawObject: Type_stringifyUTF16_args ) : Type_stringifyUTF16_ret {
+export function stringify( rawObject: Type_stringify_args ) : Type_stringify_ret {
+	logger.log('verbose', 'stringify: ', { rawObject } );
 	const rawString    = JSON.stringify( rawObject );
 	const cookedString = rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
+	logger.log('verbose', 'stringify: ', { cookedString } );
 	return cookedString;
 }
 
@@ -202,8 +204,8 @@ export function stripQueryParams( rawURI : Type_stripQueryParams_args ) : Type_s
 	const cookedURI  = decodedURI.replace( /\?.*/, '' );
 	return cookedURI;
 }
-
 /**
+
  * @param object: with properties:
  *           - uri:         the URI without any query parameters or trailing query, e.g., http://mydom/mypath
  *           - queryParams: an object containing the query parameters, e.g., { qp1: 'val1', doit: 'yes' }

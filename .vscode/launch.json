@@ -53,7 +53,7 @@
 			],
 			"program": "${workspaceFolder}/node_modules/.bin/jest",
 			//"runtimeVersion": "22.14.0",
-			"outFiles": ["${workspaceFolder}/test-out/**/*.js"],
+			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
 			"env": {
 				"NODE_OPTIONS":  "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
 				"NODE_ENV":       "test-unit",
@@ -129,18 +129,18 @@
 			"type": "node",
 			"request": "launch",
 			"name": "API System Test",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"program": "${workspaceFolder}/test/system/api/gip_db_dynamodb_utils.spec.js",
-			"preLaunchTask": "tsc: build - tsconfig-systemtest.json",
-			"outFiles": ["${workspaceFolder}/test-out/**/*.js"],
+			"program": "${workspaceFolder}/node_modules/.bin/jest",
+			//"runtimeVersion": "22.14.0",
 			"env": {
-				"AWS_REGION":       "eu-west-1",
-				"AWS_ENDPOINT":     "http://localhost:8000",
-				"STAGE":            "dev",
-				"GIP_MAX_PROGRAMS": "20",
-			}
+				"NODE_OPTIONS":     "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
+				"NODE_ENV":         "test-unit",
+				"NODE_LOG_LEVEL":   "off",
+			},
+			"args": [
+				"--config=./test/system/.jest/jest.config.ts",
+				"--testPathPatterns=./test/system/api/programs.spec.ts",
+			],
+			"outputCapture": "std",
 		},
 		{
 			"type": "node",
@@ -175,7 +175,8 @@
 			"env": {
 				"AWS_REGION":     "eu-west-1",
 				"STAGE":          "dev",
-				"NODE_LOG_LEVEL": "info"
+				"NODE_LOG_LEVEL": "info",
+				"GIP_DOMAIN":     "Add your domain here",
 			}
 		},
 		{

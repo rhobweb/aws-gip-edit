@@ -256,7 +256,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 		expectedResult = {
 			statusCode: 200,
 			headers:    {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 			body:       expectedBody,
@@ -277,7 +277,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 		expectedResult = {
 			statusCode: 200,
 			headers:    {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 			body:       expectedBody,
@@ -443,7 +443,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			statusCode: 400,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -458,7 +458,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			statusCode: 500,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -475,7 +475,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			statusCode: 500,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -494,7 +494,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			statusCode: 500,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -518,7 +518,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 			statusCode: 200,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -664,7 +664,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 			statusCode: 400,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -680,7 +680,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 			statusCode: 400,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -695,7 +695,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 			statusCode: 500,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -712,7 +712,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 			statusCode: 500,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};
@@ -731,7 +731,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 			statusCode: 200,
 			body:       expectedBody,
 			headers: {
-				'Content-Type':   'application/json; charset=UTF-16',
+				'Content-Type':   'application/json; charset=UTF-8',
 				'Content-Length': expectedBody.length,
 			},
 		};

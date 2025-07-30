@@ -2,7 +2,6 @@
  * Node utility to create data items in the AWS DynamoDB for local testing.
  */
 
-//var aws    = require("aws-sdk");
 const { DynamoDBClient, CreateTableCommand, DeleteTableCommand } = require( '@aws-sdk/client-dynamodb' );
 const { DynamoDBDocumentClient, PutCommand } = require( '@aws-sdk/lib-dynamodb' );
 const commands = { CreateTableCommand, PutCommand, DeleteTableCommand };

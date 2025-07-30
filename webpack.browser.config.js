@@ -1,51 +1,23 @@
-import path from 'node:path';
-//import {
-//	copyFileSync,
-//	existsSync,
-//	mkdirSync,
-//} from 'node:fs';
+/**
+ * File:        webpack.browser.config.js
+ * Description: Webpack configuration to run a browser to serve the static content.
+ *
+ * Usage:       For local development, from the project directory, run:
+ *                IS_OFFLINE=true webpack serve --config webpack.browser.config.js --mode development
+ *              For production, to package up the content, run:
+ *                webpack --config webpack.browser.config.js --mode production
+ */
+import path                      from 'node:path';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import MiniCssExtractPlugin      from 'mini-css-extract-plugin';
 import { StatsWriterPlugin }     from 'webpack-stats-plugin';
 import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
 import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
-//import slsw    from 'serverless-webpack';
-import webpack from 'webpack';
+import webpack                   from 'webpack';
+import { fileURLToPath }         from 'url';
+
 const { ProvidePlugin, DefinePlugin } = webpack;
-
-import { fileURLToPath } from 'url';
-//import stream from 'stream-browserify';
-//import os from 'os-browserify';
-//import process from 'process/browser.js';
-
-//function createDestDir( filePath ) {
-//	const dirPath = path.dirname( filePath );
-//	if ( ! existsSync( dirPath ) ) {
-//		mkdirSync( dirPath, { recursive: true } );
-//	}
-//}
-//
-//function copyFiles() {
-//	const arrFileToCopy = [
-//		//{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.join(__dirname, './dist/src/browser/index.css') },
-//		//{ from: path.resolve(__dirname, './src/browser/index.cjs'),                to: path.join(__dirname, './dist/src/browser/index.cjs') },
-//		//{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.join(__dirname, './dist/public/gip-common.css') },
-//		//{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.join(__dirname, './dist/public/favicon.ico') },
-//		//{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.join(__dirname, './dist/public/program_image_placeholder.png') },
-//	];
-//
-//	for ( const fileToCopy of arrFileToCopy ) {
-//		try {
-//			createDestDir( fileToCopy.to );
-//			copyFileSync( fileToCopy.from, fileToCopy.to );
-//		}
-//		catch ( err ) {
-//			console.log( `Failed to copy: ${fileToCopy.from}` );
-//			throw err;
-//		}
-//	}
-//}
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,10 +27,7 @@ console.log( `dirname is ${__dirname}` );
 const isOffline      = !!process.env.IS_OFFLINE;
 const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
 const AUTH_URI       = process.env.AUTH_URI || 'undefined';
-//console.log( 'webpack: browser.config: env: ' + AUTH_URI );
 console.log( 'webpack: browser isOffline: ' + isOffline );
-
-//copyFiles();
 
 export default {
 	entry: {
@@ -67,16 +36,7 @@ export default {
 	//context: __dirname,
 	target: 'web',
 	mode: isOffline ? 'development' : 'production',
-	//entry: slsw.lib.entries,
-	//mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
-	//node: {
-	//  __dirname:  true,
-	//  __filename: true,
-	//},
 	devServer: {
-		//static: {
-		//	directory: path.join(__dirname, 'dist/public'), // Set the public directory
-		//},
 		hot: true,
 		headers: {
 			'Access-Control-Allow-Origin': '*',
@@ -168,26 +128,9 @@ export default {
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
-				//test: /\.(c|m)?jsx?$/,
 				exclude: /node_modules/, // we shouldn't need processing `node_modules`
 				use: 'babel-loader',
 			},
-			//{
-			//	test: /\.tsx?$/,
-			//	exclude: [
-			//		/node_modules/, // we shouldn't need processing `node_modules`
-			//		path.resolve(__dirname, '.webpack'),
-			//		path.resolve(__dirname, '.serverless'),
-			//	],
-			//	loader: "ts-loader",
-			//	// https://www.npmjs.com/package/ts-loader#options
-			//	options: {
-			//		// Disable type checking, this will lead to improved build times
-			//		transpileOnly: true,
-			//		// Enable file caching, can be quite useful when running offline
-			//		experimentalFileCaching: true,
-			//	},
-			//},
 			{
 				test: /\.css$/,
 				use: [MiniCssExtractPlugin.loader, 'css-loader'],
@@ -209,22 +152,13 @@ export default {
 			configFile: './tsconfig.json',
 		} ) ],
 		extensions: ['.browser.tsx', '.browser.ts', '.browser.jsx', '.browser.js', '.tsx', '.ts', '.jsx', '.js'],
-		//extensions: [ '.browser.jsx', '.browser.tsx','.browser.js', '.browser.ts', '.jsx', '.tsx', '.cjs', '.mjs', '.js', '.ts', ],
 		fallback: {
 			'stream':  'stream-browserify',
 			'os':      'os-browserify',
 			//'process': 'process/browser.js',
 		}
 	},
-	//experiments: {
-	//  outputModule: true,
-	//},
 	output: {
-		// TODO: Comment:
-		// Uncaught ReferenceError: module is not defined
-		//   at streams|util:1:1
-		//   at webpackJsonpCallback (jsonp chunk loading:519:1)
-		//   at Array.forEach (<anonymous>)
 		path: path.join(__dirname, 'dist'),
 		filename: isOffline ? '[name].js' : '[name].[contenthash:8].js',
 		crossOriginLoading: 'anonymous', // enable cross-origin loading of chunks

@@ -53,7 +53,7 @@ const ARR_STATUS_DOWNLOADED = [ VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY ];
 /**
  * @param object with properties:
  *         - current:     true if the current day is regarded as active, false otherwise;
- *         - day_of_week: either null or the capitalised three character day of the week to check, e.g., 'Mon'.
+ *         - day_of_week: either undefined, null or the capitalised three character day of the week to check, e.g., 'Mon'.
  * @returns true if the specified day of the week is active, false otherwise.
  */
 function isDayActive( { current, day_of_week } : Type_isDayActive_args ) : Type_isDayActive_ret {
@@ -82,7 +82,7 @@ function isDayActive( { current, day_of_week } : Type_isDayActive_args ) : Type_
 export function filterPrograms( { programs, params } : Type_filterPrograms_args ) : Type_filterPrograms_ret {
 	let cookedPrograms : Type_filterPrograms_ret;
 
-	if ( params.all  ) {
+	if ( params.all ) {
 		cookedPrograms = programs;
 	} else {
 		const { current = false, downloaded = false } = params;

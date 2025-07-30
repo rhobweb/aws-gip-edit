@@ -26,8 +26,8 @@ import type {
 	Type_extractJsonResponseStream_ret,
 	Type_parseQueryParams_args,
 	Type_parseQueryParams_ret,
-	Type_stringifyUTF16_args,
-	Type_stringifyUTF16_ret,
+	Type_stringify_args,
+	Type_stringify_ret,
 	Type_stripQueryParams_args,
 	Type_stripQueryParams_ret,
 	Type_genURI_args,
@@ -41,7 +41,7 @@ interface Type_TestModule {
 	extractJsonResponse:       ( args: Type_extractJsonResponse_args )       => Type_extractJsonResponse_ret,
 	extractJsonResponseStream: ( args: Type_extractJsonResponseStream_args ) => Type_extractJsonResponseStream_ret,
 	parseQueryParams:          ( args: Type_parseQueryParams_args )          => Type_parseQueryParams_ret,
-	stringifyUTF16:            ( args: Type_stringifyUTF16_args )            => Type_stringifyUTF16_ret,
+	stringify:                 ( args: Type_stringify_args )                 => Type_stringify_ret,
 	stripQueryParams:          ( args: Type_stripQueryParams_args )          => Type_stripQueryParams_ret,
 	genURI:                    ( args: Type_genURI_args )                    => Type_genURI_ret,
 };
@@ -335,11 +335,11 @@ describe(MODULE_NAME + ':parseQueryParams', () => {
 	} );
 } );
 
-describe(MODULE_NAME + ':stringifyUTF16', () => {
+describe(MODULE_NAME + ':stringify', () => {
 	let testModuleObj  : Type_TestModule;
-	let testArgs       : Type_stringifyUTF16_args;
-	let actualResult   : Type_stringifyUTF16_ret;
-	let expectedResult : Type_stringifyUTF16_ret;
+	let testArgs       : Type_stringify_args;
+	let actualResult   : Type_stringify_ret;
+	let expectedResult : Type_stringify_ret;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -356,7 +356,7 @@ describe(MODULE_NAME + ':stringifyUTF16', () => {
 	});
 
 	test( 'OK', () => {
-		actualResult = testModuleObj.stringifyUTF16( testArgs );
+		actualResult = testModuleObj.stringify( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	} );
 } );
