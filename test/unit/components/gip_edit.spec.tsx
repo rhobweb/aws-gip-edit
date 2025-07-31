@@ -127,30 +127,23 @@ window.alert = alertMock;
 
 const TEST_FETCH_ARR_DEFAULT = [
 	{
-		pos:           1,
-		pid:           'pid1',
-		status:        'Pending',
-		title:         'Title1',
-		synopsis:      'Synopsis1.',
-		image_uri:     'ImageUri1',
-		genre:         'Books & Spoken',
-		day_of_week:   'Thu',
-		quality:       'High',
-		download_time: '',
-		modify_time:   '',
+		pid:         'pid1',
+		status:      'Pending',
+		title:       'Title1',
+		synopsis:    'Synopsis1.',
+		image_uri:   'ImageUri1',
+		genre:       'Books & Spoken',
+		day_of_week: 'Thu',
+		quality:     'High',
 	},
 	{
-		pos:           2,
-		pid:           'pid2',
-		status:        'Success',
-		title:         'Title2',
-		synopsis:      'Synopsis2.',
-		image_uri:     'ImageUri2',
-		genre:         'Comedy',
-		day_of_week:   'Any',
-		quality:       'Normal',
-		download_time: '',
-		modify_time:   '',
+		pid:         'pid2',
+		status:      'Success',
+		title:       'Title2',
+		synopsis:    'Synopsis2.',
+		image_uri:   'ImageUri2',
+		genre:       'Comedy',
+		quality:     'Normal',
 	},
 ] as Type_DbProgramEditItem[];
 
@@ -277,17 +270,14 @@ describe(MODULE_NAME + ':processProgramForSaving', () => {
 			selected:    false,
 		};
 		expectedResult = {
-			pid:           'pid1',
-			status:        'Pending',
-			title:         'Title1',
-			synopsis:      'Synopsis1.',
-			image_uri:     'ImageUri1',
-			genre:         'Comedy',
-			day_of_week:   'Thu',
-			quality:       'Normal',
-			pos:           null,
-			download_time: '',
-			modify_time:   '',
+			pid:         'pid1',
+			status:      'Pending',
+			title:       'Title1',
+			synopsis:    'Synopsis1.',
+			image_uri:   'ImageUri1',
+			genre:       'Comedy',
+			quality:     'Normal',
+			day_of_week: 'Thu',
 		};
 	});
 
@@ -385,17 +375,14 @@ describe(MODULE_NAME + ':savePrograms', () => {
 
 	function genExpectedFetchBody( args: Type_savePrograms_args ) : Type_DbProgramEditItem[] {
 		const cookedResult = args.map( el => ({
-			pid:           el.pid,
-			status:        el.status,
-			title:         el.title,
-			synopsis:      el.synopsis,
-			image_uri:     el.image_uri,
-			genre:         el.genre,
-			day_of_week:   el.day_of_week,
-			quality:       el.quality,
-			download_time: '',
-			modify_time:   '',
-			pos:           null,
+			pid:         el.pid,
+			status:      el.status,
+			title:       el.title,
+			synopsis:    el.synopsis,
+			image_uri:   el.image_uri,
+			genre:       el.genre,
+			quality:     el.quality,
+			day_of_week: el.day_of_week,
 		}) );
 		return cookedResult;
 	}
@@ -419,10 +406,6 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		expectedFetchURI  = '/gip_edit/api/programs';
 		expectedFetchRet  = genExpectedFetchBody( testArgs );
 		expectedFetchBody = genExpectedFetchBody( testArgs );
-		expectedFetchRet.forEach( el => {
-			el.download_time = '2025-06-30T01:02:03.456';
-			el.modify_time   = '2025-06-30T01:02:03.456';
-		} );
 		initFetchRet( expectedFetchRet );
 		expectedFetchOptions = {
 			method: 'POST',
@@ -443,6 +426,7 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		expect( actualResult ).toEqual( expectedResult );
 		// Stringified JSON cannot be matched directly, so match any string first, then match the stringified JSON
 		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
+		// @ts-expect-error toMatchJSON is an expect extension
 		expect( fetchMock.mock.calls[ 0 ][ 1 ].body ).toMatchJSON( expectedFetchBody ); // eslint-disable-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
 	});
 

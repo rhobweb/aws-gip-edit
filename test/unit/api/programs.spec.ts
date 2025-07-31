@@ -87,6 +87,19 @@ function formatBody( rawObject : object ) : string {
 	return rawString.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
 }
 
+function genExpectedBody( arrObject : object[] ) : string {
+	const arrCooked = [] as object[];
+	const arrDeleteProp = [ 'pos', 'modify_time' ];
+	for ( const rawItem of arrObject ) {
+		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as object;
+		for ( const prop of arrDeleteProp ) {
+			delete cookedItem[ prop ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
+		}
+		arrCooked.push( cookedItem );
+	}
+	return formatBody( arrCooked );
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Unit tests
 
@@ -252,7 +265,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 
 	test( 'no parameters, ignore already downloaded', async () => {
 		sendErr = null;
-		expectedBody = formatBody( [ testItems[ 0 ] ] );
+		expectedBody   = genExpectedBody( [ testItems[ 0 ] ] );
 		expectedResult = {
 			statusCode: 200,
 			headers:    {
@@ -273,7 +286,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 		testArgs.queryStringParameters = {
 			downloaded: '1',
 		};
-		expectedBody = formatBody( [ testItems[ 1 ], testItems[ 0 ] ] );
+		expectedBody = genExpectedBody( [ testItems[ 1 ], testItems[ 0 ] ] );
 		expectedResult = {
 			statusCode: 200,
 			headers:    {

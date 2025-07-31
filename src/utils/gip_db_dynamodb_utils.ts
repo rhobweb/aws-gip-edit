@@ -51,6 +51,10 @@ import {
 } from './gip_prog_fields';
 
 import {
+	genProgramEditItem,
+} from './gip_prog_db_utils';
+
+import {
 	HttpError,
 } from './gip_http_utils';
 
@@ -232,15 +236,7 @@ function genDbRecord( { program, programPos } : Type_genDbRecord_args ) : Type_g
 	}
 
 	cookedRecord[ DB_FIELD_MODIFY_TIME ] = cookedRecord[ DB_FIELD_MODIFY_TIME ] ?? new Date().toISOString();
-
-	if ( ! cookedRecord[ DB_FIELD_POS ] ) {
-		cookedRecord[ DB_FIELD_POS ] = programPos;
-	} else {
-		cookedRecord[ DB_FIELD_POS ] = cookedRecord[ DB_FIELD_POS ] as number; // Ensure the position is a number
-	}
-
-	// Not stored in the program table
-	delete cookedRecord[ DB_FIELD_DOWNLOAD_TIME ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
+	cookedRecord[ DB_FIELD_POS ]         = programPos;
 
 	return cookedRecord as unknown as Type_DbProgramItem;
 }
@@ -718,6 +714,18 @@ function resetDb( objDb : Type_resetDb_args ) : void {
 	}
 }
 
+/**
+ * @param {Type_DbProgramItem[]} arrRawProgram : array of program items read from the database.
+ * @returns an array of program items suitable for editing.
+ */
+function postProcessPrograms( arrRawProgram : Type_DbProgramItem[] ) : Type_DbProgramEditItem[] {
+	const arrCookedProgram = [] as Type_DbProgramEditItem[];
+	for ( const rawProgram of arrRawProgram ) {
+		arrCookedProgram.push( genProgramEditItem( rawProgram ) );
+	}
+	return arrCookedProgram;
+}
+
 ////////////////////////////////////////
 // Exported definitions
 
@@ -730,7 +738,8 @@ export async function loadPrograms() : Type_loadPrograms_ret {
 	try {
 		logger.log( 'debug', `${MODULE_NAME}: loadPrograms: BEGIN` );
 		objDb    = new GipDynamoDB();
-		programs = await loadProgramsHelper( objDb.getDocClient() ) as Type_DbProgramEditItem[];
+		const rawPrograms = await loadProgramsHelper( objDb.getDocClient() );
+		programs = postProcessPrograms( rawPrograms );
 		logger.log( 'debug', `${MODULE_NAME}: loadPrograms: END: `, { programs } );
 	}
 	catch ( err ) {

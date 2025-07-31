@@ -23,10 +23,7 @@ import {
 	DB_FIELD_PID,
 	DB_FIELD_TITLE,
 	DB_FIELD_SYNOPSIS,
-	DB_FIELD_MODIFY_TIME,
-	DB_FIELD_DOWNLOAD_TIME,
 	DB_FIELD_IMAGE_URI,
-	DB_FIELD_POS,
 } from './gip_prog_fields';
 
 import {
@@ -53,6 +50,7 @@ import type {
 } from './gip_types.ts';
 
 import type {
+	Type_DbProgramItem,
 	Type_DbProgramEditItem,
 	Type_DbProgramEditItemPropName,
 } from './gip_prog_fields.ts';
@@ -73,6 +71,9 @@ export type Type_progToDb_ret  = Type_DbProgramEditItem;
 
 export type Type_dbToProgArray_args = Type_DbProgramEditItem[];
 export type Type_dbToProgArray_ret  = Type_DisplayProgramItem[];
+
+export type Type_genProgramEditItem_args = Type_DbProgramItem;
+export type Type_genProgramEditItem_ret  = Type_DbProgramEditItem;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -137,10 +138,7 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
 		[DB_FIELD_PID]:           '',
 		[DB_FIELD_TITLE]:         '',
 		[DB_FIELD_SYNOPSIS]:      '',
-		[DB_FIELD_MODIFY_TIME]:   '',
-		[DB_FIELD_DOWNLOAD_TIME]: '',
 		[DB_FIELD_IMAGE_URI]:     '',
-		[DB_FIELD_POS]:           null,
 	};
 
 	// Say 'value' is a string, but it may be null or for DB_FIELD_POS it may be a number
@@ -148,9 +146,7 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
 		const dbField = PROG_TO_DB_FIELD_MAP[ field ] as Type_DbProgramEditItemPropName | undefined;
 
 		if ( dbField ) {
-			if ( dbField !== DB_FIELD_POS ) {
-				dbProg[ dbField ] = value;
-			}
+			dbProg[ dbField ] = value;
 		}
 	}
 
@@ -166,6 +162,37 @@ export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret 
 export function dbToProgArray( rawPrograms: Type_DbProgramEditItem[] ) : Type_DisplayProgramItem[] {
 	const programs = rawPrograms.map( prog => dbToProg( prog ) );
 	return programs;
+}
+
+/**
+ * @param {Type_DbProgramItem} rawProgramItem : a program item as read from the database.
+ * @returns {Type_DbProgramEditItem} a program item containing only the data required for editing.
+ */
+export function genProgramEditItem( rawProgramItem : Type_genProgramEditItem_args ) : Type_genProgramEditItem_ret {
+	const cookedProgramItem = { // Filled with mandatory fields
+		[DB_FIELD_STATUS]    : '',
+		[DB_FIELD_PID]       : '',
+		[DB_FIELD_TITLE]     : '',
+		[DB_FIELD_SYNOPSIS]  : '',
+		[DB_FIELD_IMAGE_URI] : '',
+		[DB_FIELD_GENRE]     : '',
+		[DB_FIELD_QUALITY]   : '',
+	} as Type_DbProgramEditItem;
+
+	const arrOptionalField : (keyof Type_DbProgramEditItem)[] = [
+		DB_FIELD_DAY_OF_WEEK,
+	];
+	for ( const field of Object.keys( cookedProgramItem ) as (keyof Type_DbProgramEditItem)[] ) {
+		// The mandatory fields are guaranteed to be non-null.
+		cookedProgramItem[ field ] = rawProgramItem[ field ]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+	}
+	for ( const field of arrOptionalField ) {
+		if ( ! ([undefined,null] as unknown[]).includes( rawProgramItem[ field as keyof Type_DbProgramItem ] ) ) {
+			// @ts-expect-error we know the types align in this direction, so just disable the error
+			cookedProgramItem[ field ] = rawProgramItem[ field ];
+		}
+	}
+	return cookedProgramItem;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

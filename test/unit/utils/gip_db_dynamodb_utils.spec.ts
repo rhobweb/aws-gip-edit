@@ -254,14 +254,11 @@ describe(MODULE_NAME + ':genDbRecord', () => {
 			pid:           'mypid',
 			status:        'Pending',
 			genre:         'Books&Spoken',
-			day_of_week:   'Mon',
 			quality:       'Normal',
 			title:         'My Title',
 			synopsis:      'My Synopsis',
-			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage.png',
-			download_time: '2025-06-01T11:00:00Z',
-			pos:           null,
+			day_of_week:   'Mon',
 		};
 		testArgs = {
 			program:    testProgram,
@@ -276,10 +273,10 @@ describe(MODULE_NAME + ':genDbRecord', () => {
 			quality:       'Normal',
 			title:         'My Title',
 			synopsis:      'My Synopsis',
-			modify_time:   '2025-06-01T12:00:00Z',
+			modify_time:   testStrSystemTime,
 			image_uri:     'http://mydom/myimage.png',
-			// download_time is not stored
 			pos:           7,
+			// download_time is not stored
 		};
 	});
 
@@ -288,16 +285,13 @@ describe(MODULE_NAME + ':genDbRecord', () => {
 		jest.useRealTimers();
 	});
 
-	test( 'Pos exists, day of the week present', () => {
-		testProgram.pos    = 3;
-		expectedResult.pos = 3;
-		actualResult       = testModuleObj.genDbRecord( testArgs );
+	test( 'Day of the week present', () => {
+		actualResult = testModuleObj.genDbRecord( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
 
-	test( 'Pos null, day of week null, no modify time', () => {
+	test( 'Day of week null', () => {
 		testProgram.day_of_week = null;
-		testProgram.modify_time = null;
 		delete expectedResult.day_of_week;
 		expectedResult.modify_time = testStrSystemTime;
 		actualResult = testModuleObj.genDbRecord( testArgs );
@@ -327,9 +321,6 @@ describe(MODULE_NAME + ':genDbHistoryRecord', () => {
 			title:         'My Title',
 			synopsis:      'My Synopsis',
 			image_uri:     'http://mydom/myimage.png',
-			modify_time:   'any old time',
-			download_time: 'any old time',
-			pos:           null,
 		};
 		expectedResult = {
 			pid:           'mypid',
@@ -745,6 +736,8 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 	let actualErr      : Error | null;
 	let expectedItems  : WriteRequest[];
 	let expectedErrMessage : string;
+	const testStrSystemTime = '2025-06-01T01:02:03.456Z';
+	const testDtSystemTime  = new Date( testStrSystemTime );
 	const rawProg1 : Type_DbProgramEditItem = {
 		pid:           'mypid1',
 		status:        'Pending',
@@ -753,10 +746,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		quality:       'Normal',
 		title:         'My Title1',
 		synopsis:      'My Synopsis1',
-		modify_time:   '2025-06-01T12:00:00Z',
 		image_uri:     'http://mydom/myimage1.png',
-		download_time: '2025-06-01T11:00:00Z',
-		pos:           null,
 	};
 	const rawProg2 : Type_DbProgramEditItem = {
 		pid:           'mypid2',
@@ -766,10 +756,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		quality:       'High',
 		title:         'My Title2',
 		synopsis:      'My Synopsis2',
-		modify_time:   '2025-06-02T13:01:05Z',
 		image_uri:     'http://mydom/myimage2.png',
-		download_time: '2025-06-02T13:01:02Z',
-		pos:           null,
 	};
 	testArgs = [ rawProg1, rawProg2 ];
 	const expectedItem1 : Type_DbProgramItem = {
@@ -780,7 +767,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		quality:       'Normal',
 		title:         'My Title1',
 		synopsis:      'My Synopsis1',
-		modify_time:   '2025-06-01T12:00:00Z',
+		modify_time:   testStrSystemTime,
 		image_uri:     'http://mydom/myimage1.png',
 		// download_time is not stored
 		pos:           1,
@@ -793,7 +780,7 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 		quality:       'High',
 		title:         'My Title2',
 		synopsis:      'My Synopsis2',
-		modify_time:   '2025-06-02T13:01:05Z',
+		modify_time:   testStrSystemTime,
 		image_uri:     'http://mydom/myimage2.png',
 		// download_time is not stored
 		pos:           2,
@@ -801,6 +788,8 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 
 	beforeEach( () => {
 		commonBeforeEach();
+		jest.useFakeTimers();
+		jest.setSystemTime( testDtSystemTime );
 		testModuleObj = testModule.privateDefs;
 		testArgs = [ rawProg1, rawProg2 ];
 		expectedItems = [
@@ -812,12 +801,13 @@ describe(MODULE_NAME + ':genWriteCommandParams', () => {
 				[EXPECTED_TABLE_NAME_PROGRAM]: expectedItems,
 			},
 		};
-		actualErr   = null;
+		actualErr = null;
 		expectedErrMessage = '';
 	});
 
 	afterEach( () => {
 		commonAfterEach();
+		jest.useRealTimers();
 	});
 
 	test( 'One item', () => {
@@ -863,10 +853,7 @@ describe(MODULE_NAME + ':validateUpdate', () => {
 			quality:       'Normal',
 			title:         'My Title1',
 			synopsis:      'My Synopsis1',
-			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage1.png',
-			download_time: '2025-06-01T11:00:00Z',
-			pos:           null,
 		};
 		actualErr          = null;
 		expectedErrMessage = '';
@@ -960,10 +947,7 @@ describe(MODULE_NAME + ':genUpdateHistoryItemCommand', () => {
 			quality:       'Normal',
 			title:         'My Title1',
 			synopsis:      'My Synopsis1',
-			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage1.png',
-			download_time: '2025-06-01T11:00:00Z',
-			pos:           null,
 		};
 		const tempExpectedObject = JSON.parse( JSON.stringify( testArgs ) ) as Record<string,unknown>;
 		delete tempExpectedObject.pos;         // pos is not stored in history
@@ -1027,10 +1011,7 @@ describe(MODULE_NAME + ':genUpdateHistoryCommandParams', () => {
 			quality:       'Normal',
 			title:         'My Title1',
 			synopsis:      'My Synopsis1',
-			modify_time:   '2025-06-01T12:00:00Z',
 			image_uri:     'http://mydom/myimage1.png',
-			download_time: '2025-06-01T11:00:00Z',
-			pos:           1,
 		};
 		testProg2 = {
 			pid:           'mypid2',
@@ -1040,10 +1021,7 @@ describe(MODULE_NAME + ':genUpdateHistoryCommandParams', () => {
 			quality:       'High',
 			title:         'My Title2',
 			synopsis:      'My Synopsis2',
-			modify_time:   '2025-06-01T12:02:30Z',
 			image_uri:     'http://mydom/myimage2.png',
-			download_time: '2025-06-01T11:02:00Z',
-			pos:           2,
 		};
 		expectedObject1 = genExpectedObject( testProg1 );
 		expectedObject2 = genExpectedObject( testProg2 );
@@ -1930,6 +1908,15 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 		pid: 'pid1',
 	} as unknown as Type_DbProgramItem;
 
+	function genExpectedProgram( rawItem : object ) : object {
+		const arrDeleteProp = [ 'pos', 'modify_time' ];
+		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as object;
+		for ( const prop of arrDeleteProp ) {
+			delete cookedItem[ prop ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
+		}
+		return cookedItem;
+	}
+
 	beforeEach( () => {
 		commonBeforeEach();
 		testModuleObj        = testModule;
@@ -1955,7 +1942,7 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 		};
 		expectedResult = [
 			{
-				...testItem1,
+				...genExpectedProgram(testItem1),
 			},
 		] as unknown as Awaited<Type_DbProgramEditItem[]>;
 		actualErr = null;
@@ -2125,8 +2112,7 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 	const testDtSystemTime  = new Date( testStrSystemTime );
 	const testItem1 = {
 		pid: 'pid1',
-		pos: 1,
-	} as unknown as Type_DbProgramEditItem;
+	} as Type_DbProgramEditItem;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -2171,9 +2157,6 @@ describe(MODULE_NAME + ':updatePrograms', () => {
 		const arrHistoryItem = [
 			{ ...testItem1, status: 'Success', modify_time: testStrSystemTime, download_time: testStrSystemTime },
 		];
-		for ( const histItem of arrHistoryItem ) {
-			delete histItem.pos;
-		}
 		const sendExpectedUpdateArgs = {
 			TransactItems: [
 				{

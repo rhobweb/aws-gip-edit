@@ -55,12 +55,9 @@ const TEST_PROGRAM_ITEM : Type_DbProgramEditItem = {
 	synopsis:      'synopsis',
 	status:        'Pending',
 	genre:         'Books&Spoken',
-	day_of_week:   null,
 	quality:       'Normal',
-	modify_time:   '2025-06-29T12:34:56.789Z',
-	download_time: '2025-06-29T12:33:56.789Z',
 	image_uri:     'http://myimage/image.img',
-	pos:           1,
+	day_of_week:   null,
 };
 
 ////////////////////////////////////////
@@ -85,16 +82,16 @@ function commonAfterEach() : void {
 	jest.resetModules();
 }
 
-/**
- * @param {string|Date} start : earliest date/time.
- * @param {string|Date} end   : optional latest date/time, defaults to current date.
- * @returns a random date/time between the specified start and end date/times, as an ISO string.
- */
-function randomDate(start : (Date | string), end : (Date | string) = new Date() ) : string {
-	const dtStart = new Date( start );
-	const dtEnd   = new Date( end );
-	return (new Date(dtStart.getTime() + Math.random() * (dtEnd.getTime() - dtStart.getTime()))).toISOString();
-}
+///**
+// * @param {string|Date} start : earliest date/time.
+// * @param {string|Date} end   : optional latest date/time, defaults to current date.
+// * @returns a random date/time between the specified start and end date/times, as an ISO string.
+// */
+//function randomDate(start : (Date | string), end : (Date | string) = new Date() ) : string {
+//	const dtStart = new Date( start );
+//	const dtEnd   = new Date( end );
+//	return (new Date(dtStart.getTime() + Math.random() * (dtEnd.getTime() - dtStart.getTime()))).toISOString();
+//}
 
 /**
  * @param numItems : the number of program items to create.
@@ -110,9 +107,6 @@ function createProgramItems( numItems: number ) : Type_DbProgramEditItem[] {
 		item.title         += strPos;
 		item.synopsis      += strPos;
 		item.pid           += strPos;
-		item.pos           = numItems + 1 - pos;
-		item.download_time = randomDate( new Date(2025, 0, 1) );
-		item.modify_time   = randomDate( item.download_time );
 	}
 	return arrItem;
 }

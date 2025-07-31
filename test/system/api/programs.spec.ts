@@ -33,7 +33,7 @@ import axios, {
 // Types
 
 import type {
-	Type_DbProgramItem,
+	Type_DbProgramEditItem,
 } from '../../../src/utils/gip_prog_fields';
 
 interface Type_axios_result {
@@ -47,56 +47,48 @@ interface Type_axios_result {
 
 const GIP_API_URI = 'http://localhost:13003/gip_edit/api/programs';
 
-const TEST_PROGRAM_01 : Type_DbProgramItem = {
+const TEST_PROGRAM_01 : Type_DbProgramEditItem = {
 	pid:         'mypid1',
 	status:      'Pending',
 	genre:       'Books&Spoken',
-	//day_of_week: will be null or undefined,
 	quality:     'Normal',
 	synopsis:    'Test program 1',
 	title:       'Radio Program with a Unicode character \u2042',
-	modify_time: '2023-06-21T01:02:03Z',
 	image_uri:   'https://myimage1.jpg',
-	pos:         1,
+	//day_of_week: will be null or undefined,
 };
 
-const TEST_PROGRAM_02 : Type_DbProgramItem = {
+const TEST_PROGRAM_02 : Type_DbProgramEditItem = {
 	pid:         'mypid2',
 	status:      'Success',
 	genre:       'Comedy',
-	day_of_week: 'Thu',
 	quality:     'High',
 	synopsis:    'Test program 2',
 	title:       'Another Radio Program',
-	modify_time: '2025-06-21T02:03:04Z',
 	image_uri:   'https://myimage2.jpg',
-	pos:         2,
+	day_of_week: 'Thu',
 };
 
-const TEST_PROGRAM_03 : Type_DbProgramItem = {
+const TEST_PROGRAM_03 : Type_DbProgramEditItem = {
 	pid:         'mypid3',
 	status:      'Already',
 	genre:       'Books&Spoken',
-	day_of_week: 'Any',
 	quality:     'Normal',
 	synopsis:    'Test program 3',
 	title:       'Yet Another Radio Program',
-	modify_time: '2025-06-22T04:05:06Z',
 	image_uri:   'https://myimage3.jpg',
-	pos:         3,
+	//day_of_week: will be null or undefined,
 };
 
-const TEST_PROGRAM_04 : Type_DbProgramItem = {
+const TEST_PROGRAM_04 : Type_DbProgramEditItem = {
 	pid:         'mypid4',
 	status:      'Pending',
 	genre:       'Books&Spoken',
-	day_of_week: 'Wed',
 	quality:     'Normal',
 	synopsis:    'Test program 4',
 	title:       'Radio Program',
-	modify_time: '2023-06-22T02:03:03Z',
 	image_uri:   'https://myimage4.jpg',
-	pos:         4,
+	day_of_week: 'Wed',
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +112,7 @@ function fail( err : string | Error ) : void {
 	throw( cookedErr );
 }
 
-async function postPrograms( testData : Type_DbProgramItem[] ) : Promise<void> {
+async function postPrograms( testData : Type_DbProgramEditItem[] ) : Promise<void> {
 	const requestConfig : AxiosRequestConfig = {
 		url:    GIP_API_URI,
 		method: 'POST',
@@ -181,6 +173,41 @@ function calcEncodedObjectLength( objItem : object ) : string {
 	return iLength.toString();
 }
 
+const ARR_DAY_OF_WEEK          = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+type Type_DayOfWeek            = typeof ARR_DAY_OF_WEEK[number];
+type Type_ValidDayOfWeekOffset = (-1|0|1);
+type Type_DayOfWeekOffset      = Type_ValidDayOfWeekOffset | null | undefined;
+
+/**
+ * @param {Type_ValidDayOfWeekOffset} dayOffset : -1 - yesterday, 0 - today, 1 - tomorrow;
+ * @returns the day of the week, e.g., 'Mon'.
+ */
+function calcDayOfWeek( dayOffset: Type_ValidDayOfWeekOffset ) : Type_DayOfWeek {
+	const curDayIndex = (new Date()).getDay();
+	const retDayIndex = (curDayIndex + dayOffset) % ARR_DAY_OF_WEEK.length;
+	return ARR_DAY_OF_WEEK[ retDayIndex ];
+}
+
+/**
+ * @param {number[]} arrProgNum : array of zero or more test program numbers, 1-4;
+ * @param {Type_DayOfWeekOffset[]} arrDayOffset : optional array of day offsets relative to the current day, e.g., -1 is yesterday.
+ * @returns array of program items for test purposes.
+ */
+function genTestPrograms( arrProgNum : (1|2|3|4)[], arrDayOffset : Type_DayOfWeekOffset[] = [] ) : Type_DbProgramEditItem[] {
+	const arrProgram = [] as Type_DbProgramEditItem[];
+	const arrSrcProg = [ TEST_PROGRAM_01, TEST_PROGRAM_02, TEST_PROGRAM_03, TEST_PROGRAM_04 ];
+
+	for ( const n of arrProgNum ) {
+		const index = n - 1;
+		const thisProgram = JSON.parse( JSON.stringify( arrSrcProg[ index ] ) ) as Type_DbProgramEditItem;
+		if ( ! ([null,undefined] as Type_DayOfWeekOffset[]).includes( arrDayOffset[ index ] ) ) {
+			thisProgram.day_of_week = calcDayOfWeek( arrDayOffset[ index ]! ); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+		}
+		arrProgram.push( thisProgram );
+	}
+
+	return arrProgram;
+}
 
 // Set the timeout to allow debugging. Defaults to 5000 ms
 const TEST_TIMEOUT_MS = 300 * 1000;
@@ -193,7 +220,7 @@ jest.setTimeout( TEST_TIMEOUT_MS );
 describe(MODULE_NAME + ':POST', () => {
 	let requestConfig  : AxiosRequestConfig;
 	let rawResponse    : AxiosResponse;
-	let testData       : Type_DbProgramItem[];
+	let testData       : Type_DbProgramEditItem[];
 	let actualResult   : Type_axios_result;
 	let expectedResult : Type_axios_result;
 	let expectedBody   : object;
@@ -219,7 +246,7 @@ describe(MODULE_NAME + ':POST', () => {
 
 	afterEach( () => {
 		commonAfterEach();
-		jest.useRealTimers();	});
+	});
 
 	test( 'No programs', async () => {
 		requestConfig.data = null;
@@ -286,20 +313,17 @@ describe(MODULE_NAME + ':POST', () => {
 describe(MODULE_NAME + ':GET', () => {
 	let requestConfig   : AxiosRequestConfig;
 	let rawResponse     : AxiosResponse;
-	let testData        : Type_DbProgramItem[];
+	let testData        : Type_DbProgramEditItem[];
 	let actualResult    : Type_axios_result;
 	let expectedResult  : Type_axios_result;
 	let expectedBody    : object;
 	let expectedHeaders : object;
-	const testStrSystemTime  = '2025-07-30T01:02:03.456Z'; // A Wednesday
-	const TEST_DAY_TODAY     = 'Wed';
-	const TEST_DAY_YESTERDAY = 'Tue';
-	const testDtSystemTime   = new Date( testStrSystemTime );
+	const DAY_TODAY     = 0  as Type_DayOfWeekOffset;
+	const DAY_YESTERDAY = -1 as Type_DayOfWeekOffset;
+	const DAY_TOMORROW  = 1  as Type_DayOfWeekOffset;
 
 	beforeEach( () => {
 		commonBeforeEach();
-		jest.useFakeTimers();
-		jest.setSystemTime( testDtSystemTime );
 		requestConfig = {
 			url:    GIP_API_URI,
 			method: 'GET',
@@ -316,10 +340,10 @@ describe(MODULE_NAME + ':GET', () => {
 
 	afterEach( () => {
 		commonAfterEach();
-		jest.useRealTimers();	});
+	});
 
 	test( 'No programs', async () => {
-		testData = [];
+		testData = genTestPrograms( [] );
 		await postPrograms( testData );
 		expectedBody   = [];
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
@@ -339,8 +363,9 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Three programs, only one pending', async () => {
+		testData = genTestPrograms( [1,2,3] );
 		await postPrograms( testData );
-		expectedBody   = JSON.parse( JSON.stringify( [ TEST_PROGRAM_01 ] ) ) as object;
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[ 0 ] ] ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
 		expectedResult = {
 			status:  200,
@@ -358,6 +383,7 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Three programs, get all', async () => {
+		testData = genTestPrograms( [1,2,3] );
 		await postPrograms( testData );
 		expectedBody   = JSON.parse( JSON.stringify( testData ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
@@ -378,9 +404,9 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Four programs, two pending, one day_of_week out of range', async () => {
-		testData.push( TEST_PROGRAM_04 );
+		testData = genTestPrograms( [1,2,3,4], [null,DAY_TOMORROW,null,DAY_TODAY] );
 		await postPrograms( testData );
-		expectedBody   = JSON.parse( JSON.stringify( [ TEST_PROGRAM_01 ] ) ) as object;
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[ 0 ] ] ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
 		expectedResult = {
 			status:  200,
@@ -398,11 +424,9 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Four programs, two pending, one day_of_week today', async () => {
-		const prog4 = JSON.parse( JSON.stringify( TEST_PROGRAM_04 ) ) as Type_DbProgramItem;
-		prog4.day_of_week = TEST_DAY_TODAY;
-		testData.push( prog4 );
+		testData = genTestPrograms( [1,2,3,4], [null,DAY_TOMORROW,null,DAY_TODAY] );
 		await postPrograms( testData );
-		expectedBody   = JSON.parse( JSON.stringify( [ TEST_PROGRAM_01 ] ) ) as object;
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[ 0 ] ] ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
 		expectedResult = {
 			status:  200,
@@ -420,12 +444,10 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Four programs, two pending, one day_of_week today, get current', async () => {
-		const prog4 = JSON.parse( JSON.stringify( TEST_PROGRAM_04 ) ) as Type_DbProgramItem;
-		prog4.day_of_week = TEST_DAY_TODAY;
-		testData.push( prog4 );
+		testData = genTestPrograms( [1,2,3,4], [null,DAY_TOMORROW,null,DAY_TODAY] );
 		requestConfig.url = `${requestConfig.url}?current`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
 		await postPrograms( testData );
-		expectedBody   = JSON.parse( JSON.stringify( [ TEST_PROGRAM_01, prog4 ] ) ) as object;
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[0], testData[3] ] ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
 		expectedResult = {
 			status:  200,
@@ -443,11 +465,30 @@ describe(MODULE_NAME + ':GET', () => {
 	});
 
 	test( 'Four programs, two pending, one day_of_week yesterday', async () => {
-		const prog4 = JSON.parse( JSON.stringify( TEST_PROGRAM_04 ) ) as Type_DbProgramItem;
-		prog4.day_of_week = TEST_DAY_YESTERDAY;
-		testData.push( prog4 );
+		testData = genTestPrograms( [1,2,3,4], [null,DAY_TOMORROW,null,DAY_YESTERDAY] );
 		await postPrograms( testData );
-		expectedBody   = JSON.parse( JSON.stringify( [ TEST_PROGRAM_01, prog4 ] ) ) as object;
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[0], testData[3] ] ) ) as object;
+		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
+		expectedResult = {
+			status:  200,
+			body:    expectedBody,
+			headers: expectedHeaders,
+		};
+		try {
+			rawResponse  = await axios( requestConfig );
+			actualResult = parseAxiosResponse( rawResponse );
+		}
+		catch ( err ) {
+			fail( err as Error );
+		}
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Three programs, get downloaded', async () => {
+		testData = genTestPrograms( [3,1,2], [null,null,DAY_YESTERDAY] );
+		requestConfig.url = `${requestConfig.url}?downloaded`; // eslint-disable-line @typescript-eslint/restrict-template-expressions
+		await postPrograms( testData );
+		expectedBody   = JSON.parse( JSON.stringify( [ testData[0], testData[1], testData[2] ] ) ) as object;
 		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
 		expectedResult = {
 			status:  200,

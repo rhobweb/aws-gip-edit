@@ -83,10 +83,7 @@ export type Type_DbProgramItemPropName = keyof Type_DbProgramItem;
 // The program object in database with relaxed property values
 type Type_DbProgramItem_unwanted = typeof DB_FIELD_DAY_OF_WEEK | typeof DB_FIELD_MODIFY_TIME | typeof DB_FIELD_POS;
 export interface Type_DbProgramEditItem extends Omit<Type_DbProgramItem,Type_DbProgramItem_unwanted> {
-	[DB_FIELD_DOWNLOAD_TIME]? : string,
-	[DB_FIELD_DAY_OF_WEEK]?   : string | null,
-	[DB_FIELD_MODIFY_TIME]?   : string | null,
-	[DB_FIELD_POS]?           : number | null,
+	[DB_FIELD_DAY_OF_WEEK]? : string | null,
 };
 
 export type Type_DbProgramEditItemPropName = keyof Type_DbProgramEditItem;

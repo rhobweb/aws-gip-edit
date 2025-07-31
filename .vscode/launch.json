@@ -21,6 +21,7 @@
 				"AWS_ENDPOINT":   "http://localhost:8000",
 				"STAGE":          "lcl",
 				"NODE_LOG_LEVEL": "debug",
+				"GIP_DOMAIN":     "dummy-domain.com",
 				"AUTH_URI":       "http://localhost:3013/sso",
 			}
 		},
