@@ -53,7 +53,7 @@ const objProgramHistoryIndexes = {
 				}
 			],
 			Projection: {
-				ProjectionType: "ALL"
+				ProjectionType: 'KEYS_ONLY'
 			},
 			BillingMode: 'PAY_PER_REQUEST',
 		}

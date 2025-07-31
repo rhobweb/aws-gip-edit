@@ -42,6 +42,8 @@ import {
 	ScanCommandInput,
 	BatchWriteCommand,
 	BatchWriteCommandInput,
+	BatchGetCommand,
+	BatchGetCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 
 import assert from 'node:assert';
@@ -247,6 +249,7 @@ async function getHistoryKeys() : Promise<Type_ProgramHistoryKey[]> {
 	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
 	const scanCommandArgs : ScanCommandInput = {
 		TableName:               TABLE_NAME_PROGRAM_HISTORY,
+		IndexName:               INDEX_NAME_PROGRAM_HISTORY_PID,
 		ProjectionExpression:    '#pid,#download_time',
 		ExpressionAttributeNames: { '#pid': 'pid', '#download_time': 'download_time' },
 	};
@@ -290,7 +293,27 @@ async function clearHistoryTable() : Promise<number> {
 	return numDeleted;
 }
 
-async function getProgramHistoryItemsForPID( pid : string ) : Promise<Type_DbProgramHistoryItem[]> {
+async function getProgramHistoryItemsByKey( arrProgramHistoryKey : Type_ProgramHistoryKey[] ) : Promise<Type_DbProgramHistoryItem[]> {
+	const arrProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
+	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
+	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
+	const commandArgs : BatchGetCommandInput = {
+		RequestItems: {
+			[TABLE_NAME_PROGRAM_HISTORY]: {
+				Keys: arrProgramHistoryKey,
+			}
+		},
+	};
+	const command  = new BatchGetCommand( commandArgs );
+	const response = await dbDocClient.send( command );
+	if ( response.Responses ) {
+		arrProgramHistoryItem.push( ...response.Responses[ TABLE_NAME_PROGRAM_HISTORY ] as Type_DbProgramHistoryItem[] );
+	}
+
+	return arrProgramHistoryItem;
+}
+
+async function getProgramHistoryKeysForPID( pid : string ) : Promise<Type_ProgramHistoryKey[]> {
 	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
 	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
 	const commandArgs : QueryCommandInput = {
@@ -303,16 +326,30 @@ async function getProgramHistoryItemsForPID( pid : string ) : Promise<Type_DbPro
 
 	const queryCommand  = new QueryCommand( commandArgs );
 	const queryResponse = await dbDocClient.send( queryCommand );
-	const arrItem       = queryResponse.Items as Type_DbProgramHistoryItem[];
+	const arrItem       = queryResponse.Items as Type_ProgramHistoryKey[];
 	return arrItem;
 }
 
-async function getProgramHistoryItems( arrPID : string[] ) : Promise<Type_DbProgramHistoryItem[]> {
-	const arrProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
+function sortProgramHistoryItems( { arrPID, arrProgramHistoryItem } : { arrPID: string[], arrProgramHistoryItem : Type_DbProgramHistoryItem[] } ) : Type_DbProgramHistoryItem[] {
+	const arrSortedProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
+
 	for ( const pid of arrPID ) {
-		const arrItem = await getProgramHistoryItemsForPID( pid );
-		arrProgramHistoryItem.push( ...arrItem );
+		arrSortedProgramHistoryItem.push( ...arrProgramHistoryItem.filter( phi => phi.pid === pid ) );
 	}
+
+	return arrSortedProgramHistoryItem;
+}
+
+async function getProgramHistoryItems( arrPID : string[] ) : Promise<Type_DbProgramHistoryItem[]> {
+	const arrProgramHistoryKey = [] as Type_ProgramHistoryKey[];
+	for ( const pid of arrPID ) {
+		const arrKey = await getProgramHistoryKeysForPID( pid );
+		arrProgramHistoryKey.push( ...arrKey );
+	}
+
+	const arrUnsortedProgramHistoryItem = await getProgramHistoryItemsByKey( arrProgramHistoryKey );
+	const arrProgramHistoryItem         = sortProgramHistoryItems( { arrPID, arrProgramHistoryItem: arrUnsortedProgramHistoryItem } );
+
 	return arrProgramHistoryItem;
 }
 

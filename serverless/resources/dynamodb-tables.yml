@@ -25,4 +25,9 @@ Resources:
         - AttributeName: download_time
           KeyType:       RANGE
       BillingMode: PAY_PER_REQUEST
-
+      GlobalSecondaryIndexes:
+        IndexName: "${self:custom.dynamoTableNamePrefix}ProgramHistory-pid"
+        KeySchema:
+          - AttributeName: pid
+            KeyType:       HASH
+        ProjectionType: 'KEYS_ONLY'
