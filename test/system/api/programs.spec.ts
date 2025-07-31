@@ -29,11 +29,29 @@ import axios, {
 	AxiosError,
 } from 'axios';
 
+import {
+	DynamoDBClient,
+	DynamoDBClientConfig,
+} from '@aws-sdk/client-dynamodb';
+
+import {
+	DynamoDBDocumentClient,
+	QueryCommand,
+	QueryCommandInput,
+	ScanCommand,
+	ScanCommandInput,
+	BatchWriteCommand,
+	BatchWriteCommandInput,
+} from '@aws-sdk/lib-dynamodb';
+
+import assert from 'node:assert';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DbProgramEditItem,
+	Type_DbProgramHistoryItem,
 } from '../../../src/utils/gip_prog_fields';
 
 interface Type_axios_result {
@@ -208,6 +226,114 @@ function genTestPrograms( arrProgNum : (1|2|3|4)[], arrDayOffset : Type_DayOfWee
 
 	return arrProgram;
 }
+
+const DB_CLIENT_CONFIG : DynamoDBClientConfig = {
+	region:   process.env.AWS_REGION,
+	endpoint: process.env.LOCAL_DYNAMO_DB_ENDPOINT,
+};
+
+const TABLE_NAME_PROGRAM_HISTORY     = process.env.TABLE_NAME_PROGRAM_HISTORY!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+const INDEX_NAME_PROGRAM_HISTORY_PID = `${process.env.TABLE_NAME_PROGRAM_HISTORY!}-pid`; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );     // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+assert( INDEX_NAME_PROGRAM_HISTORY_PID !== undefined ); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+
+interface Type_ProgramHistoryKey {
+	pid           : string;
+	download_time : string;
+};
+
+async function getHistoryKeys() : Promise<Type_ProgramHistoryKey[]> {
+	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
+	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
+	const scanCommandArgs : ScanCommandInput = {
+		TableName:               TABLE_NAME_PROGRAM_HISTORY,
+		ProjectionExpression:    '#pid,#download_time',
+		ExpressionAttributeNames: { '#pid': 'pid', '#download_time': 'download_time' },
+	};
+
+	const scanCommand   = new ScanCommand( scanCommandArgs );
+	const scanResponse  = await dbDocClient.send( scanCommand );
+	const arrKey        = scanResponse.Items as Type_ProgramHistoryKey[];
+	return arrKey;
+}
+
+async function deleteHistoryPrograms( arrHistoryKey : Type_ProgramHistoryKey[] ) : Promise<number> {
+	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
+	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
+
+	const arrDeleteRequests = arrHistoryKey.map(key => ({
+		DeleteRequest: {
+			Key: { pid: key.pid, download_time: key.download_time },
+		},
+	}));
+
+	const deleteCommandArgs : BatchWriteCommandInput = {
+		RequestItems: {
+			[TABLE_NAME_PROGRAM_HISTORY]: arrDeleteRequests,
+		},
+	};
+	const deleteCommand  = new BatchWriteCommand(deleteCommandArgs);
+	await dbDocClient.send(deleteCommand);
+	// TODO check for unprcessed records
+	return arrHistoryKey.length;
+}
+
+async function clearHistoryTable() : Promise<number> {
+	let numDeleted  = 0;
+
+	const arrHistoryKey = await getHistoryKeys();
+
+	if ( arrHistoryKey.length ) {
+		numDeleted = await deleteHistoryPrograms( arrHistoryKey );
+	}
+
+	return numDeleted;
+}
+
+async function getProgramHistoryItemsForPID( pid : string ) : Promise<Type_DbProgramHistoryItem[]> {
+	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
+	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
+	const commandArgs : QueryCommandInput = {
+		TableName:                 TABLE_NAME_PROGRAM_HISTORY,
+		IndexName:                 INDEX_NAME_PROGRAM_HISTORY_PID,
+		KeyConditionExpression:    '#pid = :pid',
+		ExpressionAttributeNames:  { '#pid': 'pid' },
+		ExpressionAttributeValues: { ':pid': pid },
+	};
+
+	const queryCommand  = new QueryCommand( commandArgs );
+	const queryResponse = await dbDocClient.send( queryCommand );
+	const arrItem       = queryResponse.Items as Type_DbProgramHistoryItem[];
+	return arrItem;
+}
+
+async function getProgramHistoryItems( arrPID : string[] ) : Promise<Type_DbProgramHistoryItem[]> {
+	const arrProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
+	for ( const pid of arrPID ) {
+		const arrItem = await getProgramHistoryItemsForPID( pid );
+		arrProgramHistoryItem.push( ...arrItem );
+	}
+	return arrProgramHistoryItem;
+}
+
+function genExpectedHistoryItem( programItem : Type_DbProgramEditItem ) : Type_DbProgramHistoryItem {
+	return {
+		pid:           programItem.pid,
+		status:        programItem.status,
+		genre:         programItem.genre,
+		quality:       programItem.quality,
+		title:         programItem.title,
+		synopsis:      programItem.synopsis,
+		image_uri:     programItem.image_uri,
+		modify_time:   expect.any(String), // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+		download_time: expect.any(String), // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+	};
+}
+
+function genExpectedHistoryItems( arrProgramItem : Type_DbProgramEditItem[] ) : Type_DbProgramHistoryItem[] {
+	return arrProgramItem.map( pi => genExpectedHistoryItem( pi ) );
+}
+
 
 // Set the timeout to allow debugging. Defaults to 5000 ms
 const TEST_TIMEOUT_MS = 300 * 1000;
@@ -503,5 +629,96 @@ describe(MODULE_NAME + ':GET', () => {
 			fail( err as Error );
 		}
 		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
+describe(MODULE_NAME + ':PATCH', () => {
+	let requestConfig        : AxiosRequestConfig;
+	let rawResponse          : AxiosResponse;
+	let testData             : Type_DbProgramEditItem[];
+	let actualResult         : Type_axios_result;
+	let expectedResult       : Type_axios_result;
+	let expectedBody         : object;
+	let expectedHeaders      : object;
+	let expectedHistoryItems : Type_DbProgramHistoryItem[];
+	let actualHistoryItems   : Type_DbProgramHistoryItem[];
+
+	beforeEach( async () => {
+		commonBeforeEach();
+		await clearHistoryTable();
+		requestConfig = {
+			url:    GIP_API_URI,
+			method: 'PATCH',
+			headers: {
+				'content-type': 'application/json; charset=UTF-8',
+			} as RawAxiosRequestHeaders,
+			data: null,
+		};
+		testData = [];
+		expectedHeaders = {
+			'content-type':   'application/json; charset=UTF-8',
+			'cache-control':  'no-cache',
+			'content-length': 0,
+		};
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'One program', async () => {
+		testData = genTestPrograms( [1] );
+		await postPrograms( testData );
+		requestConfig.data = [
+			{ pid: testData[ 0 ].pid, status: 'Success' }
+		];
+		expectedBody = { message: 'OK' };
+		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
+		expectedResult = {
+			status:  200,
+			body:    expectedBody,
+			headers: expectedHeaders,
+		};
+		testData[ 0 ].status = 'Success';
+		expectedHistoryItems = genExpectedHistoryItems( testData );
+		try {
+			rawResponse        = await axios( requestConfig );
+			actualResult       = parseAxiosResponse( rawResponse );
+			actualHistoryItems = await getProgramHistoryItems( testData.map( el => el.pid ) );
+		}
+		catch ( err ) {
+			fail( err as Error );
+		}
+		expect( actualResult ).toEqual( expectedResult );
+		expect( actualHistoryItems ).toEqual( expectedHistoryItems );
+	});
+
+	test( 'Two programs', async () => {
+		testData = genTestPrograms( [4,1] );
+		await postPrograms( testData );
+		requestConfig.data = [
+			{ pid: testData[ 0 ].pid, status: 'Success' },
+			{ pid: testData[ 1 ].pid, status: 'Error' },
+		];
+		expectedBody = { message: 'OK' };
+		expectedHeaders[ 'content-length' ] = calcEncodedObjectLength( expectedBody );
+		expectedResult = {
+			status:  200,
+			body:    expectedBody,
+			headers: expectedHeaders,
+		};
+		testData[ 0 ].status = 'Success';
+		testData[ 1 ].status = 'Error';
+		expectedHistoryItems = genExpectedHistoryItems( testData );
+		try {
+			rawResponse        = await axios( requestConfig );
+			actualResult       = parseAxiosResponse( rawResponse );
+			actualHistoryItems = await getProgramHistoryItems( testData.map( el => el.pid ) );
+		}
+		catch ( err ) {
+			fail( err as Error );
+		}
+		expect( actualResult ).toEqual( expectedResult );
+		expect( actualHistoryItems ).toEqual( expectedHistoryItems );
 	});
 });

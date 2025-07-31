@@ -174,6 +174,7 @@ async function handlePATCH( event: APIGatewayEvent ) : Promise<Type_HandlerRespo
 		if ( newPrograms.length > 0 ) {
 			logger.log( 'debug', 'handlePATCH: programs: ', newPrograms );
 			await updatePrograms( { programs: newPrograms } );
+			rawResultBody = { message: 'OK' };
 		} else {
 			logger.log( 'info', 'handlePATCH: called with no programs' );
 			result.statusCode = 400;

@@ -133,9 +133,12 @@
 			"program": "${workspaceFolder}/node_modules/.bin/jest",
 			//"runtimeVersion": "22.14.0",
 			"env": {
-				"NODE_OPTIONS":     "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
-				"NODE_ENV":         "test-unit",
-				"NODE_LOG_LEVEL":   "off",
+				"NODE_OPTIONS":               "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
+				"NODE_ENV":                   "test-unit",
+				"NODE_LOG_LEVEL":             "off",
+				"AWS_REGION":                 "eu-west-1",
+				"LOCAL_DYNAMO_DB_ENDPOINT":   "http://localhost:8000",
+				"TABLE_NAME_PROGRAM_HISTORY": "dev_gip-edit-react_ProgramHistory",
 			},
 			"args": [
 				"--config=./test/system/.jest/jest.config.ts",
