@@ -68,14 +68,6 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 	//	// Load `tsconfig.json` path mapping
 	//	...jestModuleNameMapper,
 	//},
-	// When running it warn that setting ts-jest options this way is deprecated.
-	// However, adding it under 'transform' does not pick up the tsconfig file.
-	// It says see: https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
-	//globals: {
-	//	'ts-jest': {
-	//		tsconfig: './tsconfig-unittest.json',
-	//	}
-	//},
 //	transform: {
 //		...defaultPreset.transform,
 //		//...tsJestTransformCfg,

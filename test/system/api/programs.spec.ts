@@ -22,6 +22,22 @@ const MODULE_NAME = 'gip-system-test';
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+// Add possibility of calling API in development environment, however, CORS currently forbids this.
+// Would need to disable CORS or use a test proxy server to allow this.
+import ENV_VARS_LCL from '../../../.env-lcl.json' with { type: "json" };
+import ENV_VARS_DEV from '../../../.env-dev.json' with { type: "json" };
+
+const STAGE = process.env.STAGE;
+
+interface Type_EnvVars {
+	AWS_REGION                 : string,
+	TABLE_NAME_PROGRAM_HISTORY : string,
+	GIP_API_URI                : string,
+	LOCAL_DYNAMO_DB_ENDPOINT?  : string,
+};
+
+const ENV_VARS = (STAGE === 'dev' ? ENV_VARS_DEV : ENV_VARS_LCL) as Type_EnvVars;
+
 import axios, {
 	AxiosResponse,
 	AxiosRequestConfig,
@@ -48,6 +64,21 @@ import {
 
 import assert from 'node:assert';
 
+const {
+	GIP_API_URI,
+	AWS_REGION,
+	LOCAL_DYNAMO_DB_ENDPOINT,   // May be undefined if running remotely
+	TABLE_NAME_PROGRAM_HISTORY,
+} = ENV_VARS;
+
+// ESLint does not detect the assertions, so the condition is required to prevent ESLint warnings.
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+assert( GIP_API_URI !== undefined );
+assert( AWS_REGION !== undefined );
+assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );
+const INDEX_NAME_PROGRAM_HISTORY_PID = `${TABLE_NAME_PROGRAM_HISTORY}-pid`;
+/* eslint-enable @typescript-eslint/no-unnecessary-condition */
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
@@ -64,8 +95,6 @@ interface Type_axios_result {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
-
-const GIP_API_URI = 'http://localhost:13003/gip_edit/api/programs';
 
 const TEST_PROGRAM_01 : Type_DbProgramEditItem = {
 	pid:         'mypid1',
@@ -132,6 +161,11 @@ function fail( err : string | Error ) : void {
 	throw( cookedErr );
 }
 
+/**
+ * @description call the POST programs endpoint to store a set of programs.
+ * @param testData : array of program items to store.
+ * @exception if the request fails.
+ */
 async function postPrograms( testData : Type_DbProgramEditItem[] ) : Promise<void> {
 	const requestConfig : AxiosRequestConfig = {
 		url:    GIP_API_URI,
@@ -151,10 +185,13 @@ async function postPrograms( testData : Type_DbProgramEditItem[] ) : Promise<voi
 	}
 }
 
+/**
+ * @param rawBody : the response body from an API request.
+ * @returns either the object from the response body, or if the body is a string, an object with property 'message'.
+ */
 function parseAxiosBody( rawBody : object | string | undefined ) : object {
 	let cookedBody : object;
 	if ( typeof rawBody === 'string' ) {
-		//cookedBody = utf16ToText( rawBody );
 		cookedBody = { message: rawBody };
 	} if ( rawBody === undefined ) {
 		cookedBody = {};
@@ -164,6 +201,13 @@ function parseAxiosBody( rawBody : object | string | undefined ) : object {
 	return cookedBody;
 }
 
+/**
+ * @param axiosResponse - the response to an API request.
+ * @returns an object with properties:
+ *           - status:  the API response code as a number, e.g., 200;
+ *           - body:    an object containing the response payload;
+ *           - headers: an object containing the response headers.
+ */
 function parseAxiosResponse( axiosResponse : AxiosResponse<unknown, unknown> ) : Type_axios_result {
 	const cookedBody = parseAxiosBody( axiosResponse.data as (string | undefined) );
 	// Need to convert headers to an object otherwise Jest moans about the types
@@ -174,6 +218,13 @@ function parseAxiosResponse( axiosResponse : AxiosResponse<unknown, unknown> ) :
 	};
 }
 
+/**
+ * @param axiosError : the API error response;
+ * @returns an object with properties:
+ *           - status:  the API error response code as a number, e.g., 418;
+ *           - body:    an object containing the response payload;
+ *           - headers: an object containing the response headers.
+ */
 function parseAxiosError( axiosError : AxiosError ) : Type_axios_result {
 	if ( axiosError.response ) {
 		return parseAxiosResponse( axiosError.response as AxiosResponse<unknown, unknown>);
@@ -186,6 +237,10 @@ function parseAxiosError( axiosError : AxiosError ) : Type_axios_result {
 	}
 }
 
+/**
+ * @param objItem : an object.
+ * @returns the length of the stringified object with UTF-8 characters encoded as Unicode escapes, e.g., '\u1234'.
+ */
 function calcEncodedObjectLength( objItem : object ) : string {
 	const strObject     = JSON.stringify( objItem );
 	const strEncoded    = strObject.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
@@ -193,9 +248,10 @@ function calcEncodedObjectLength( objItem : object ) : string {
 	return iLength.toString();
 }
 
+// Day of week types and definitions
 const ARR_DAY_OF_WEEK          = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 type Type_DayOfWeek            = typeof ARR_DAY_OF_WEEK[number];
-type Type_ValidDayOfWeekOffset = (-1|0|1);
+type Type_ValidDayOfWeekOffset = (-1|0|1); // -1 - yesterday, 0 - today, 1 - tomorrow;
 type Type_DayOfWeekOffset      = Type_ValidDayOfWeekOffset | null | undefined;
 
 /**
@@ -210,7 +266,8 @@ function calcDayOfWeek( dayOffset: Type_ValidDayOfWeekOffset ) : Type_DayOfWeek 
 
 /**
  * @param {number[]} arrProgNum : array of zero or more test program numbers, 1-4;
- * @param {Type_DayOfWeekOffset[]} arrDayOffset : optional array of day offsets relative to the current day, e.g., -1 is yesterday.
+ * @param {Type_DayOfWeekOffset[]} arrDayOffset : optional array of day offsets relative to the current day, e.g., -1 is yesterday;
+ *                                                in the same order as arrProgNum, one per program.
  * @returns array of program items for test purposes.
  */
 function genTestPrograms( arrProgNum : (1|2|3|4)[], arrDayOffset : Type_DayOfWeekOffset[] = [] ) : Type_DbProgramEditItem[] {
@@ -229,21 +286,22 @@ function genTestPrograms( arrProgNum : (1|2|3|4)[], arrDayOffset : Type_DayOfWee
 	return arrProgram;
 }
 
+// AWS connection configuration
 const DB_CLIENT_CONFIG : DynamoDBClientConfig = {
-	region:   process.env.AWS_REGION,
-	endpoint: process.env.LOCAL_DYNAMO_DB_ENDPOINT,
+	region:   AWS_REGION,
+	endpoint: LOCAL_DYNAMO_DB_ENDPOINT, // May be undefined if running remotely
 };
 
-const TABLE_NAME_PROGRAM_HISTORY     = process.env.TABLE_NAME_PROGRAM_HISTORY!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-const INDEX_NAME_PROGRAM_HISTORY_PID = `${process.env.TABLE_NAME_PROGRAM_HISTORY!}-pid`; // eslint-disable-line @typescript-eslint/no-non-null-assertion
-assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );     // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-assert( INDEX_NAME_PROGRAM_HISTORY_PID !== undefined ); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-
+// Type for the program history table key
 interface Type_ProgramHistoryKey {
 	pid           : string;
 	download_time : string;
 };
 
+/**
+ * @description scans the program history table index to return all object keys.
+ * @returns array of program history table key objects.
+ */
 async function getHistoryKeys() : Promise<Type_ProgramHistoryKey[]> {
 	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
 	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
@@ -260,6 +318,10 @@ async function getHistoryKeys() : Promise<Type_ProgramHistoryKey[]> {
 	return arrKey;
 }
 
+/**
+ * @param arrHistoryKey : array of one or more program history key objects.
+ * @returns the number of deleted objects.
+ */
 async function deleteHistoryPrograms( arrHistoryKey : Type_ProgramHistoryKey[] ) : Promise<number> {
 	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
 	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
@@ -277,10 +339,14 @@ async function deleteHistoryPrograms( arrHistoryKey : Type_ProgramHistoryKey[] )
 	};
 	const deleteCommand  = new BatchWriteCommand(deleteCommandArgs);
 	await dbDocClient.send(deleteCommand);
-	// TODO check for unprcessed records
+	// TODO check for unprocessed records
 	return arrHistoryKey.length;
 }
 
+/**
+ * @description delete all objects in the program history table.
+ * @returns the number of objects deleted.
+ */
 async function clearHistoryTable() : Promise<number> {
 	let numDeleted  = 0;
 
@@ -293,6 +359,10 @@ async function clearHistoryTable() : Promise<number> {
 	return numDeleted;
 }
 
+/**
+ * @param arrProgramHistoryKey : array of one or more program history key objects.
+ * @returns an array of zero or more program history objects.
+ */
 async function getProgramHistoryItemsByKey( arrProgramHistoryKey : Type_ProgramHistoryKey[] ) : Promise<Type_DbProgramHistoryItem[]> {
 	const arrProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
 	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
@@ -313,6 +383,10 @@ async function getProgramHistoryItemsByKey( arrProgramHistoryKey : Type_ProgramH
 	return arrProgramHistoryItem;
 }
 
+/**
+ * @param pid : identifies a program.
+ * @returns an array of zero or more program history key objects.
+ */
 async function getProgramHistoryKeysForPID( pid : string ) : Promise<Type_ProgramHistoryKey[]> {
 	const dbClient    = new DynamoDBClient( DB_CLIENT_CONFIG );
 	const dbDocClient = DynamoDBDocumentClient.from( dbClient );
@@ -330,6 +404,11 @@ async function getProgramHistoryKeysForPID( pid : string ) : Promise<Type_Progra
 	return arrItem;
 }
 
+/**
+ * @param param0.arrPID:                array of zero or more program IDs;
+ * @param param0.arrProgramHistoryItem: array of zero or more program history objects.
+ * @returns an array of zero or more program history objects in arrPID order.
+ */
 function sortProgramHistoryItems( { arrPID, arrProgramHistoryItem } : { arrPID: string[], arrProgramHistoryItem : Type_DbProgramHistoryItem[] } ) : Type_DbProgramHistoryItem[] {
 	const arrSortedProgramHistoryItem = [] as Type_DbProgramHistoryItem[];
 
@@ -340,6 +419,10 @@ function sortProgramHistoryItems( { arrPID, arrProgramHistoryItem } : { arrPID: 
 	return arrSortedProgramHistoryItem;
 }
 
+/**
+ * @param arrPID: array of zero or more program IDs;
+ * @returns an array of zero or more program history objects in arrPID order.
+ */
 async function getProgramHistoryItems( arrPID : string[] ) : Promise<Type_DbProgramHistoryItem[]> {
 	const arrProgramHistoryKey = [] as Type_ProgramHistoryKey[];
 	for ( const pid of arrPID ) {
@@ -353,6 +436,10 @@ async function getProgramHistoryItems( arrPID : string[] ) : Promise<Type_DbProg
 	return arrProgramHistoryItem;
 }
 
+/**
+ * @param programItem : the program object to be stored.
+ * @returns an object suitable for using in a jest.expect call for a program history object.
+ */
 function genExpectedHistoryItem( programItem : Type_DbProgramEditItem ) : Type_DbProgramHistoryItem {
 	return {
 		pid:           programItem.pid,
@@ -367,10 +454,13 @@ function genExpectedHistoryItem( programItem : Type_DbProgramEditItem ) : Type_D
 	};
 }
 
+/**
+ * @param arrProgramItem : array of program objects to be stored.
+ * @returns an array of objects suitable for using in a jest.expect call for a program history object.
+ */
 function genExpectedHistoryItems( arrProgramItem : Type_DbProgramEditItem[] ) : Type_DbProgramHistoryItem[] {
 	return arrProgramItem.map( pi => genExpectedHistoryItem( pi ) );
 }
-
 
 // Set the timeout to allow debugging. Defaults to 5000 ms
 const TEST_TIMEOUT_MS = 300 * 1000;

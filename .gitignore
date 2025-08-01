@@ -21,4 +21,5 @@ jest_html_reporters.html
 
 # Other
 .DS_Store
-
+.env-lcl.json
+.env-dev.json

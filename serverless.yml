@@ -18,8 +18,8 @@ build:
 provider:
   name: aws
   runtime: nodejs22.x
-  region: ${opt:region, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
+  region: ${opt:region, "${file(${self:custom.envFile}):AWS_REGION}"}
   memorySize: 512
   timeout: 6
   logRetentionInDays: 7
@@ -57,9 +57,10 @@ provider:
 
 custom:
   serviceName: ${self:service}
-  stage: ${env:STAGE, "${self:provider.stage}"}
-  apiGatewayRestApiName: ${self:custom.stage}-${self:custom.serviceName}
-  baseDomain: ${env:GIP_DOMAIN}
+  stage: ${self:provider.stage}
+  envFile: "./.env-${self:provider.stage}.json"
+  apiGatewayRestApiName: ${self:provider.stage}-${self:custom.serviceName}
+  baseDomain: ${file(${self:custom.envFile}):GIP_DOMAIN}
   envIsOffline: ${env:IS_OFFLINE, "default"}
   isOfflineMap:
     true:    "true"

@@ -73,9 +73,25 @@ Update the status of the program items and also update the program history table
 | pid      | Identifies the program. |
 | status   | The program status, see `Program Item`. |
 
+## Environment Configuration
+
+There is a configuration file for each environment in the project directory, with file name format:
+  * .env-{stage}.json
+
+e.g., '.env-lcl.json', '.env-dev.json'
+
+This file contains the following properties:
+
+| Property | Description |
+|----------|-------------|
+| AWS_REGION  | The AWS region to deploy to, e.g., eu-west-1. |
+| GIP_DOMAIN  | The stageless domain to deploy to. e.g., "domain.com", not "dev.domain.com" |
+| GIP_API_URI | The programs API. Required for API system testing only. |
+|	TABLE_NAME_PROGRAM_HISTORY | Required for API system testing only. |
+
 ## Deployment
 
-Update launch.json to set GIP_DOMAIN is be the deployment domain, e.g., 'domain.com'.
+Ensure that the correct environement configuration is specified (see above).
 <br>Then run the `Deploy` debug target from VS Code.
 
 ## History

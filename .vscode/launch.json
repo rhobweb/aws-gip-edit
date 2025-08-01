@@ -18,7 +18,6 @@
 			],
 			"env": {
 				"AWS_REGION":     "eu-west-1",
-				"AWS_ENDPOINT":   "http://localhost:8000",
 				"STAGE":          "lcl",
 				"NODE_LOG_LEVEL": "debug",
 				"GIP_DOMAIN":     "dummy-domain.com",
@@ -133,12 +132,10 @@
 			"program": "${workspaceFolder}/node_modules/.bin/jest",
 			//"runtimeVersion": "22.14.0",
 			"env": {
-				"NODE_OPTIONS":               "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
-				"NODE_ENV":                   "test-unit",
-				"NODE_LOG_LEVEL":             "off",
-				"AWS_REGION":                 "eu-west-1",
-				"LOCAL_DYNAMO_DB_ENDPOINT":   "http://localhost:8000",
-				"TABLE_NAME_PROGRAM_HISTORY": "dev_gip-edit-react_ProgramHistory",
+				"NODE_OPTIONS":   "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
+				"NODE_ENV":       "test-unit",
+				"NODE_LOG_LEVEL": "off",
+				"STAGE":          "lcl"
 			},
 			"args": [
 				"--config=./test/system/.jest/jest.config.ts",
@@ -177,10 +174,8 @@
 				"${workspaceFolder}/dist/**/*.js"
 			],
 			"env": {
-				"AWS_REGION":     "eu-west-1",
 				"STAGE":          "dev",
 				"NODE_LOG_LEVEL": "info",
-				"GIP_DOMAIN":     "Add your domain here",
 			}
 		},
 		{
