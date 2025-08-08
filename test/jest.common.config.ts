@@ -2,7 +2,7 @@
  * Common Jest config for all tests.
  * This file is pulled in by the unit test jest config.
  */
-import type { JestConfigWithTsJest } from 'ts-jest/dist/types'
+import type { JestConfigWithTsJest } from 'ts-jest';
 //import { defaults as tsjPreset } from 'ts-jest/presets'
 //import { jsWithTs as tsjPreset } from 'ts-jest/presets'
 //import { jsWithBabel as tsjPreset } from 'ts-jest/presets'
@@ -14,7 +14,7 @@ import { createJsWithBabelPreset as createPreset } from 'ts-jest';
 
 const defaultPreset = createPreset();
 //const tsJestTransformCfg = createPreset().transform;
-import jestModuleNameMapper from 'jest-module-name-mapper';
+//import jestModuleNameMapper from 'jest-module-name-mapper';
 
 export default async (): Promise<JestConfigWithTsJest> => ({
 	...defaultPreset,

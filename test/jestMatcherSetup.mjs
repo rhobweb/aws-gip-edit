@@ -1,7 +1,7 @@
 /**
  * Additional Jest matchers that are available to all tests.
  * 
- * Add this the Jest config file with:
+ * Add this to the Jest config file with:
  *   ...
  *   setupFilesAfterEnv: [ '<rootDir>/test/jestMatcherSetup.mjs' ],
  *   ...
