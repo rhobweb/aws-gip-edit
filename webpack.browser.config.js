@@ -1,11 +1,22 @@
+/**
+ * File:        webpack.browser.config.js
+ * Description: Webpack configuration to run a browser to serve the static content.
+ *
+ * Usage:       For local development, from the project directory, run:
+ *                IS_OFFLINE=true webpack serve --config webpack.browser.config.js --mode development
+ *              For production, to package up the content, run:
+ *                webpack --config webpack.browser.config.js --mode production
+ */
 import path                      from 'node:path';
-import { copyFileSync }          from 'node:fs';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import MiniCssExtractPlugin      from 'mini-css-extract-plugin';
 import { StatsWriterPlugin }     from 'webpack-stats-plugin';
+import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
+import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
 //import slsw    from 'serverless-webpack';
 import webpack from 'webpack';
+import { copyFileSync }          from 'node:fs';
 const { ProvidePlugin, DefinePlugin } = webpack;
 
 import { fileURLToPath } from 'url';
@@ -50,9 +61,10 @@ export default {
 	context: __dirname,
 	target: 'web',
 	entry: {
-		main: path.join(__dirname, 'dist/src/browser/index.cjs'),
-		//main: path.join(__dirname, 'src/browser/index.tsx'),
+		main: path.join(__dirname, 'src/browser/index.tsx'),
+		//main: path.join(__dirname, 'dist/src/browser/index.cjs'),
 	},
+	target: 'web',
 	mode: isOffline ? 'development' : 'production',
 	//entry: slsw.lib.entries,
 	//mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
@@ -77,11 +89,11 @@ export default {
 			},
 		},
 		devMiddleware: {
-			writeToDisk: true,
-			//writeToDisk: (filePath) => {
-			//  // Always write the stats.json to disk, so we can load it in code
-			//  return /\bstats\.json$/.test(filePath);
-			//},
+			//writeToDisk: true,
+			writeToDisk: (filePath) => {
+				// Always write the stats.json to disk, so we can load it in code
+				return /\bstats\.json$/.test(filePath);
+			},
 		},
 		port: 8082,
 	},
@@ -107,11 +119,21 @@ export default {
 				},
 			},
 		},
-		sideEffects: true,
+		//sideEffects: true,
 	},
 	// React recommends `cheap-module-source-map` for development
 	devtool: isOffline ? 'cheap-module-source-map' : 'nosources-source-map',
 	plugins: [
+		new CleanWebpackPlugin(),
+		new CopyWebpackPlugin({
+			patterns: [
+				{
+					// Copy content from `./public/` folder to our output directory
+					context: "./public/",
+					from: "**/*",
+				},
+			],
+		}),
 		new MiniCssExtractPlugin({
 			filename: isOffline ? '[name].css' : '[name].[contenthash:8].css',
 		}),
@@ -145,8 +167,8 @@ export default {
 	module: {
 		rules: [
 			{
-				//test: /\.(t|j)sx?$/,
-				test: /\.(c|m)?jsx?$/,
+				test: /\.(t|j)sx?$/,
+				//test: /\.(c|m)?jsx?$/,
 				exclude: /node_modules/, // we shouldn't need processing `node_modules`
 				use: 'babel-loader',
 			},

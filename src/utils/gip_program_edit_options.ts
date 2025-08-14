@@ -1,16 +1,49 @@
+/**
+ * File:        utils/program_edit_options.ts
+ * Description: A class to manipulate the program options fields.
+ */
+'use strict';
 
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
-import type {
-	Type_ProgramItem,
-	Type_ProgramEditOptions,
-} from './gip_types.ts';
 import {
 	PROG_FIELD_GENRE,
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
-} from './gip_types.js';
-import { FIELD_DEFAULT_VALUES } from '../utils/gip_prog_fields.js';
+//} from './gip_types';
+} from '#utils/gip_types';
 
+//import { FIELD_DEFAULT_VALUES } from '../utils/gip_prog_fields';
+import { FIELD_DEFAULT_VALUES } from '#utils/gip_prog_fields';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_DisplayProgramItem,
+	Type_ProgramEditOptions,
+} from './gip_types.ts';
+
+////////////////////////////////////////
+// Exported and local types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+// Class to handle the program options fields
 export default class GipProgramEditOptions implements Type_ProgramEditOptions {
 
 	[ PROG_FIELD_GENRE ]       = '';
@@ -37,9 +70,12 @@ export default class GipProgramEditOptions implements Type_ProgramEditOptions {
 		this[ PROG_FIELD_QUALITY ]     = source[ PROG_FIELD_QUALITY ];
 	}
 
-	assignFromProgram( programItem: Type_ProgramItem ) : void {
+	assignFromProgram( programItem: Type_DisplayProgramItem ) : void {
 		this[ PROG_FIELD_GENRE ]       = programItem[ PROG_FIELD_GENRE ];
 		this[ PROG_FIELD_DAY_OF_WEEK ] = programItem[ PROG_FIELD_DAY_OF_WEEK ];
 		this[ PROG_FIELD_QUALITY ]     = programItem[ PROG_FIELD_QUALITY ];
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

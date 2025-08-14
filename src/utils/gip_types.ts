@@ -1,4 +1,22 @@
+/**
+ * File:        utils/gip_types.ts
+ * Description: Types used throughout this app.
+ */
+'use strict';
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
 
 export type Nullable<T> = T | null;
 export type Falsy<T>    = T | null | undefined;
@@ -7,6 +25,7 @@ export type Type_HttpHeaders   = Record<string, string>;
 export type Type_RawHttpParams = Record<string, string | string[] | boolean>;
 export type Type_HttpParams    = Type_RawHttpParams | string;
 
+export const PROG_FIELD_POS         = 'pos';
 export const PROG_FIELD_URI         = 'uri';
 export const PROG_FIELD_PID         = 'pid';
 export const PROG_FIELD_STATUS      = 'status';
@@ -18,23 +37,20 @@ export const PROG_FIELD_DAY_OF_WEEK = 'day_of_week';
 export const PROG_FIELD_QUALITY     = 'quality';
 export const PROG_FIELD_SELECTED    = 'selected';
 
-// No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface Type_ProgramEditInput extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditInput {
 	[PROG_FIELD_URI]       : string;
 	[PROG_FIELD_TITLE]     : string;
 	[PROG_FIELD_SYNOPSIS]  : string;
 	[PROG_FIELD_IMAGE_URI] : string;
 }
 
-// No idea why, but TS moans if the value type is set to anything other than 'any'
-export interface Type_ProgramEditOptions extends Record<string,any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export interface Type_ProgramEditOptions {
 	[PROG_FIELD_GENRE]       : string;
 	[PROG_FIELD_DAY_OF_WEEK] : string;
 	[PROG_FIELD_QUALITY]     : string;
 }
 
-
-export interface Type_ProgramItem extends Record<string, string | boolean | number | null> {
+export interface Type_DisplayProgramItem {
 	[PROG_FIELD_URI]         : string;
 	[PROG_FIELD_PID]         : string;
 	[PROG_FIELD_STATUS]      : string;
@@ -47,23 +63,10 @@ export interface Type_ProgramItem extends Record<string, string | boolean | numb
 	[PROG_FIELD_SELECTED]    : boolean;
 }
 
-export type Type_ProgramItemField = keyof Type_ProgramItem;
+export type Type_DisplayProgramItemPropName       = keyof Type_DisplayProgramItem;
+export type Type_DisplayProgramItemStringPropName = Exclude<Type_DisplayProgramItemPropName,typeof PROG_FIELD_SELECTED>;
 
-//export type Type_ProgramItemField =
-//  typeof PROG_FIELD_PID         |
-//  typeof PROG_FIELD_STATUS      |
-//  typeof PROG_FIELD_TITLE       |
-//  typeof PROG_FIELD_SYNOPSIS    |
-//  typeof PROG_FIELD_IMAGE_URI   |
-//  typeof PROG_FIELD_GENRE       |
-//  typeof PROG_FIELD_DAY_OF_WEEK |
-//  typeof PROG_FIELD_QUALITY     |
-//  typeof PROG_FIELD_SELECTED    |
-//  typeof PROG_FIELD_URI;
-
-export type Type_ProgramList = Type_ProgramItem[];
-
-export type Type_HandlerProgramChange = ( newPrograms: Type_ProgramList ) => void;
+export type Type_HandlerProgramChange = ( newPrograms: Type_DisplayProgramItem[] ) => void;
 
 export interface Type_ProgramDownloadOptions {
 	all?:        boolean,
@@ -105,4 +108,19 @@ export type Type_EventHandlerMouse        = (event: Type_EventMouse)          =>
 export type Type_EventHandlerSelectChange = (event: Type_EventChangeSelect)   => void;
 export type Type_EventHandlerSelectKey    = (event: Type_EventKeyboardSelect) => void;
 
-//export type Type_HandlerProgramChange     = ( programs: { newPrograms: Type_ProgramItem[] } ) => void;
+//export type Type_HandlerProgramChange     = ( programs: { newPrograms: Type_DisplayProgramItem[] } ) => void;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

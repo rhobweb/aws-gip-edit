@@ -2,7 +2,7 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 
-import App from "./App";
+import App from "./App.js";
 
 jest.mock("./components/ConfigContext");
 

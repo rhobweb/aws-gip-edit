@@ -1,12 +1,19 @@
+/**
+ * File:        webpack.server.config.js
+ * Description: Webpack configuration to package the Serverless infrastructure and code.
+ *
+ * Usage:       In the servlerless.yml file, under the "custom:" section, add:
+ *                webpack:
+ *                  webpackConfig: "webpack.server.config.js"
+ */
 import path                   from 'node:path';
-import { copyFileSync }       from 'node:fs';
 import slsw                   from 'serverless-webpack';
 import TsconfigPathsPlugin    from 'tsconfig-paths-webpack-plugin';
+import { copyFileSync }       from 'node:fs';
 import MiniCssExtractPlugin   from 'mini-css-extract-plugin';
 //import { StatsWriterPlugin }  from 'webpack-stats-plugin';
 
 const __dirname  = import.meta.dirname;
-//const __filename = import.meta.filename;
 
 console.log( "webpack.server dirname is: ", __dirname );
 
@@ -36,17 +43,18 @@ console.log( 'webpack.server.config: IS_OFFLINE: ', IS_OFFLINE );
 copyFiles();
 
 export default {
-	//entry: slsw.lib.entries,
-	entry: Object.assign( slsw.lib.entries, {
-		"main":     path.join(__dirname, "dist/main.cjs"),
-		//"programs": path.join(__dirname, "dist/src/api/progs.cjs" ),
-	} ),
+	entry: slsw.lib.entries,
+	//entry: Object.assign( slsw.lib.entries, {
+	//	"main":     path.join(__dirname, "dist/main.cjs"),
+	//	//"programs": path.join(__dirname, "dist/src/api/progs.cjs" ),
+	//} ),
 	//entry: {
 	//	"main":     path.join(__dirname, "dist/main.cjs"),
 	//	"programs": path.join(__dirname, "dist/src/api/programs.js" ),
 	//},
 	target: "node",
-	mode: IS_OFFLINE ? "development" : "production",
+	mode: slsw.lib.webpack.isLocal ? "development" : "production",
+	//mode: IS_OFFLINE ? "development" : "production",
 	node: {
 		__dirname: true,
 		__filename: true,
@@ -63,35 +71,23 @@ export default {
 	module: {
 		rules: [
 			{
-				//test: /\.tsx?$/,
-				//test: /\.(c|m)?(j|t)sx?$/,
-				test: /\.(c|m)?jsx?$/,
+				test: /\.(c|m)?(j|t)sx?$/,
+				//test: /\.(c|m)?jsx?$/,
 				exclude: /node_modules/, // we shouldn't need processing `node_modules`
-				use: "babel-loader",
+				use: 'babel-loader',
 			},
-			//{
-			//	test: /\.tsx?$/,
-			//	exclude: [
-			//		/node_modules/, // we shouldn't need processing `node_modules`
-			//		path.resolve(__dirname, '.webpack'),
-			//		path.resolve(__dirname, '.serverless'),
-			//	],
-			//	loader: "ts-loader",
-			//	// https://www.npmjs.com/package/ts-loader#options
-			//	options: {
-			//		// Disable type checking, this will lead to improved build times
-			//		transpileOnly: true,
-			//		// Enable file caching, can be quite useful when running offline
-			//		experimentalFileCaching: true,
-			//	},
-			//},
 			{
 				test: /\.css$/,
 				use: "null-loader", // No server-side CSS processing
 			},
 			{
 				test: /\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$/,
-				use: "url-loader",
+				use: [
+					{
+						loader: 'url-loader',
+						options: { limit: 8192 },
+					},
+				],
 			},
 		],
 	},
@@ -142,13 +138,13 @@ export default {
 	//  //  filename: IS_OFFLINE ? "[name].css" : "[name].[contenthash:8].css",
 	//  //}),
 	//].filter(Boolean),
-	//experiments: {
-	//	outputModule: true,
-	//},
+	experiments: {
+		outputModule: true,
+	},
 	output: {
 		library: {
-			type: 'commonjs2',
-			//type: 'module',
+			//type: 'commonjs2',
+			type: 'module',
 		},
 		path: path.join(__dirname, ".webpack"),
 		//filename: "[name].js",

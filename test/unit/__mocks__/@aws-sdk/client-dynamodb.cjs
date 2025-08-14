@@ -5,10 +5,10 @@
 //const mockedModule = jest.requireActual( MODULE_NAME ); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 //const mockedModule : object = jest.createMockFromModule( MODULE_NAME );
 
-import {
-	DynamoDBClientConfig,
-	ScanCommandInput,
-} from '@aws-sdk/client-dynamodb';
+//import {
+//	DynamoDBClientConfig,
+//	ScanCommandInput,
+//} from '@aws-sdk/client-dynamodb';
 
 /**
  * When a test makes mutliple calls to these mocked objects, the same object gets reused and jest can't match the expected object correctly.
@@ -17,39 +17,32 @@ import {
  * @param {Object} sourceObj
  * @return a copy of the object.
  */
-function copyObject( sourceObj : object ) : object {
-	return JSON.parse( JSON.stringify( sourceObj ) ) as object;
+function copyObject( sourceObj ) {
+	return JSON.parse( JSON.stringify( sourceObj ) );
 }
 
-
-const dynamoDBClientMock : DynamoDBClient = {
+const dynamoDBClientMock = {
 	// @ts-expect-error just a stub, test shall mock this
-	send: () : Promise<unknown> => ({}),
+	send: () => ({}),
 };
 
-export interface DynamoDBClientTestProps {
-	name:      string,
-	destroyed: boolean,
-	config:    (DynamoDBClientConfig | null),
-};
-
-export class DynamoDBClient {
-	testProps : DynamoDBClientTestProps = {
+class DynamoDBClient {
+	testProps = {
 		name:      'DynamoDBClient mock',
 		destroyed: false,
 		config:    null,
 	};
 
-	constructor ( config : DynamoDBClientConfig ) {
+	constructor ( config ) {
 		if ( config === null ) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 			throw new Error( 'DynamoDBClient config cannot be null' );
 		}
-		const newObj = copyObject( dynamoDBClientMock ) as DynamoDBClient;
+		const newObj = copyObject( dynamoDBClientMock );
 		Object.assign( this, newObj );
 		this.testProps.config = config;
 		return this;
 	}
-	destroy() : void {
+	destroy() {
 		this.testProps.config    = null;
 		this.testProps.destroyed = true;
 	}
@@ -59,21 +52,22 @@ const scanCommandMock = {
 	args: {},
 };
 
-export class ScanCommand {	// eslint-disable-line @typescript-eslint/no-extraneous-class
-	constructor ( args : ScanCommandInput ) {
-		const newObj = copyObject( scanCommandMock ) as DynamoDBClient;
+class ScanCommand {	// eslint-disable-line @typescript-eslint/no-extraneous-class
+	constructor ( args ) {
+		const newObj = copyObject( scanCommandMock );
 		// @ts-expect-error add an extra property to the mock object
 		newObj.testObj = { args };
 		return newObj;
 	}
 }
 
-export const mocks = {
+const mocks = {
 	dynamoDBClientMock,
 	scanCommandMock,
 };
 
-export default {
+//export default {
+module.exports = {
 	mocks,
 	DynamoDBClient,
 	ScanCommand,

@@ -6,10 +6,10 @@
  *   DB Program Item: a program object in DB format;
  *   Program Item:    a program object in display format.
  */
+'use strict';
 
-import type {
-	Type_DbProgramItem,
-} from './gip_prog_fields';
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import {
 	FIELD_MAP_COLLECTION,
@@ -23,16 +23,9 @@ import {
 	DB_FIELD_PID,
 	DB_FIELD_TITLE,
 	DB_FIELD_SYNOPSIS,
-	DB_FIELD_MODIFY_TIME,
-	DB_FIELD_DOWNLOAD_TIME,
 	DB_FIELD_IMAGE_URI,
-	DB_FIELD_POS,
-} from './gip_prog_fields';
-
-import type {
-	Type_ProgramItem,
-	Type_ProgramItemField,
-} from './gip_types';
+//} from './gip_prog_fields';
+} from '#utils/gip_prog_fields';
 
 import {
 	PROG_FIELD_PID,
@@ -45,27 +38,66 @@ import {
 	PROG_FIELD_QUALITY,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_URI,
-} from './gip_types';
+//} from './gip_types';
+} from '#utils/gip_types';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+import type {
+	Type_DisplayProgramItemPropName,
+} from './gip_types.ts';
+
+import type {
+	Type_DbProgramItem,
+	Type_DbProgramEditItem,
+	Type_DbProgramEditItemPropName,
+} from './gip_prog_fields.ts';
+
+import type {
+	Type_DisplayProgramItem,
+	Type_DisplayProgramItemStringPropName,
+} from './gip_types.ts';
+
+////////////////////////////////////////
+// Exported and local types
+
+export type Type_dbToProg_args = Type_DbProgramEditItem;
+export type Type_dbToProg_ret  = Type_DisplayProgramItem;
+
+export type Type_progToDb_args = Type_DisplayProgramItem;
+export type Type_progToDb_ret  = Type_DbProgramEditItem;
+
+export type Type_dbToProgArray_args = Type_DbProgramEditItem[];
+export type Type_dbToProgArray_ret  = Type_DisplayProgramItem[];
+
+export type Type_genProgramEditItem_args = Type_DbProgramItem;
+export type Type_genProgramEditItem_ret  = Type_DbProgramEditItem;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
 
 const PROG_TO_DB_FIELD_MAP = FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 const DB_TO_PROG_FIELD_MAP = REVERSE_FIELD_MAP_COLLECTION[ DUMMY_FIELD_DB ];
 
-export type Type_dbToProg_args = Type_DbProgramItem;
-export type Type_dbToProg_ret  = Type_ProgramItem;
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
-export type Type_progToDb_args = Type_ProgramItem;
-export type Type_progToDb_ret  = Type_DbProgramItem;
+////////////////////////////////////////
+// Local definitions
 
-export type Type_dbToProgArray_args = Type_DbProgramItem[];
-export type Type_dbToProgArray_ret  = Type_ProgramItem[];
-
+////////////////////////////////////////
+// Exported definitions
 
 /**
  * @param prog : a DB Program Item object;
  * @returns a Program Item object.
  */
 export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
-	const prog : Type_ProgramItem = {
+	const prog : Type_DisplayProgramItem = {
 		[PROG_FIELD_PID]:         '',
 		[PROG_FIELD_STATUS]:      '',
 		[PROG_FIELD_TITLE]:       '',
@@ -78,8 +110,9 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 		[PROG_FIELD_SELECTED]:    false,
 	};
 
-	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) ) {
-		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_ProgramItemField;
+	// Say 'value' is a string, but it may be null or for FIELD_POS it may be a number
+	for ( const [ dbField, dbValue ] of Object.entries( dbProg ) as [Type_DbProgramEditItemPropName, string][] ) {
+		const progField = DB_TO_PROG_FIELD_MAP[ dbField ] as Type_DisplayProgramItemStringPropName | undefined;
 
 		if ( progField ) {
 			prog[ progField ] = dbValue;
@@ -95,11 +128,11 @@ export function dbToProg( dbProg : Type_dbToProg_args ) : Type_dbToProg_ret {
 }
 
 /**
- * @param prog : a Program Item object;
- * @returns a DB Program Item object.
+ * @param programItem : a Program item display object;
+ * @returns a DB Program Item object suitable for manipulation.
  */
-export function progToDb( prog: Type_progToDb_args ) : Type_progToDb_ret {
-	const dbProg : Type_DbProgramItem = {
+export function progToDb( programItem: Type_progToDb_args ) : Type_progToDb_ret {
+	const dbProg : Type_DbProgramEditItem = {
 		[DB_FIELD_STATUS]:        '',
 		[DB_FIELD_GENRE]:         '',
 		[DB_FIELD_DAY_OF_WEEK]:   '',
@@ -107,17 +140,15 @@ export function progToDb( prog: Type_progToDb_args ) : Type_progToDb_ret {
 		[DB_FIELD_PID]:           '',
 		[DB_FIELD_TITLE]:         '',
 		[DB_FIELD_SYNOPSIS]:      '',
-		[DB_FIELD_MODIFY_TIME]:   '',
-		[DB_FIELD_DOWNLOAD_TIME]: '',
 		[DB_FIELD_IMAGE_URI]:     '',
-		[DB_FIELD_POS]:           null,
 	};
 
-	for ( const [field, value] of Object.entries( prog ) as [string, string][] ) {
-		const dbField = PROG_TO_DB_FIELD_MAP[ field ];
+	// Say 'value' is a string, but it may be null or for DB_FIELD_POS it may be a number
+	for ( const [field, value] of Object.entries( programItem ) as [Type_DisplayProgramItemPropName, string][] ) {
+		const dbField = PROG_TO_DB_FIELD_MAP[ field ] as Type_DbProgramEditItemPropName | undefined;
 
 		if ( dbField ) {
-			dbProg[ field ] = value;
+			dbProg[ dbField ] = value;
 		}
 	}
 
@@ -130,7 +161,41 @@ export function progToDb( prog: Type_progToDb_args ) : Type_progToDb_ret {
  * @param rawPrograms : array of DB Program Item objects;
  * @returns array of Program Item objects.
  */
-export function dbToProgArray( rawPrograms: Type_DbProgramItem[] ) : Type_ProgramItem[] {
+export function dbToProgArray( rawPrograms: Type_DbProgramEditItem[] ) : Type_DisplayProgramItem[] {
 	const programs = rawPrograms.map( prog => dbToProg( prog ) );
 	return programs;
 }
+
+/**
+ * @param {Type_DbProgramItem} rawProgramItem : a program item as read from the database.
+ * @returns {Type_DbProgramEditItem} a program item containing only the data required for editing.
+ */
+export function genProgramEditItem( rawProgramItem : Type_genProgramEditItem_args ) : Type_genProgramEditItem_ret {
+	const cookedProgramItem = { // Filled with mandatory fields
+		[DB_FIELD_STATUS]    : '',
+		[DB_FIELD_PID]       : '',
+		[DB_FIELD_TITLE]     : '',
+		[DB_FIELD_SYNOPSIS]  : '',
+		[DB_FIELD_IMAGE_URI] : '',
+		[DB_FIELD_GENRE]     : '',
+		[DB_FIELD_QUALITY]   : '',
+	} as Type_DbProgramEditItem;
+
+	const arrOptionalField : (keyof Type_DbProgramEditItem)[] = [
+		DB_FIELD_DAY_OF_WEEK,
+	];
+	for ( const field of Object.keys( cookedProgramItem ) as (keyof Type_DbProgramEditItem)[] ) {
+		// The mandatory fields are guaranteed to be non-null.
+		cookedProgramItem[ field ] = rawProgramItem[ field ]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+	}
+	for ( const field of arrOptionalField ) {
+		if ( ! ([undefined,null] as unknown[]).includes( rawProgramItem[ field as keyof Type_DbProgramItem ] ) ) {
+			// @ts-expect-error we know the types align in this direction, so just disable the error
+			cookedProgramItem[ field ] = rawProgramItem[ field ];
+		}
+	}
+	return cookedProgramItem;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

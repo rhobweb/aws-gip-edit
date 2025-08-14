@@ -2,9 +2,24 @@
  * DESCRIPTION:
  * Unit Tests for utils/gip_date_utils.ts.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_date_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+//import * as TEST_MODULE from '../../../src/utils/gip_date_utils';
+import * as TEST_MODULE from '#utils/gip_date_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Type_DayOfWeek,
@@ -15,7 +30,8 @@ import type {
 	Type_dayOfWeekDiff_ret,
 	Type_isDayOfWeekAvailable_args,
 	Type_isDayOfWeekAvailable_ret,
-} from '../../../src/utils/gip_date_utils';
+//} from '../../../src/utils/gip_date_utils';
+} from '#utils/gip_date_utils';
 
 interface Type_TestModulePrivateDefs {
 	dayOfWeekToIndex: (args: Type_dayOfWeekToIndex_args)       => Type_dayOfWeekToIndex_ret,
@@ -28,12 +44,19 @@ interface Type_TestModule {
 	isDayOfWeekAvailable: (args?: Type_isDayOfWeekAvailable_args) => Type_isDayOfWeekAvailable_ret,
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 const ARR_DAY_OF_WEEK     = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 const CURRENT_DAY_OF_WEEK = ARR_DAY_OF_WEEK[ (new Date()).getDay() ];
 
-import * as TEST_MODULE from '../../../src/utils/gip_date_utils';
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
@@ -42,6 +65,9 @@ function commonAfterEach() : void {
 	jest.restoreAllMocks();
 	jest.resetModules();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;

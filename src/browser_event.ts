@@ -1,11 +1,44 @@
+/**
+ * File:        relative/path_name.ext
+ * Description: Explains the purpose of the file.
+ *
+ * Types Used:  describes types used in the file.
+ * Environment: describes environment variables used in the file.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 
 import React from 'react';
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
+
 export type Type_Ref  = React.RefObject<HTMLInputElement|null>;
-export type Type_Refs = Record<string,Type_Ref>;
 
 export type Type_EventKeyboardAny     = React.KeyboardEvent<HTMLElement>;
 export type Type_EventHandlerKeyboard = (event: Type_EventKeyboardAny) => void;
 
 export type Type_EventDragAny  = React.DragEvent<HTMLElement>;
 export type Type_EventTouchAny = React.TouchEvent<HTMLElement>;
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

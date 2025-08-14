@@ -12,9 +12,14 @@ package-lock.json
 dist
 test-out
 
-# Other
-.DS_Store
+# Unit test output
 .nyc_output
 coverage
 output
+jest-html-reporters-attach/
+jest_html_reporters.html
 
+# Other
+.DS_Store
+.env-lcl.json
+.env-dev.json

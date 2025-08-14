@@ -22,7 +22,8 @@ export default (api) => {
 			//  },
 			//],
 			"@babel/preset-typescript",
-			"@babel/preset-react",
+			['@babel/preset-react', {runtime: 'automatic'}],
+			//"@babel/preset-react",
 		],
 		plugins: [
 			!isNode && isOffline && "react-refresh/babel",

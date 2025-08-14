@@ -1,10 +1,42 @@
+/**
+ * File:        components/useConfig.tsx
+ * Description: Hook to read application configuration settings.
+ */
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
 import { useContext } from 'react';
 
-import { Config }    from '../server/config.js';
-import ConfigContext from './ConfigContext.js';
+//import { Config }    from '../server/config';
+//import ConfigContext from './ConfigContext';
+import { Config }    from '#server/config';
+import ConfigContext from '#components/ConfigContext';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
 
 /**
- * Hook to read application configuration settings
+ * @description Hook to read application configuration settings
+ * @returns React context object.
+ * @exception if the context object cannot be created.
  */
 export default function useConfig(): Config {
 	const config = useContext(ConfigContext);
@@ -13,3 +45,6 @@ export default function useConfig(): Config {
 	}
 	return config;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions

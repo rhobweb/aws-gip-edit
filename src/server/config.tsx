@@ -1,8 +1,26 @@
 /**
- * Configuration
+ * File:        server/config.tsx
+ * Description: Configuration settings for the application.
  */
-import manifest from '../../public/manifest.json'; // with { type: 'json' };
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+//import manifest from '../../public/manifest.json'; // with { type: 'json' };
+import manifest from '../../public/manifest.json' with { type: 'json' };
 import process  from 'process';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+////////////////////////////////////////
+// Imported types
+
+////////////////////////////////////////
+// Exported and local types
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
 
 /** Whether we're running on a local desktop or on AWS Lambda */
 const isLocal = process.env.IS_LOCAL ?? process.env.IS_OFFLINE;
@@ -32,6 +50,18 @@ const config = {
 		PUBLIC_URL: isLocal ? LOCAL_APIGATEWAY_URL : String(process.env.APP_PUBLIC_URL),
 	},
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+////////////////////////////////////////
+// Local definitions
+
+////////////////////////////////////////
+// Exported definitions
+
+////////////////////////////////////////////////////////////////////////////////
+// Unit test definitions
 
 export type Config = typeof config;
 export default config;
