@@ -8,7 +8,7 @@ export default (api) => {
 			//[
 			//	"@babel/preset-env",
 			//	{
-	 		//		targets: {
+			//		targets: {
 			//			node: 'current',
 			//		}
 			//	}

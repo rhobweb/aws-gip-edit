@@ -10,17 +10,19 @@ const ignores = defineConfig( [
 	globalIgnores( [
 		'.webpack/',
 		'__mocks__/',
-		'**/jest.config.ts',
-		'**/jest.common.config.ts',
-		'**/jest.setEnvVars.ts',
+		'**/jest.config.mjs',
+		'**/jest.common.config.mjs',
+		'**/jest.setEnvVars.mjs',
 		'**/eslint.config.mjs',
 		'**/dist/',
+		'**/output/',
+		'**/test-out/',
 		'**/node_modules/',
 		'**/z-*.ts',
 		'**/z-*.tsx',
-		'**/*.js',
-		'**/*.cjs',
-		'**/*.mjs',
+		"**/*.js",
+		"**/*.cjs",
+		"**/*.mjs",
 	] )
 ]);
 
