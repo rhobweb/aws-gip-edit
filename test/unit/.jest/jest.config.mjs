@@ -31,8 +31,6 @@ const ROOT_DIR         = path.resolve(  `${__dirname}/${REL_ROOT_DIR}` );
 //console.log( __dirname );
 const TEST_PATH_DIRS   = [ TEST_DIR ];
 const TEST_REGEX       = '.spec.ts';
-//const TEMP_FILE1       = path.resolve( `${ROOT_DIR}/test/unit/__mocks__/@aws-sdk/lib-dynamodb.ts` );
-//const TEMP_FILE2       = path.resolve( `${ROOT_DIR}/test/unit/__mocks__/@aws-sdk/client-dynamodb.ts` );
 
 export default async () => {
 	const parentConfig = await parentConfigFn();
