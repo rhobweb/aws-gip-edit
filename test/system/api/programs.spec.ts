@@ -507,7 +507,7 @@ describe(MODULE_NAME + ':POST', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 
@@ -601,7 +601,7 @@ describe(MODULE_NAME + ':GET', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 
@@ -799,7 +799,7 @@ describe(MODULE_NAME + ':PATCH', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 
