@@ -20,9 +20,9 @@ const ignores = defineConfig( [
 		'**/node_modules/',
 		'**/z-*.ts',
 		'**/z-*.tsx',
-		"**/*.js",
-		"**/*.cjs",
-		"**/*.mjs",
+		'**/*.js',
+		'**/*.cjs',
+		'**/*.mjs',
 	] )
 ]);
 
