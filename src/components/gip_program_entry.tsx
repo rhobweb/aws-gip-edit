@@ -7,10 +7,8 @@
 // Imports
 import React, { ForwardedRef } from 'react';
 
-//import { GipGridRow } from './gip_grid_row';
 import { GipGridRow } from '#components/gip_grid_row';
 
-//import { GipProgramOptions } from './gip_program_options';
 import { GipProgramOptions } from '#components/gip_program_options';
 
 import {
@@ -18,7 +16,6 @@ import {
 	PROG_FIELD_TITLE,
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_IMAGE_URI,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
 import DEFAULT_PROGRAM_IMAGE_URI from '../../public/program_image_placeholder.png';

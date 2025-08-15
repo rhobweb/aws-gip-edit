@@ -23,12 +23,13 @@ import {
 	fireEvent,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_program_table';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DisplayProgramItem,
-//} from '../../../src/utils/gip_types';
 } from '#utils/gip_types';
 
 import type {
@@ -68,8 +69,6 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-//import * as TEST_MODULE from '../../../src/components/gip_program_table';
-import * as TEST_MODULE from '#components/gip_program_table';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -13,17 +13,14 @@ import {
 	VALUE_STATUS_PENDING,
 	VALUE_STATUS_ERROR,
 	VALUE_STATUS_SUCCESS
-//} from '../utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
-//import { GipGridRow } from './gip_grid_row';
 import { GipGridRow } from '#components/gip_grid_row';
 
 import {
 	PROG_FIELD_STATUS,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_DAY_OF_WEEK,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +33,6 @@ import type {
 	Type_DisplayProgramItem,
 	Type_DisplayProgramItemStringPropName,
 	Type_HandlerProgramChange,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////

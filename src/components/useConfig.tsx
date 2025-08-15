@@ -7,8 +7,6 @@
 // Imports
 import { useContext } from 'react';
 
-//import { Config }    from '../server/config';
-//import ConfigContext from './ConfigContext';
 import { Config }    from '#server/config';
 import ConfigContext from '#components/ConfigContext';
 

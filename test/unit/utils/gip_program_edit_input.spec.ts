@@ -27,7 +27,6 @@ import GipProgramEditInput from '#utils/gip_program_edit_input';
 import type {
 	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
-//} from '../../../src/utils/gip_types.ts';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////

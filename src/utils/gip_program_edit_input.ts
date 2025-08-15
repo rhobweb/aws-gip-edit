@@ -18,7 +18,6 @@ import {
 	PROG_FIELD_TITLE,
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_IMAGE_URI,
-//} from './gip_types'; // Not just types, so need to include these here
 } from '#utils/gip_types'; // Not just types, so need to include these here
 
 ////////////////////////////////////////////////////////////////////////////////

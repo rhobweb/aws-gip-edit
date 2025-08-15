@@ -70,7 +70,7 @@ type Type_RawQueryParamScalarValue    = string | null | undefined;
 type Type_RawQueryParamValue          = Type_RawQueryParamScalarValue | string[];
 export type Type_RawQueryParams       = Partial<Record<string, Type_RawQueryParamValue>>;
 
-// Type to make the properties of the returned UrlParse object mutable
+// Type to make the properties of the returned UrlParse object mutable and optional
 type Type_MutableUrlParse = {
 	-readonly [P in keyof UrlParse<string>]+?: UrlParse<string>[P];
 };

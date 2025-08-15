@@ -27,7 +27,6 @@ import * as TEST_MODULE from '#utils/gip_prog_fields';
 import type {
 	Type_FieldMap,
 	Type_FieldOrder,
-//} from '../../../src/utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
 ////////////////////////////////////////
@@ -224,8 +223,9 @@ const EXPECTED_FIELD_DEFAULT_VALUES : Record<string,string|undefined> = {
 	status:        'Pending',
 };
 
-////////////////////////////////////////
-// The module under test
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

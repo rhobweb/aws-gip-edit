@@ -7,9 +7,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
-//import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from './gip_prog_fields';
-//import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from './gip_types';
-//import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from './gip_date_utils';
 import { VALUE_STATUS_SUCCESS, VALUE_STATUS_ALREADY } from '#utils/gip_prog_fields';
 import { PROG_FIELD_STATUS, PROG_FIELD_DAY_OF_WEEK }  from '#utils/gip_types';
 import { getCurrentDayOfWeek, isDayOfWeekAvailable  } from '#utils/gip_date_utils';

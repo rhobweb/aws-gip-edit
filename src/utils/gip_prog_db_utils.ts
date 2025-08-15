@@ -24,7 +24,6 @@ import {
 	DB_FIELD_TITLE,
 	DB_FIELD_SYNOPSIS,
 	DB_FIELD_IMAGE_URI,
-//} from './gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
 import {
@@ -38,7 +37,6 @@ import {
 	PROG_FIELD_QUALITY,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_URI,
-//} from './gip_types';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////

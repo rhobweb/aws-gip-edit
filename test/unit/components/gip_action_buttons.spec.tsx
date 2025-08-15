@@ -23,12 +23,13 @@ import {
 	fireEvent,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_action_buttons';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DisplayProgramItem,
-//} from '../../../src/utils/gip_types';
 } from '#utils/gip_types';
 
 import type {
@@ -36,7 +37,6 @@ import type {
 	Type_ActionButtons_ret,
 	Type_GipActionButtons_args,
 	Type_GipActionButtons_ret,
-//} from '../../../src/components/gip_action_buttons';
 } from '#components/gip_action_buttons';
 
 interface Type_TestModulePrivateDefs {
@@ -56,8 +56,6 @@ type Type_savePrograms_fn = (args: Type_DisplayProgramItem[]) => Promise<Type_Di
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-//import * as TEST_MODULE from '../../../src/components/gip_action_buttons';
-import * as TEST_MODULE from '#components/gip_action_buttons';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const alertMock   = jest.fn();

@@ -14,8 +14,7 @@ import { StatsWriterPlugin }     from 'webpack-stats-plugin';
 import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
 import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
-//import slsw    from 'serverless-webpack';
-import webpack from 'webpack';
+import webpack                   from 'webpack';
 import { copyFileSync }          from 'node:fs';
 const { ProvidePlugin, DefinePlugin } = webpack;
 
@@ -27,7 +26,6 @@ import { fileURLToPath } from 'url';
 function copyFiles() {
 	const arrFileToCopy = [
 		{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.resolve(__dirname, './dist/src/browser/index.css') },
-		{ from: path.resolve(__dirname, './src/browser/index.cjs'),                to: path.resolve(__dirname, './dist/src/browser/index.cjs') },
 		{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.resolve(__dirname, './dist/public/gip-common.css') },
 		{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.resolve(__dirname, './dist/public/favicon.ico') },
 		{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.resolve(__dirname, './dist/public/program_image_placeholder.png') },
@@ -52,7 +50,6 @@ console.log( `dirname is ${__dirname}` );
 const isOffline      = !!process.env.IS_OFFLINE;
 const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
 const AUTH_URI       = process.env.AUTH_URI || 'undefined';
-//console.log( 'webpack: browser.config: env: ' + AUTH_URI );
 console.log( 'webpack: browser isOffline: ' + isOffline );
 
 copyFiles();
@@ -62,7 +59,6 @@ export default {
 	target: 'web',
 	entry: {
 		main: path.join(__dirname, 'src/browser/index.tsx'),
-		//main: path.join(__dirname, 'dist/src/browser/index.cjs'),
 	},
 	target: 'web',
 	mode: isOffline ? 'development' : 'production',
@@ -168,7 +164,6 @@ export default {
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
-				//test: /\.(c|m)?jsx?$/,
 				exclude: /node_modules/, // we shouldn't need processing `node_modules`
 				use: 'babel-loader',
 			},
@@ -192,8 +187,7 @@ export default {
 		plugins: [ new TsconfigPathsPlugin( {
 			configFile: './tsconfig.json',
 		} ) ],
-		//extensions: ['.browser.tsx', '.browser.ts', '.browser.jsx', '.browser.js', '.tsx', '.ts', '.jsx', '.js'],
-		extensions: [ '.browser.jsx', '.browser.tsx','.browser.js', '.browser.ts', '.jsx', '.tsx', '.cjs', '.mjs', '.js', '.ts', ],
+		extensions: ['.browser.tsx', '.browser.ts', '.browser.jsx', '.browser.js', '.tsx', '.ts', '.jsx', '.js'],
 		fallback: {
 			'stream':  'stream-browserify',
 			'os':      'os-browserify',

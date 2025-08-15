@@ -22,21 +22,12 @@ const MODULE_NAME = 'gip-system-test';
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals';
+
 // Add possibility of calling API in development environment, however, CORS currently forbids this.
 // Would need to disable CORS or use a test proxy server to allow this.
 import ENV_VARS_LCL from '../../../.env-lcl.json' with { type: "json" };
 import ENV_VARS_DEV from '../../../.env-dev.json' with { type: "json" };
-
-const STAGE = process.env.STAGE;
-
-interface Type_EnvVars {
-	AWS_REGION                 : string,
-	TABLE_NAME_PROGRAM_HISTORY : string,
-	GIP_API_URI                : string,
-	LOCAL_DYNAMO_DB_ENDPOINT?  : string,
-};
-
-const ENV_VARS = (STAGE === 'dev' ? ENV_VARS_DEV : ENV_VARS_LCL) as Type_EnvVars;
 
 import axios, {
 	AxiosResponse,
@@ -64,28 +55,12 @@ import {
 
 import assert from 'node:assert';
 
-const {
-	GIP_API_URI,
-	AWS_REGION,
-	LOCAL_DYNAMO_DB_ENDPOINT,   // May be undefined if running remotely
-	TABLE_NAME_PROGRAM_HISTORY,
-} = ENV_VARS;
-
-// ESLint does not detect the assertions, so the condition is required to prevent ESLint warnings.
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-assert( GIP_API_URI !== undefined );
-assert( AWS_REGION !== undefined );
-assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );
-const INDEX_NAME_PROGRAM_HISTORY_PID = `${TABLE_NAME_PROGRAM_HISTORY}-pid`;
-/* eslint-enable @typescript-eslint/no-unnecessary-condition */
-
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DbProgramEditItem,
 	Type_DbProgramHistoryItem,
-//} from '../../../src/utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
 interface Type_axios_result {
@@ -97,8 +72,40 @@ interface Type_axios_result {
 interface Type_Headers {
 	"content-type":   string,
 	"cache-control":  string,
-	"content-length": number,
+	"content-length": string,
 };
+
+interface Type_EnvVars {
+	AWS_REGION                 : string,
+	TABLE_NAME_PROGRAM_HISTORY : string,
+	GIP_API_URI                : string,
+	LOCAL_DYNAMO_DB_ENDPOINT?  : string,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const STAGE = process.env.STAGE;
+
+const ENV_VARS = (STAGE === 'dev' ? ENV_VARS_DEV : ENV_VARS_LCL) as Type_EnvVars;
+
+const {
+	GIP_API_URI,
+	AWS_REGION,
+	LOCAL_DYNAMO_DB_ENDPOINT,   // May be undefined if running remotely
+	TABLE_NAME_PROGRAM_HISTORY,
+} = ENV_VARS;
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+// ESLint does not detect the assertions, so the condition is required to prevent ESLint warnings.
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+assert( GIP_API_URI !== undefined );
+assert( AWS_REGION !== undefined );
+assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );
+const INDEX_NAME_PROGRAM_HISTORY_PID = `${TABLE_NAME_PROGRAM_HISTORY}-pid`;
+/* eslint-enable @typescript-eslint/no-unnecessary-condition */
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
@@ -248,11 +255,11 @@ function parseAxiosError( axiosError : AxiosError ) : Type_axios_result {
  * @param objItem : an object.
  * @returns the length of the stringified object with UTF-8 characters encoded as Unicode escapes, e.g., '\u1234'.
  */
-function calcEncodedObjectLength( objItem : object ) : number {
+function calcEncodedObjectLength( objItem : object ) : string {
 	const strObject     = JSON.stringify( objItem );
 	const strEncoded    = strObject.replace( /[\u007F-\uFFFF]/g, chr => "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).slice(-4) );
 	const iLength       = strEncoded.length;
-	return iLength;
+	return iLength.toString();
 }
 
 // Day of week types and definitions

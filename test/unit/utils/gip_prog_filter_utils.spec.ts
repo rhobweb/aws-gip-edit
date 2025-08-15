@@ -26,10 +26,8 @@ import * as TEST_MODULE from '#utils/gip_prog_filter_utils';
 
 import type {
 	Type_ProgramDownloadOptions,
-//} from '../../../src/utils/gip_types.ts';
 } from '#utils/gip_types';
 
-//import type { Type_DbProgramEditItem } from '../../../src/utils/gip_prog_fields';
 import type { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
 
 import type {
@@ -37,7 +35,6 @@ import type {
 	Type_isDayActive_ret,
 	Type_filterPrograms_args,
 	Type_filterPrograms_ret,
-//} from '../../../src/utils/gip_prog_filter_utils';
 } from '#utils/gip_prog_filter_utils';
 
 ////////////////////////////////////////
@@ -66,8 +63,8 @@ const TEST_PROGRAM_ITEM : Type_DbProgramEditItem = {
 	day_of_week:   null,
 };
 
-////////////////////////////////////////
-// The module under test
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 

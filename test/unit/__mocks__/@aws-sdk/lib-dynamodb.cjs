@@ -1,3 +1,13 @@
+/**
+ * FILE:        test/utils/__mocks__/@aws-sdk/lib-dynamodb.cjs
+ * DESCRIPTION: Mocks for the @aws-sdk/lib-dynamodb package.
+ *
+ * Usage:       ts-jest with ESM does not automatically pick up this mock.
+ *              Need to configure a Jest setup script to run:
+ *                 import {jest} from '@jest/globals';
+ *                 const libDynamodb = jest.requireActual( '../__mocks__/@aws-sdk/lib-dynamodb.cjs' );
+ *                 jest.mock( '@aws-sdk/lib-dynamodb', () => ({ __esModule: true, ...libDynamodb }) );
+ */
 'use strict';
 
 //const MODULE_NAME = '@aws-sdk/lib-dynamodb';

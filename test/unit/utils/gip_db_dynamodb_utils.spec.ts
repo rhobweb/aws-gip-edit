@@ -112,7 +112,6 @@ import type {
 	Type_savePrograms_ret,
 	Type_updatePrograms_args,
 	Type_updatePrograms_ret,
-//} from '../../../src/utils/gip_db_dynamodb_utils.ts';
 } from '#utils/gip_db_dynamodb_utils';
 
 import type {
@@ -121,7 +120,6 @@ import type {
 	//Type_DbProgramHistoryItem,
 	Type_DbProgramEditItem,
 	//Type_FieldMap
-//} from '../../../src/utils/gip_prog_fields.ts';
 } from '#utils/gip_prog_fields';
 
 //import type {

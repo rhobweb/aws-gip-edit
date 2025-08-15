@@ -15,9 +15,7 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import {jest} from '@jest/globals'; // For isolateModulesAsync
 
-//import GipProgramItem from '../../../src/utils/gip_program_item';
 import GipProgramItem from '#utils/gip_program_item';
-//import * as TEST_MODULE from '../../../src/utils/gip_program_item';
 import * as TEST_MODULE from '#utils/gip_program_item';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,14 +29,12 @@ import type {
 	Type_getTrimmedField_ret,
 	Type_extractPID_args,
 	Type_extractPID_ret,
-//} from '../../../src/utils/gip_program_item.ts';
 } from '#utils/gip_program_item';
 
 import type {
 	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-//} from '../../../src/utils/gip_types.ts';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////

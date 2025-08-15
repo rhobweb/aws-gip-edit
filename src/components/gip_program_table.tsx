@@ -12,10 +12,8 @@ import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
 	DUMMY_HEADER_FIELD,
-//} from '../utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
-//import { GipGridRow } from './gip_grid_row';
 import { GipGridRow } from '#components/gip_grid_row';
 
 import {
@@ -25,7 +23,6 @@ import {
 	Type_EventHandlerMouse,
 	Type_HandlerProgramChange,
 	Type_EventMouse,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////

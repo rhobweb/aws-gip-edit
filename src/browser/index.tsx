@@ -17,9 +17,6 @@ import * as React from 'react';
 //import { hydrate } from 'react-dom';
 import { hydrateRoot } from 'react-dom/client';
 
-//import ConfigContext from '../components/ConfigContext';
-//import { Config } from '../server/config';
-//import App from '../App';
 import ConfigContext from '#components/ConfigContext';
 import { Config } from '#server/config';
 import App from '#App';

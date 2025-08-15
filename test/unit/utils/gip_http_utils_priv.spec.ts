@@ -15,7 +15,6 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import {jest} from '@jest/globals'; // For isolateModulesAsync
 
-//import * as TEST_MODULE from '../../../src/utils/gip_http_utils_priv';
 import * as TEST_MODULE from '#utils/gip_http_utils_priv';
 
 ////////////////////////////////////////////////////////////////////////////////

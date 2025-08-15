@@ -12,8 +12,6 @@
 ////////////////////////////////////////
 // Imported types
 
-//import type { Config } from './config';
-//import type { Stats }  from './types';
 import type { Config } from '#server/config';
 import type { Stats }  from '#server/types';
 

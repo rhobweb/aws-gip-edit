@@ -23,6 +23,8 @@ import {
 	fireEvent,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_program_options';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
@@ -31,7 +33,6 @@ import type {
 	Type_ProgramOptionsSelect_ret,
 	Type_GipProgramOptions_args,
 	Type_GipProgramOptions_ret,
-//} from '../../../src/components/gip_program_options';
 } from '#components/gip_program_options';
 
 interface Type_TestModulePrivateDefs {
@@ -49,8 +50,6 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-//import * as TEST_MODULE from '../../../src/components/gip_program_options';
-import * as TEST_MODULE from '#components/gip_program_options';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -18,13 +18,10 @@ import {jest} from '@jest/globals'; // For isolateModulesAsync
 import React     from 'react';
 import userEvent from '@testing-library/user-event';
 
-//import GipProgramItem      from '../../../src/utils/gip_program_item';
 import GipProgramItem      from '#utils/gip_program_item';
-//import GipProgramEditInput from '../../../src/utils/gip_program_edit_input';
 import GipProgramEditInput from '#utils/gip_program_edit_input';
 import {
 	REVERSE_FIELD_MAP_COLLECTION,
-//} from '../../../src/utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
 import {
@@ -35,13 +32,18 @@ import {
 	act, // See https://testing-library.com/docs/react-testing-library/api/#act
 } from '@testing-library/react';
 
+import { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
+
+import { Type_DisplayProgramItem } from '#utils/gip_types';
+
+import * as TEST_MODULE from '#components/gip_edit';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-//} from '../../../src/utils/gip_types';
 } from '#utils/gip_types';
 
 import type {
@@ -55,7 +57,6 @@ import type {
 	Type_processDrop_args,
 	Type_processDrop_ret,
 	Type_GipEdit_ret,
-//} from '../../../src/components/gip_edit';
 } from '#components/gip_edit';
 
 import type { UserEvent } from '@testing-library/user-event';
@@ -110,12 +111,6 @@ const TEST_PROG_LINK_HTML = `
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-//import * as TEST_MODULE from '../../../src/components/gip_edit';
-import * as TEST_MODULE from '#components/gip_edit';
-//import { Type_DbProgramEditItem } from '../../../src/utils/gip_prog_fields';
-import { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
-//import { Type_DisplayProgramItem } from '../../../src/utils/gip_types';
-import { Type_DisplayProgramItem } from '#utils/gip_types';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const {
@@ -203,10 +198,6 @@ async function sleep( ms : number ) : Promise<void> {
 interface Type_setupUserEvent_ret extends RenderResult {
 	user: UserEvent,
 };
-
-//interface Type_UserEventExtended extends UserEvent {
-//	setup: () => UserEvent,
-//};
 
 /**
  * @param {React.JSX.Element} jsx : the JSX element to render.

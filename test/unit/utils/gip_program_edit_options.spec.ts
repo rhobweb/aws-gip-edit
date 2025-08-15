@@ -15,7 +15,6 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import {jest} from '@jest/globals'; // For isolateModulesAsync
 
-//import GipProgramEditOptions from '../../../src/utils/gip_program_edit_options';
 import GipProgramEditOptions from '#utils/gip_program_edit_options';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +26,6 @@ import GipProgramEditOptions from '#utils/gip_program_edit_options';
 import type {
 	Type_DisplayProgramItem,
 	Type_ProgramEditOptions,
-//} from '../../../src/utils/gip_types.ts';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////

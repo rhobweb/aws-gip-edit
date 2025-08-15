@@ -1,9 +1,14 @@
+/**
+ * FILE:        test/utils/__mocks__/@aws-sdk/client-dynamodb.cjs
+ * DESCRIPTION: Mocks for the @aws-sdk/client-dynamodb package.
+ *
+ * Usage:       ts-jest with ESM does not automatically pick up this mock.
+ *              Need to configure a Jest setup script to run:
+ *                 import {jest} from '@jest/globals';
+ *                 const clientDynamodb = jest.requireActual( '../__mocks__/@aws-sdk/client-dynamodb.cjs' );
+ *                 jest.mock( '@aws-sdk/client-dynamodb', () => ({ __esModule: true, ...clientDynamodb }) );
+ */
 'use strict';
-
-//const MODULE_NAME = '@aws-sdk/client-dynamodb';
-
-//const mockedModule = jest.requireActual( MODULE_NAME ); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-//const mockedModule : object = jest.createMockFromModule( MODULE_NAME );
 
 //import {
 //	DynamoDBClientConfig,

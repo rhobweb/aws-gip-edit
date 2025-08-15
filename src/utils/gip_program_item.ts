@@ -9,7 +9,6 @@
 
 import {
 	VALUE_STATUS_PENDING,
-//} from '../utils/gip_prog_fields';
 } from '#utils/gip_prog_fields';
 
 import {
@@ -23,7 +22,6 @@ import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
 	PROG_FIELD_SELECTED,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////

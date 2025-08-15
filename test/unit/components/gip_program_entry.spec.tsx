@@ -29,8 +29,9 @@ import DEFAULT_PROGRAM_IMAGE_URI from 'file!../../../public/program_image_placeh
 import {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-//} from '../../../src/utils/gip_types';
 } from '#utils/gip_types';
+
+import * as TEST_MODULE from '#components/gip_program_entry';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types
@@ -49,7 +50,6 @@ import type {
 	Type_GipProgramEntry_args,
 	Type_GipProgramEntry_ret,
 	Type_UriAndTitleRefs,
-//} from '../../../src/components/gip_program_entry';
 } from '#components/gip_program_entry';
 
 interface Type_TestModulePrivateDefs {
@@ -73,8 +73,6 @@ type Type_Ref = React.RefObject<HTMLInputElement|null>;
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-//import * as TEST_MODULE from '../../../src/components/gip_program_entry';
-import * as TEST_MODULE from '#components/gip_program_entry';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

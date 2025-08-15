@@ -15,7 +15,6 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import {jest} from '@jest/globals'; // For isolateModulesAsync
 
-//import * as TEST_MODULE from '../../../src/utils/gip_prog_title_utils';
 import * as TEST_MODULE from '#utils/gip_prog_title_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,8 +38,8 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 
-////////////////////////////////////////
-// The module under test
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 

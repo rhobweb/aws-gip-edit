@@ -50,7 +50,6 @@ interface Type_TestModule {
 	default: Type_TestModuleDefaultDefs,
 };
 
-//import * as TEST_MODULE from '../../../src/api/programs';
 import * as TEST_MODULE from '#api/programs';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +102,7 @@ function genExpectedBody( arrObject : object[] ) : string {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Unit tests
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;

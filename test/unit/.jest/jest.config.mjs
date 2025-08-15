@@ -1,20 +1,8 @@
+/**
+ * Jest configuration file for the system tests
+ */
 
 import parentConfigFn from '../../jest.common.config.mjs'
-
-/**
- * Jest configuration file for the unit tests
- */
-//import type { JestConfigWithTsJest } from 'ts-jest/dist/types'
-
-//import { createJsWithBabelPreset as createPreset } from 'ts-jest';
-//import { createJsWithTsEsmPreset as createPreset } from 'ts-jest';
-
-//const defaultPreset = createPreset();
-//const tsJestTransformCfg = createPreset().transform;
-//import jestModuleNameMapper from 'jest-module-name-mapper';
-
-
-//import type {Config} from 'jest';
 
 const REL_TEST_DIR = `../../../test/unit/`; // Path from the .jest directory to the directory containing the unit tests
 //const REL_SRC_DIR = `../../../src/`;       // Path from the .jest directory to the directory containing the source files

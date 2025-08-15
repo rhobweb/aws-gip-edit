@@ -11,7 +11,6 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { Helmet } from 'react-helmet';
 
-//import { getProgDetailsFromLink, cookTitle, cookSynopsis } from '../utils/gip_prog_edit_utils';
 import { getProgDetailsFromLink, cookTitle, cookSynopsis } from '#utils/gip_prog_edit_utils';
 
 import {
@@ -21,26 +20,15 @@ import {
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_SELECTED,
 	PROG_FIELD_IMAGE_URI,
-//} from '../utils/gip_types';
 } from '#utils/gip_types';
 
-//import { Type_DbProgramEditItem } from '../utils/gip_prog_fields';
 import { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
 
 import {
 	processEndpointDef,
 	extractJsonResponse,
 	extractJsonResponseStream,
-//} from '../utils/gip_http_utils';
 } from '#utils/gip_http_utils';
-
-//import { GipProgramEntry }         from './gip_program_entry';
-//import { GipProgramTable }         from './gip_program_table';
-//import { GipActionButtons }        from './gip_action_buttons';
-//import GipProgramEditInput         from '../utils/gip_program_edit_input';
-//import GipProgramEditOptions       from '../utils/gip_program_edit_options';
-//import GipProgramItem              from '../utils/gip_program_item';
-//import { dbToProgArray, progToDb } from '../utils/gip_prog_db_utils';
 
 import { GipProgramEntry }         from '#components/gip_program_entry';
 import { GipProgramTable }         from '#components/gip_program_table';
@@ -51,7 +39,6 @@ import GipProgramItem              from '#utils/gip_program_item';
 import { dbToProgArray, progToDb } from '#utils/gip_prog_db_utils';
 
 import logger                      from '@rhobweb/console-logger';
-//import ourPackage                  from '../../package.json';
 import ourPackage                  from '../../package.json' with { type: "json" };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +50,6 @@ import ourPackage                  from '../../package.json' with { type: "json"
 import type {
 	Type_EventKeyboardAny,
 	Type_EventDragAny,
-//} from '../browser_event.ts';
 } from '#browser_event';
 
 import type {
@@ -72,12 +58,10 @@ import type {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
 	Type_RawHttpParams,
-//} from '../utils/gip_types.ts';
 } from '#utils/gip_types';
 
 import type {
 	Type_UriAndTitleRefs,
-//} from './gip_program_entry';
 } from '#components/gip_program_entry';
 
 ////////////////////////////////////////

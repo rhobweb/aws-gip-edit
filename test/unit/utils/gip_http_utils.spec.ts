@@ -15,10 +15,8 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import {jest} from '@jest/globals'; // For isolateModulesAsync
 
-//import * as TEST_MODULE from '../../../src/utils/gip_http_utils';
 import * as TEST_MODULE from '#utils/gip_http_utils';
 
-//import { HttpError } from '../../../src/utils/gip_http_utils';
 import { HttpError } from '#utils/gip_http_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +28,6 @@ import type {
 	Type_EndpointOptions,
 	Type_HttpParams,
 	Type_HttpHeaders,
-//} from '../../../src/utils/gip_types.ts';
 } from '#utils/gip_types';
 
 import type {
@@ -48,7 +45,6 @@ import type {
 	Type_stripQueryParams_ret,
 	Type_genURI_args,
 	Type_genURI_ret,
-//} from '../../../src/utils/gip_http_utils';
 } from '#utils/gip_http_utils';
 
 interface Type_TestModule {

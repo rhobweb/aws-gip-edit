@@ -44,7 +44,6 @@ global.DOMParser = new jsdom.JSDOM().window.DOMParser;
  * @jest-environment jsdom
  */
 
-//import * as TEST_MODULE from '../../../src/utils/gip_prog_edit_utils';
 import * as TEST_MODULE from '#utils/gip_prog_edit_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +73,6 @@ import type {
 	Type_cookRawEpisode_ret,
 	Type_cookSynopsis_args,
 	Type_cookSynopsis_ret,
-//} from '../../../src/utils/gip_prog_edit_utils';
 } from '#utils/gip_prog_edit_utils';
 
 ////////////////////////////////////////
@@ -98,10 +96,6 @@ interface Type_TestModule {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
-
-////////////////////////////////////////
-// The module under test
-const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const { JSDOM }  = jsdom;
 
@@ -234,6 +228,11 @@ const TEST_PROG_PRIMARY_FRENCH = `
 	</div>
 </a>
 `;
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
+const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test utilities
