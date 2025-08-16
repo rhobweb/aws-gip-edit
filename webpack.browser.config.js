@@ -16,9 +16,10 @@ import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
 import webpack                   from 'webpack';
 import { copyFileSync }          from 'node:fs';
+import { fileURLToPath }         from 'url';
+
 const { ProvidePlugin, DefinePlugin } = webpack;
 
-import { fileURLToPath } from 'url';
 //import stream from 'stream-browserify';
 //import os from 'os-browserify';
 //import process from 'process/browser.js';
@@ -60,7 +61,6 @@ export default {
 	entry: {
 		main: path.join(__dirname, 'src/browser/index.tsx'),
 	},
-	target: 'web',
 	mode: isOffline ? 'development' : 'production',
 	//entry: slsw.lib.entries,
 	//mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
