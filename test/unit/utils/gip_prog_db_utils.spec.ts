@@ -2,9 +2,23 @@
  * DESCRIPTION:
  * Unit Tests for utils/gip_prog_db_utils.ts.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_prog_db_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import * as TEST_MODULE from '#utils/gip_prog_db_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Type_dbToProg_args,
@@ -15,7 +29,7 @@ import type {
 	Type_dbToProgArray_ret,
 	Type_genProgramEditItem_args,
 	Type_genProgramEditItem_ret,
-} from '../../../src/utils/gip_prog_db_utils';
+} from '#utils/gip_prog_db_utils';
 
 interface Type_TestModule {
 	dbToProg:           (args: Type_dbToProg_args)           => Type_dbToProg_ret,
@@ -24,9 +38,16 @@ interface Type_TestModule {
 	genProgramEditItem: (args: Type_genProgramEditItem_args) => Type_genProgramEditItem_ret,
 };
 
-import * as TEST_MODULE from '../../../src/utils/gip_prog_db_utils';
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
@@ -35,6 +56,9 @@ function commonAfterEach() : void {
 	jest.restoreAllMocks();
 	jest.resetModules();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;

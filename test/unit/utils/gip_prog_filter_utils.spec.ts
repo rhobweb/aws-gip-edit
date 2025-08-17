@@ -11,6 +11,14 @@ const MODULE_NAME      = 'gip_prog_filter_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+//import * as TEST_MODULE from '../../../src/utils/gip_prog_filter_utils';
+import * as TEST_MODULE from '#utils/gip_prog_filter_utils';
+
+////////////////////////////////////////////////////////////////////////////////
 // Types
 
 ////////////////////////////////////////
@@ -18,16 +26,16 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 import type {
 	Type_ProgramDownloadOptions,
-} from '../../../src/utils/gip_types.ts';
+} from '#utils/gip_types';
 
-import type { Type_DbProgramEditItem } from '../../../src/utils/gip_prog_fields';
+import type { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
 
 import type {
 	Type_isDayActive_args,
 	Type_isDayActive_ret,
 	Type_filterPrograms_args,
 	Type_filterPrograms_ret,
-} from '../../../src/utils/gip_prog_filter_utils';
+} from '#utils/gip_prog_filter_utils';
 
 ////////////////////////////////////////
 // Test module types
@@ -40,11 +48,6 @@ interface Type_TestModule {
 	privateDefs:    Type_TestModulePrivateDefs,
 	filterPrograms: (args: Type_filterPrograms_args)  => Type_filterPrograms_ret,
 };
-
-////////////////////////////////////////////////////////////////////////////////
-// Imports
-
-import * as TEST_MODULE from '../../../src/utils/gip_prog_filter_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -60,13 +63,13 @@ const TEST_PROGRAM_ITEM : Type_DbProgramEditItem = {
 	day_of_week:   null,
 };
 
-////////////////////////////////////////
-// The module under test
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local test functions
+// Test utilities
 
 /**
  * Actions to be performed before every test

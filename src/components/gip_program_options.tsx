@@ -10,13 +10,13 @@ import React from 'react';
 import {
 	FIELD_MAP_COLLECTION,
 	FIELD_ORDER_COLLECTION,
-} from '../utils/gip_prog_fields';
+} from '#utils/gip_prog_fields';
 
 import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_GENRE,
 	PROG_FIELD_QUALITY,
-} from '../utils/gip_types';
+} from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types

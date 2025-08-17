@@ -15,9 +15,29 @@ import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
 import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
 import webpack                   from 'webpack';
+//import { copyFileSync }          from 'node:fs';
 import { fileURLToPath }         from 'url';
 
 const { ProvidePlugin, DefinePlugin } = webpack;
+
+//function copyFiles() {
+//	const arrFileToCopy = [
+//		{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname, './dist/src/browser/index.css') },
+//		{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname, './dist/public/gip-common.css') },
+//		{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname, './dist/public/favicon.ico') },
+//		{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname, './dist/public/program_image_placeholder.png') },
+//	];
+//
+//	for ( const fileToCopy of arrFileToCopy ) {
+//		try {
+//			copyFileSync( fileToCopy.from, fileToCopy.to );
+//		}
+//		catch ( err ) {
+//			console.log( `Failed to copy: ${fileToCopy.from}` );
+//			throw err;
+//		}
+//	}
+//}
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -29,12 +49,14 @@ const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
 const AUTH_URI       = process.env.AUTH_URI || 'undefined';
 console.log( 'webpack: browser isOffline: ' + isOffline );
 
+//copyFiles();
+
 export default {
-	entry: {
-		main: path.join(__dirname, "src/browser/index.tsx"),
-	},
-	//context: __dirname,
+	context: __dirname,
 	target: 'web',
+	entry: {
+		main: path.join(__dirname, 'src/browser/index.tsx'),
+	},
 	mode: isOffline ? 'development' : 'production',
 	devServer: {
 		hot: true,
@@ -87,11 +109,16 @@ export default {
 		new CleanWebpackPlugin(),
 		new CopyWebpackPlugin({
 			patterns: [
-				{
-					// Copy content from `./public/` folder to our output directory
-					context: "./public/",
-					from: "**/*",
-				},
+				//{
+				//	// Copy content from `./public/` folder to our output directory
+				//	context: "./public/",
+				//	from: "**/*",
+				//},
+				{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname, './dist/src/browser/index.css') },
+				{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname, './dist/public/gip-common.css') },
+				{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname, './dist/public/favicon.ico') },
+				{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname, './dist/public/program_image_placeholder.png') },
+
 			],
 		}),
 		new MiniCssExtractPlugin({
@@ -104,7 +131,7 @@ export default {
 				const stats = JSON.stringify(
 					{
 						scripts: Object.entries(assets).flatMap(([_asset, files]) => {
-							return files.filter((filename) => filename.endsWith('.js') && !/\.hot-update\./.test(filename));
+							return files.filter((filename) => filename.match( /\.(c|m)?js$/) && !/\.hot-update\./.test(filename));
 						}),
 						styles: Object.entries(assets).flatMap(([_asset, files]) => {
 							return files.filter((filename) => filename.endsWith('.css') && !/\.hot-update\./.test(filename));
@@ -158,9 +185,16 @@ export default {
 			//'process': 'process/browser.js',
 		}
 	},
+	experiments: {
+		outputModule: true,
+	},
 	output: {
-		path: path.join(__dirname, 'dist'),
-		filename: isOffline ? '[name].js' : '[name].[contenthash:8].js',
+		//path: path.join(__dirname, 'dist/webpack/'),
+		path: path.join(__dirname, 'dist/'),
+		//library: { type: 'commonjs' },
+		//filename: isOffline ? '[name].js' : '[name].[contenthash:8].js',
+		library: { type: 'module' },
+		filename: isOffline ? '[name].mjs' : '[name].[contenthash:8].mjs',
 		crossOriginLoading: 'anonymous', // enable cross-origin loading of chunks
 	},
 };

@@ -2,10 +2,74 @@
  * DESCRIPTION:
  * Unit Tests for utils/gip_db_dynamodb_utils.ts.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_db_dynamodb_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 const OLD_ENV      = { ...process.env };
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import {
+	//// @ts-expect-error mocks is added for testing
+	//mocks as clientDynamodbMocks,
+	//DynamoDBClient,
+	DynamoDBClientConfig,
+	//ScanCommand,
+	//ScanCommandOutput,
+	//ScanCommandInput,
+	//ScanCommandOutput,
+	//BatchWriteItemCommandInput,
+	//BatchWriteItemCommand,
+	//WriteRequest,
+	//AttributeValue,
+	//TransactWriteItem,
+	//TransactWriteItemsCommandInput,
+	//TransactWriteItemsCommand,
+	WriteRequest,
+} from '@aws-sdk/client-dynamodb';
+
+import libDynamoDb, {
+	DynamoDBDocumentClient,
+	ScanCommand,
+	ScanCommandOutput,
+	BatchWriteCommand,
+	BatchWriteCommandOutput,
+	TransactWriteCommandInput,
+	TransactWriteCommand,
+	//ScanCommandInput,
+	//ScanCommandOutput,
+	//BatchWriteItemCommandInput,
+	//BatchWriteItemCommand,
+	//WriteRequest,
+	//AttributeValue,
+	//TransactWriteItem,
+} from '@aws-sdk/lib-dynamodb';
+
+// @ts-expect-error mocks is added by the mocked module
+const libDynamodbMocks = libDynamoDb.mocks; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+
+import {
+	GipDynamoDB,
+//} from '../../../src/utils/gip_db_dynamodb_utils';
+} from '#utils/gip_db_dynamodb_utils';
+
+import {
+	HttpError,
+//} from '../../../src/utils/gip_http_utils';
+} from '#utils/gip_http_utils';
+
+//import * as TEST_MODULE from '../../../src/utils/gip_db_dynamodb_utils';
+import * as TEST_MODULE from '#utils/gip_db_dynamodb_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Type_genDbRecord_args,
@@ -48,7 +112,7 @@ import type {
 	Type_savePrograms_ret,
 	Type_updatePrograms_args,
 	Type_updatePrograms_ret,
-} from '../../../src/utils/gip_db_dynamodb_utils.ts';
+} from '#utils/gip_db_dynamodb_utils';
 
 import type {
 	Type_DbProgramHistoryItem,
@@ -56,53 +120,7 @@ import type {
 	//Type_DbProgramHistoryItem,
 	Type_DbProgramEditItem,
 	//Type_FieldMap
-} from '../../../src/utils/gip_prog_fields.ts';
-
-import {
-	//// @ts-expect-error mocks is added for testing
-	//mocks as clientDynamodbMocks,
-	//DynamoDBClient,
-	DynamoDBClientConfig,
-	//ScanCommand,
-	//ScanCommandOutput,
-	//ScanCommandInput,
-	//ScanCommandOutput,
-	//BatchWriteItemCommandInput,
-	//BatchWriteItemCommand,
-	//WriteRequest,
-	//AttributeValue,
-	//TransactWriteItem,
-	//TransactWriteItemsCommandInput,
-	//TransactWriteItemsCommand,
-	WriteRequest,
-} from '@aws-sdk/client-dynamodb';
-
-import {
-	// @ts-expect-error mocks is added for testing
-	mocks as libDynamodbMocks,
-	DynamoDBDocumentClient,
-	ScanCommand,
-	ScanCommandOutput,
-	BatchWriteCommand,
-	BatchWriteCommandOutput,
-	TransactWriteCommandInput,
-	TransactWriteCommand,
-	//ScanCommandInput,
-	//ScanCommandOutput,
-	//BatchWriteItemCommandInput,
-	//BatchWriteItemCommand,
-	//WriteRequest,
-	//AttributeValue,
-	//TransactWriteItem,
-} from '@aws-sdk/lib-dynamodb';
-
-import {
-	GipDynamoDB,
-} from '../../../src/utils/gip_db_dynamodb_utils';
-
-import {
-	HttpError,
-} from '../../../src/utils/gip_http_utils';
+} from '#utils/gip_prog_fields';
 
 //import type {
 //	Type_DayOfWeek,
@@ -150,13 +168,23 @@ interface Type_TestModule {
 	updatePrograms: (args: Type_updatePrograms_args) => Type_updatePrograms_ret,
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
 // Set the timeout to allow debugging. Defaults to 5000 ms
 //const TEST_TIMEOUT_MS = 60 * 1000;
 //jest.setTimeout( TEST_TIMEOUT_MS );
 
-import * as TEST_MODULE from '../../../src/utils/gip_db_dynamodb_utils';
+const EXPECTED_TABLE_NAME_PROGRAM         = 'dev_test-aws-gip-edit_Program'; // Derived from the jest.setEnvVars.ts file
+const EXPECTED_TABLE_NAME_PROGRAM_HISTORY = 'dev_test-aws-gip-edit_ProgramHistory'; // Derived from the jest.setEnvVars.ts file
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
@@ -175,8 +203,8 @@ function fail( err : Error | string ) : void {
 	}
 }
 
-const EXPECTED_TABLE_NAME_PROGRAM         = 'dev_test-aws-gip-edit_Program'; // Derived from the jest.setEnvVars.ts file
-const EXPECTED_TABLE_NAME_PROGRAM_HISTORY = 'dev_test-aws-gip-edit_ProgramHistory'; // Derived from the jest.setEnvVars.ts file
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module', () => {
 	const OLD_ENV = { ...process.env };
@@ -197,6 +225,7 @@ describe(MODULE_NAME + ':module', () => {
 	});
 
 	test( 'Local endpoint', async () => {
+		jest.resetModules(); // Otherwise Jest complains that one of the dependencies is already in the cache
 		await jest.isolateModulesAsync(async () => { // isolateModules allows loading another instance of the module
 			process.env.AWS_REGION               = 'cn-west-1';
 			process.env.IS_LOCAL                 = '1';
@@ -1910,7 +1939,7 @@ describe(MODULE_NAME + ':loadPrograms', () => {
 
 	function genExpectedProgram( rawItem : object ) : object {
 		const arrDeleteProp = [ 'pos', 'modify_time' ];
-		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as object;
+		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as Record<string,unknown>;
 		for ( const prop of arrDeleteProp ) {
 			delete cookedItem[ prop ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 		}

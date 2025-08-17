@@ -10,7 +10,7 @@ import {
 	loadPrograms,
 	savePrograms,
 	updatePrograms,
-} from '../utils/gip_db_dynamodb_utils';
+} from '#utils/gip_db_dynamodb_utils';
 
 import {
 	APIGatewayEvent,
@@ -20,13 +20,13 @@ import {
 
 import logger from '@rhobweb/console-logger';
 
-import { filterPrograms } from '../utils/gip_prog_filter_utils';
+import { filterPrograms } from '#utils/gip_prog_filter_utils';
 
 import {
 	HttpError,
 	parseQueryParams,
 	stringify,
-} from '../utils/gip_http_utils';
+} from '#utils/gip_http_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types

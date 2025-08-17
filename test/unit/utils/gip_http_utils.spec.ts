@@ -3,11 +3,24 @@
  * Unit Tests for gip_http_utils.ts.
  */
 
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_http_utils';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
-const TEST_URI = 'http://localhost';
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import * as TEST_MODULE from '#utils/gip_http_utils';
+
+import { HttpError } from '#utils/gip_http_utils';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Nullable,
@@ -15,7 +28,7 @@ import type {
 	Type_EndpointOptions,
 	Type_HttpParams,
 	Type_HttpHeaders,
-} from '../../../src/utils/gip_types.ts';
+} from '#utils/gip_types';
 
 import type {
 	Type_processEndpointDef_args,
@@ -32,9 +45,7 @@ import type {
 	Type_stripQueryParams_ret,
 	Type_genURI_args,
 	Type_genURI_ret,
-} from '../../../src/utils/gip_http_utils';
-
-import { HttpError } from '../../../src/utils/gip_http_utils';
+} from '#utils/gip_http_utils';
 
 interface Type_TestModule {
 	processEndpointDef:        ( args: Type_processEndpointDef_args )        => Type_processEndpointDef_ret,
@@ -46,14 +57,27 @@ interface Type_TestModule {
 	genURI:                    ( args: Type_genURI_args )                    => Type_genURI_ret,
 };
 
-import * as TEST_MODULE from '../../../src/utils/gip_http_utils';
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const TEST_URI = 'http://localhost';
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
 
 function commonAfterEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;

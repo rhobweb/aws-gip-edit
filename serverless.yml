@@ -133,7 +133,7 @@ custom:
       deploy:finalize: "npx sls s3deploy --stage ${self:provider.stage}"
 
   webpack:
-    webpackConfig: "webpack.server.config.js"
+    webpackConfig: "webpack.server.config.mjs"
 
   assets:
     # Automatically copy distribution folder to S3 stopped working; do it manually (see `scripts.hooks.deploy:finalize`)

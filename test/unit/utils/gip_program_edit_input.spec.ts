@@ -11,6 +11,14 @@ const MODULE_NAME      = 'gip_program_edit_input.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+//import GipProgramEditInput from '../../../src/utils/gip_program_edit_input';
+import GipProgramEditInput from '#utils/gip_program_edit_input';
+
+////////////////////////////////////////////////////////////////////////////////
 // Types
 
 ////////////////////////////////////////
@@ -19,21 +27,16 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 import type {
 	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
-} from '.../../../src/utils/gip_types.ts';
+} from '#utils/gip_types';
 
 ////////////////////////////////////////
 // Test module types
 
 ////////////////////////////////////////////////////////////////////////////////
-// Imports
-
-import GipProgramEditInput from '../../../src/utils/gip_program_edit_input';
-
-////////////////////////////////////////////////////////////////////////////////
 // Constants
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local test functions
+// Test utilities
 
 /**
  * Actions to be performed before every test

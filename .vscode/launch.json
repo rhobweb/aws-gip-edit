@@ -61,7 +61,7 @@
 				//"TS_NODE_PROJECT": "./tsconfig-unittest.json",
 			},
 			"args": [
-				"--config=./test/unit/.jest/jest.config.ts",
+				"--config=./test/unit/.jest/jest.config.mjs",
 				//"--testPathPatterns=./test/unit/.*.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_browser_utils.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_db_dynamodb_utils.spec.ts",
@@ -96,10 +96,9 @@
 				"NODE_OPTIONS":  "--experimental-vm-modules --no-warnings=ExperimentalWarnings", // Node options required for jest to work with ts-node
 				"NODE_ENV":       "test-unit",
 				"NODE_LOG_LEVEL": "off",
-				//"TS_NODE_PROJECT": "./tsconfig-unittest.json",
 			},
 			"args": [
-				"--config=./test/unit/.jest/jest.config.ts",
+				"--config=./test/unit/.jest/jest.config.mjs",
 				"--collect-coverage",
 				//"--reporters=jest-html-reporters",
 				//"--testPathPatterns=./test/unit/utils/gip_browser_utils.spec.ts",
@@ -138,7 +137,7 @@
 				"STAGE":          "lcl"
 			},
 			"args": [
-				"--config=./test/system/.jest/jest.config.ts",
+				"--config=./test/system/.jest/jest.config.mjs",
 				"--testPathPatterns=./test/system/api/programs.spec.ts",
 			],
 			"outputCapture": "std",
@@ -171,7 +170,8 @@
 			"command": "npx sls deploy",
 			"preLaunchTask": "tsc: build - tsconfig.json",
 			"outFiles": [
-				"${workspaceFolder}/dist/**/*.js"
+				"${workspaceFolder}/dist/**/*.js",
+				"${workspaceFolder}/dist/**/*.mjs",
 			],
 			"env": {
 				"STAGE":          "dev",

@@ -1,13 +1,14 @@
 {
   "name": "aws-gip-edit",
-  "version": "1.5.5",
+  "version": "2.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "cross-env IS_OFFLINE=true concurrently --kill-others \"npm run start:devserver\" \"npm run start:offline\"",
-    "start:devserver": "IS_OFFLINE=true webpack serve --config webpack.browser.config.js --mode development",
+    "start:devserver": "IS_OFFLINE=true webpack serve --config webpack.browser.config.mjs --mode development",
     "start:offline": "IS_OFFLINE=true sls offline start",
     "build:serverless": "sls package",
-    "build:browser": "webpack --config webpack.browser.config.js --mode production",
+    "build:browser": "webpack --config webpack.browser.config.mjs --mode production",
     "deploy": "sls deploy",
     "test-unit": "NODE_ENV=test-unit NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --no-warnings=ExperimentalWarnings\" jest --config=./test/unit/.jest/jest.config.ts",
     "test-coverage": "NODE_ENV=test-unit NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --no-warnings=ExperimentalWarnings\" jest --config=./test/unit/.jest/jest.config.ts --collect-coverage",
@@ -39,7 +40,7 @@
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-stage-2": "^7.8.3",
     "@babel/preset-typescript": "^7.27.1",
-    "@stylistic/eslint-plugin": "^5.0.0",
+    "@stylistic/eslint-plugin": "^5.2.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/aws-lambda": "^8.10.149",
@@ -52,7 +53,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/mini-css-extract-plugin": "^2.5.0",
     "@types/prettier": "^2.7.3",
-    "@types/react": "^19.1.8",
+    "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.6",
     "@types/react-helmet": "^6.1.11",
     "@types/serverless": "^3.12.27",
@@ -113,5 +114,119 @@
     "bracketSpacing": true,
     "bracketSameLine": false,
     "arrowParens": "always"
+  },
+  "imports": {
+    "#browser_event": {
+      "node": "./src/browser_event.ts",
+      "default": "./src/browser_event.ts"
+    },
+    "#api/programs": {
+      "node": "./src/api/programs",
+      "default": "./src/api/programs.ts"
+    },
+    "#components/ConfigContext": {
+      "node": "./src/components/ConfigContext",
+      "default": "./src/components/ConfigContext.tsx"
+    },
+    "#components/gip_action_buttons": {
+      "node": "./src/components/gip_action_buttons",
+      "default": "./src/components/gip_action_buttons.tsx"
+    },
+    "#components/gip_edit": {
+      "node": "./src/components/gip_edit",
+      "default": "./src/components/gip_edit.tsx"
+    },
+    "#components/gip_grid_row": {
+      "node": "./src/components/gip_grid_row",
+      "default": "./src/components/gip_grid_row.tsx"
+    },
+    "#components/gip_program_entry": {
+      "node": "./src/components/gip_program_entry",
+      "default": "./src/components/gip_program_entry.tsx"
+    },
+    "#components/gip_program_options": {
+      "node": "./src/components/gip_program_options",
+      "default": "./src/components/gip_program_options.tsx"
+    },
+    "#components/gip_program_table": {
+      "node": "./src/components/gip_program_table",
+      "default": "./src/components/gip_program_table.tsx"
+    },
+    "#components/useConfig": {
+      "node": "./src/components/useConfig",
+      "default": "./src/components/useConfig.tsx"
+    },
+    "#server/config": {
+      "node": "./src/server/config",
+      "default": "./src/server/config.tsx"
+    },
+    "#server/html": {
+      "node": "./src/server/html",
+      "default": "./src/server/html.tsx"
+    },
+    "#server/types": {
+      "node": "./src/server/types.jsx",
+      "default": "./src/server/types.tsx"
+    },
+    "#App": {
+      "node": "./src/App",
+      "default": "./src/App.tsx"
+    },
+    "#utils/gip_browser_utils": {
+      "node": "./src/utils/gip_browser_utils",
+      "default": "./src/utils/gip_browser_utils.ts"
+    },
+    "#utils/gip_date_utils": {
+      "node": "./src/utils/gip_date_utils",
+      "default": "./src/utils/gip_date_utils.ts"
+    },
+    "#utils/gip_db_dynamodb_utils": {
+      "node": "./src/utils/gip_db_dynamodb_utils",
+      "default": "./src/utils/gip_db_dynamodb_utils.ts"
+    },
+    "#utils/gip_prog_db_utils": {
+      "node": "./src/utils/gip_prog_db_utils",
+      "default": "./src/utils/gip_prog_db_utils.ts"
+    },
+    "#utils/gip_http_utils": {
+      "node": "./src/utils/gip_http_utils",
+      "default": "./src/utils/gip_http_utils.ts"
+    },
+    "#utils/gip_http_utils_priv": {
+      "node": "./src/utils/gip_http_utils_priv",
+      "default": "./src/utils/gip_http_utils_priv.ts"
+    },
+    "#utils/gip_program_edit_input": {
+      "node": "./src/utils/gip_program_edit_input",
+      "default": "./src/utils/gip_program_edit_input.ts"
+    },
+    "#utils/gip_program_edit_options": {
+      "node": "./src/utils/gip_program_edit_options",
+      "default": "./src/utils/gip_program_edit_options.ts"
+    },
+    "#utils/gip_prog_edit_utils": {
+      "node": "./src/utils/gip_prog_edit_utils",
+      "default": "./src/utils/gip_prog_edit_utils.ts"
+    },
+    "#utils/gip_prog_fields": {
+      "node": "./src/utils/gip_prog_fields",
+      "default": "./src/utils/gip_prog_fields.ts"
+    },
+    "#utils/gip_prog_filter_utils": {
+      "node": "./src/utils/gip_prog_filter_utils",
+      "default": "./src/utils/gip_prog_filter_utils.ts"
+    },
+    "#utils/gip_prog_title_utils": {
+      "node": "./src/utils/gip_prog_title_utils",
+      "default": "./src/utils/gip_prog_title_utils.ts"
+    },
+    "#utils/gip_program_item": {
+      "node": "./src/utils/gip_program_item",
+      "default": "./src/utils/gip_program_item.ts"
+    },
+    "#utils/gip_types": {
+      "node": "./src/utils/gip_types",
+      "default": "./src/utils/gip_types.ts"
+    }
   }
 }

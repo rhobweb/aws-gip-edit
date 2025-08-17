@@ -11,6 +11,14 @@ const MODULE_NAME      = 'gip_prog_fields.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+//import * as TEST_MODULE from '../../../src/utils/gip_prog_fields';
+import * as TEST_MODULE from '#utils/gip_prog_fields';
+
+////////////////////////////////////////////////////////////////////////////////
 // Types
 
 ////////////////////////////////////////
@@ -19,7 +27,7 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 import type {
 	Type_FieldMap,
 	Type_FieldOrder,
-} from '../../../src/utils/gip_prog_fields';
+} from '#utils/gip_prog_fields';
 
 ////////////////////////////////////////
 // Test module types
@@ -35,11 +43,6 @@ interface Type_TestModule {
 	FIELD_DEFAULT_VALUES:         Record<string, string>,
 	//privateDefs: Type_TestModulePrivateDefs,
 };
-
-////////////////////////////////////////////////////////////////////////////////
-// Imports
-
-import * as TEST_MODULE from '../../../src/utils/gip_prog_fields';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -220,12 +223,13 @@ const EXPECTED_FIELD_DEFAULT_VALUES : Record<string,string|undefined> = {
 	status:        'Pending',
 };
 
-////////////////////////////////////////
-// The module under test
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local test functions
+// Test utilities
 
 /**
  * Actions to be performed before every test

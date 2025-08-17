@@ -9,7 +9,7 @@
 
 import logger        from '@rhobweb/console-logger';
 import queryString   from 'query-string';
-import * as privDefs from './gip_http_utils_priv';
+import * as privDefs from '#utils/gip_http_utils_priv';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types

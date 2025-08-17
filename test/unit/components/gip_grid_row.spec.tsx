@@ -13,6 +13,8 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
 import React, { ReactElement } from 'react';
 
 import {
@@ -20,13 +22,15 @@ import {
 	RenderResult,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_grid_row';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_GipGridRow_args,
 	Type_GipGridRow_ret,
-} from '../../../src/components/gip_grid_row';
+} from '#components/gip_grid_row';
 
 interface Type_TestModule {
 	GipGridRow: (args: Type_GipGridRow_args) => Type_GipGridRow_ret,
@@ -38,7 +42,6 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_grid_row';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

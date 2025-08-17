@@ -12,8 +12,8 @@
 ////////////////////////////////////////
 // Imported types
 
-import type { Config } from './config';
-import type { Stats }  from './types';
+import type { Config } from '#server/config';
+import type { Stats }  from '#server/types';
 
 ////////////////////////////////////////
 // Exported and local types
@@ -48,7 +48,7 @@ const html = ({
 		</head>
 		<body>
 			<div id="root">${content}</div>
-			${stats.scripts.map(filename => `<script src="${config.app.DIST_URL}/${filename}" crossorigin></script>`).join('\n')}
+			${stats.scripts.map(filename => `<script ${(/\.mjs$/.exec(filename)) ? 'type="module"' : ''} src="${config.app.DIST_URL}/${filename}" crossorigin></script>`).join('\n')}
 		</body>
 	</html>`;
 

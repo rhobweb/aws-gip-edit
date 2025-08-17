@@ -13,6 +13,8 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
 import React, { createRef } from 'react';
 
 import {
@@ -22,12 +24,14 @@ import {
 } from '@testing-library/react';
 
 // @ts-expect-error will moan about the PNG file
-import DEFAULT_PROGRAM_IMAGE_URI from '../../../public/program_image_placeholder.png';
+import DEFAULT_PROGRAM_IMAGE_URI from 'file!../../../public/program_image_placeholder.png';
 
 import {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-} from '../../../src/utils/gip_types';
+} from '#utils/gip_types';
+
+import * as TEST_MODULE from '#components/gip_program_entry';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types
@@ -46,7 +50,7 @@ import type {
 	Type_GipProgramEntry_args,
 	Type_GipProgramEntry_ret,
 	Type_UriAndTitleRefs,
-} from '../../../src/components/gip_program_entry';
+} from '#components/gip_program_entry';
 
 interface Type_TestModulePrivateDefs {
 	RowProgramInput:   (args: Type_RowProgramInput_args)   => Type_RowProgramInput_ret,
@@ -69,7 +73,6 @@ type Type_Ref = React.RefObject<HTMLInputElement|null>;
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_program_entry';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

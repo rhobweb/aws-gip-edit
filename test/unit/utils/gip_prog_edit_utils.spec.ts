@@ -1,6 +1,12 @@
 /**
- * DESCRIPTION:
- * Unit Tests for utils/gip_prog_edit_utils.ts.
+ * FILE:        utils/gip_prog_edit_utils.spec.ts.
+ * DESCRIPTION: Unit Tests for utils/gip_prog_edit_utils.ts.
+ *
+ * The Jest 'testEnvironment' property is configured to be 'jsdom'
+ * Change the testEnvironment so that the 'jsdom' package picks up TextEncoder and TextDecoder:
+ * @jest-environment node
+ *
+ * However, when using the node test environment need to defined a global DOMParser.
  */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -9,6 +15,36 @@
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_prog_edit_utils.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+//// NOTE: This is not required if '@jest-environment node' is added in the file header comment
+//import { // TODO: These may not work client-side
+//	TextEncoder as NodeTextEncoder,
+//	TextDecoder as NodeTextDecoder,
+//} from 'node:util';
+//
+//// jsdom expects global definitions for: TextEncoder, TextDecoder
+//if (typeof global.TextEncoder === 'undefined') {
+//	global.TextEncoder = NodeTextEncoder as typeof global.TextEncoder;
+//}
+//if (typeof global.TextDecoder === 'undefined') {
+//	global.TextDecoder = NodeTextDecoder as typeof global.TextDecoder;
+//}
+
+import jsdom from 'jsdom';
+
+// Define the global DOMParser used by the function under test.
+global.DOMParser = new jsdom.JSDOM().window.DOMParser;
+
+/**
+ * @jest-environment jsdom
+ */
+
+import * as TEST_MODULE from '#utils/gip_prog_edit_utils';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types
@@ -37,7 +73,7 @@ import type {
 	Type_cookRawEpisode_ret,
 	Type_cookSynopsis_args,
 	Type_cookSynopsis_ret,
-} from '../../../src/utils/gip_prog_edit_utils';
+} from '#utils/gip_prog_edit_utils';
 
 ////////////////////////////////////////
 // Test module types
@@ -59,31 +95,7 @@ interface Type_TestModule {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Imports
-
-import { // TODO: These may not work client-side
-	TextEncoder as NodeTextEncoder,
-	TextDecoder as NodeTextDecoder,
-} from 'node:util';
-
-// jsdom expects global definitions for: TextEncoder, TextDecoder
-if (typeof global.TextEncoder === 'undefined') {
-	global.TextEncoder = NodeTextEncoder as typeof global.TextEncoder;
-}
-if (typeof global.TextDecoder === 'undefined') {
-	global.TextDecoder = NodeTextDecoder as typeof global.TextDecoder;
-}
-
-import jsdom from 'jsdom';
-
-import * as TEST_MODULE from '../../../src/utils/gip_prog_edit_utils';
-
-////////////////////////////////////////////////////////////////////////////////
 // Constants
-
-////////////////////////////////////////
-// The module under test
-const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const { JSDOM }  = jsdom;
 
@@ -218,7 +230,12 @@ const TEST_PROG_PRIMARY_FRENCH = `
 `;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Local test functions
+// Definitions
+
+const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }

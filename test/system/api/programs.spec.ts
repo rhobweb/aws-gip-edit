@@ -22,21 +22,12 @@ const MODULE_NAME = 'gip-system-test';
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals';
+
 // Add possibility of calling API in development environment, however, CORS currently forbids this.
 // Would need to disable CORS or use a test proxy server to allow this.
 import ENV_VARS_LCL from '../../../.env-lcl.json' with { type: "json" };
 import ENV_VARS_DEV from '../../../.env-dev.json' with { type: "json" };
-
-const STAGE = process.env.STAGE;
-
-interface Type_EnvVars {
-	AWS_REGION                 : string,
-	TABLE_NAME_PROGRAM_HISTORY : string,
-	GIP_API_URI                : string,
-	LOCAL_DYNAMO_DB_ENDPOINT?  : string,
-};
-
-const ENV_VARS = (STAGE === 'dev' ? ENV_VARS_DEV : ENV_VARS_LCL) as Type_EnvVars;
 
 import axios, {
 	AxiosResponse,
@@ -64,12 +55,49 @@ import {
 
 import assert from 'node:assert';
 
+////////////////////////////////////////////////////////////////////////////////
+// Types
+
+import type {
+	Type_DbProgramEditItem,
+	Type_DbProgramHistoryItem,
+} from '#utils/gip_prog_fields';
+
+interface Type_axios_result {
+	status:  number,
+	body:    object,
+	headers: object,
+};
+
+interface Type_Headers {
+	"content-type":   string,
+	"cache-control":  string,
+	"content-length": string,
+};
+
+interface Type_EnvVars {
+	AWS_REGION                 : string,
+	TABLE_NAME_PROGRAM_HISTORY : string,
+	GIP_API_URI                : string,
+	LOCAL_DYNAMO_DB_ENDPOINT?  : string,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const STAGE = process.env.STAGE;
+
+const ENV_VARS = (STAGE === 'dev' ? ENV_VARS_DEV : ENV_VARS_LCL) as Type_EnvVars;
+
 const {
 	GIP_API_URI,
 	AWS_REGION,
 	LOCAL_DYNAMO_DB_ENDPOINT,   // May be undefined if running remotely
 	TABLE_NAME_PROGRAM_HISTORY,
 } = ENV_VARS;
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
 
 // ESLint does not detect the assertions, so the condition is required to prevent ESLint warnings.
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -78,20 +106,6 @@ assert( AWS_REGION !== undefined );
 assert( TABLE_NAME_PROGRAM_HISTORY !== undefined );
 const INDEX_NAME_PROGRAM_HISTORY_PID = `${TABLE_NAME_PROGRAM_HISTORY}-pid`;
 /* eslint-enable @typescript-eslint/no-unnecessary-condition */
-
-////////////////////////////////////////////////////////////////////////////////
-// Types
-
-import type {
-	Type_DbProgramEditItem,
-	Type_DbProgramHistoryItem,
-} from '../../../src/utils/gip_prog_fields';
-
-interface Type_axios_result {
-	status:  number,
-	body:    object,
-	headers: object,
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
@@ -477,7 +491,7 @@ describe(MODULE_NAME + ':POST', () => {
 	let actualResult   : Type_axios_result;
 	let expectedResult : Type_axios_result;
 	let expectedBody   : object;
-	let expectedHeaders: object;
+	let expectedHeaders: Type_Headers;
 
 	beforeEach( () => {
 		commonBeforeEach();
@@ -493,7 +507,7 @@ describe(MODULE_NAME + ':POST', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 
@@ -570,7 +584,7 @@ describe(MODULE_NAME + ':GET', () => {
 	let actualResult    : Type_axios_result;
 	let expectedResult  : Type_axios_result;
 	let expectedBody    : object;
-	let expectedHeaders : object;
+	let expectedHeaders : Type_Headers;
 	const DAY_TODAY     = 0  as Type_DayOfWeekOffset;
 	const DAY_YESTERDAY = -1 as Type_DayOfWeekOffset;
 	const DAY_TOMORROW  = 1  as Type_DayOfWeekOffset;
@@ -587,7 +601,7 @@ describe(MODULE_NAME + ':GET', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 
@@ -766,7 +780,7 @@ describe(MODULE_NAME + ':PATCH', () => {
 	let actualResult         : Type_axios_result;
 	let expectedResult       : Type_axios_result;
 	let expectedBody         : object;
-	let expectedHeaders      : object;
+	let expectedHeaders      : Type_Headers;
 	let expectedHistoryItems : Type_DbProgramHistoryItem[];
 	let actualHistoryItems   : Type_DbProgramHistoryItem[];
 
@@ -785,7 +799,7 @@ describe(MODULE_NAME + ':PATCH', () => {
 		expectedHeaders = {
 			'content-type':   'application/json; charset=UTF-8',
 			'cache-control':  'no-cache',
-			'content-length': 0,
+			'content-length': '0',
 		};
 	});
 

@@ -11,6 +11,14 @@ const MODULE_NAME      = 'gip_program_item.ts';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 
 ////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import GipProgramItem from '#utils/gip_program_item';
+import * as TEST_MODULE from '#utils/gip_program_item';
+
+////////////////////////////////////////////////////////////////////////////////
 // Types
 
 ////////////////////////////////////////
@@ -21,13 +29,13 @@ import type {
 	Type_getTrimmedField_ret,
 	Type_extractPID_args,
 	Type_extractPID_ret,
-} from '.../../../src/utils/gip_program_item.ts';
+} from '#utils/gip_program_item';
 
 import type {
 	Type_DisplayProgramItem,
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-} from '.../../../src/utils/gip_types.ts';
+} from '#utils/gip_types';
 
 ////////////////////////////////////////
 // Test module types
@@ -42,17 +50,12 @@ interface Type_TestModule {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Imports
+// Constants
 
-import GipProgramItem from '../../../src/utils/gip_program_item';
-import * as TEST_MODULE from '../../../src/utils/gip_program_item';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Constants
-
-////////////////////////////////////////////////////////////////////////////////
-// Local test functions
+// Test utilities
 
 /**
  * Actions to be performed before every test

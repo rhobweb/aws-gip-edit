@@ -66,10 +66,15 @@ export default {
 		} ) ],
 		extensions: [".server.tsx", ".server.ts", ".server.jsx", ".server.js", ".tsx", ".ts", ".jsx", ".js"],
 	},
+	experiments: {
+		outputModule: true,
+	},
 	output: {
-		libraryTarget: "commonjs2",
 		path: path.join(__dirname, ".webpack"),
-		filename: "[name].js",
+		library: { type: 'module' },
+		filename: "[name].mjs",
+		//library: { type: 'commonjs' },
+		//filename: "[name].js",
 		sourceMapFilename: "[file].map",
 	},
 };

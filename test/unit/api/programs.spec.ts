@@ -9,7 +9,9 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
-import type {
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import {
 	APIGatewayEvent,
 	//APIGatewayProxyStructuredResultV2,
 	//Context,
@@ -19,7 +21,7 @@ import {
 	ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 
-import type {
+import libDynamodb, {
 	BatchWriteCommand,
 	BatchWriteCommandOutput,
 	DynamoDBDocumentClient,
@@ -29,7 +31,6 @@ import type {
 	TransactWriteCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
 
-import libDynamodb from '@aws-sdk/lib-dynamodb';
 // @ts-expect-error mocks is added as part of the module mocking
 const dynamoDBDocumentClientMock = libDynamodb.mocks.dynamoDBDocumentClientMock as DynamoDBDocumentClient; // eslint-disable-line @typescript-eslint/no-unsafe-member-access
 
@@ -49,7 +50,7 @@ interface Type_TestModule {
 	default: Type_TestModuleDefaultDefs,
 };
 
-import * as TEST_MODULE from '../../../src/api/programs';
+import * as TEST_MODULE from '#api/programs';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Test utilities
@@ -91,7 +92,7 @@ function genExpectedBody( arrObject : object[] ) : string {
 	const arrCooked = [] as object[];
 	const arrDeleteProp = [ 'pos', 'modify_time' ];
 	for ( const rawItem of arrObject ) {
-		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as object;
+		const cookedItem = JSON.parse( JSON.stringify( rawItem ) ) as Record<string,unknown>;
 		for ( const prop of arrDeleteProp ) {
 			delete cookedItem[ prop ]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
 		}
@@ -101,7 +102,7 @@ function genExpectedBody( arrObject : object[] ) : string {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Unit tests
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;
@@ -115,6 +116,7 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 	});
 
 	it ('module initialises OK', async () => {
+		jest.resetModules(); // Otherwise Jest complains that one of the dependencies is already in the cache
 		await jest.isolateModulesAsync(async () => { // Load another instance of the module. This allows configuring a different environment
 			testModuleObj = await import( TEST_MODULE_PATH ) as Type_TestModule;
 		});
@@ -187,7 +189,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 	let expectedResult   : Awaited<Type_handler_ret>;
 	let expectedBody     : string;
 	let testArgs         : Type_handler_args;
-	let sendMock         : typeof jest.fn;
+	let sendMock         : jest.MockedFunction<(args: ScanCommand) => ScanCommandOutput>;
 	let sendErr          : Error | null;
 	let sendRet          : ScanCommandOutput;
 	let sendExpectedArgs : ScanCommand;
@@ -227,7 +229,7 @@ describe(MODULE_NAME + ':handler GET', () => {
 		// @ts-expect-error don't bother trying to type this
 		dynamoDBDocumentClientMock.send = sendMock;
 		// @ts-expect-error don't bother trying to type this
-		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await,@typescript-eslint/no-unsafe-call
+		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await
 			if ( ! sendErr ) {
 				return sendRet;
 			} else {
@@ -308,7 +310,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 	let expectedResult      : Awaited<Type_handler_ret>;
 	let expectedBody        : string;
 	let testArgs            : Type_handler_args;
-	let sendMock            : typeof jest.fn;
+	let sendMock            : jest.MockedFunction<(args: ScanCommand|BatchWriteCommand) => ScanCommandOutput|BatchWriteCommandOutput>;
 	let sendErrArr          : (Error | null)[];
 	let sendRetArr          : [ ScanCommandOutput, BatchWriteCommandOutput, BatchWriteCommandOutput ];
 	let sendExpectedArgsArr : [ ScanCommand, BatchWriteCommand, BatchWriteCommand ];
@@ -352,7 +354,7 @@ describe(MODULE_NAME + ':handler POST', () => {
 		// @ts-expect-error don't bother trying to type this
 		dynamoDBDocumentClientMock.send = sendMock;
 		// @ts-expect-error don't bother trying to type this
-		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await,@typescript-eslint/no-unsafe-call
+		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await
 			const sendErr = sendErrArr.shift();
 			const sendRet = sendRetArr.shift();
 			if ( ! sendErr ) {
@@ -552,7 +554,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 	let expectedResult      : Awaited<Type_handler_ret>;
 	let expectedBody        : string;
 	let testArgs            : Type_handler_args;
-	let sendMock            : typeof jest.fn;
+	let sendMock            : jest.MockedFunction<(args: ScanCommand|TransactWriteCommand) => ScanCommandOutput|TransactWriteCommandOutput>;
 	let sendErrArr          : (Error | null)[];
 	let sendRetArr          : [ ScanCommandOutput, TransactWriteCommandOutput ];
 	let sendExpectedArgsArr : [ ScanCommand, TransactWriteCommand ];
@@ -583,7 +585,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 		// @ts-expect-error don't bother trying to type this
 		dynamoDBDocumentClientMock.send = sendMock;
 		// @ts-expect-error don't bother trying to type this
-		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await,@typescript-eslint/no-unsafe-call
+		sendMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await
 			const sendErr = sendErrArr.shift();
 			const sendRet = sendRetArr.shift();
 			if ( ! sendErr ) {
@@ -739,7 +741,7 @@ describe(MODULE_NAME + ':handler PATCH', () => {
 	test( 'OK', async () => {
 		sendErrArr[ 0 ] = null;
 		sendErrArr[ 1 ] = null;
-		expectedBody = formatBody( {} );
+		expectedBody = formatBody( { message: 'OK' } );
 		expectedResult = {
 			statusCode: 200,
 			body:       expectedBody,

@@ -13,7 +13,9 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
-import React from 'react';
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import React, { MouseEventHandler } from 'react';
 
 import {
 	render,
@@ -21,19 +23,21 @@ import {
 	fireEvent,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_action_buttons';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DisplayProgramItem,
-} from '../../../src/utils/gip_types';
+} from '#utils/gip_types';
 
 import type {
 	Type_ActionButtons_args,
 	Type_ActionButtons_ret,
 	Type_GipActionButtons_args,
 	Type_GipActionButtons_ret,
-} from '../../../src/components/gip_action_buttons';
+} from '#components/gip_action_buttons';
 
 interface Type_TestModulePrivateDefs {
 	ActionButtons: (args: Type_ActionButtons_args) => Type_ActionButtons_ret,
@@ -44,17 +48,18 @@ interface Type_TestModule {
 	GipActionButtons: (args?: Type_GipActionButtons_args) => Type_GipActionButtons_ret,
 };
 
+type Type_savePrograms_fn = (args: Type_DisplayProgramItem[]) => Promise<Type_DisplayProgramItem[]>;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_action_buttons';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const alertMock   = jest.fn();
-const confirmMock = jest.fn();
+const confirmMock : (jest.MockedFunction<(message?: string) => boolean>) = jest.fn();
 
 window.alert   = alertMock;
 window.confirm = confirmMock;
@@ -111,7 +116,7 @@ describe(MODULE_NAME + ':ActionButtons', () => {
 	let testPrograms        : Type_DisplayProgramItem[];
 	let onProgramChangeMock : jest.Mock;
 	let programsSavedMock   : jest.Mock;
-	let saveProgramsMock    : jest.Mock;
+	let saveProgramsMock    : jest.MockedFunction<Type_savePrograms_fn>;
 	let ActionButtons       : (args: Type_ActionButtons_args) => Type_ActionButtons_ret;
 	let component           : RenderResult | null;
 	let element             : HTMLButtonElement;
@@ -210,7 +215,7 @@ describe(MODULE_NAME + ':ActionButtons', () => {
 				<input type="button" className="gip-action-button gip-action-button-clear-days"      name="clearDays"      value="Clear Days"      onClick={ () => { expect.any(Function); } }/>
 				<input type="button" className="gip-action-button gip-action-button-select-ok"       name="selectOK"       value="Select OK"       onClick={ () => { expect.any(Function); } }/>
 				<input type="button" className="gip-action-button gip-action-button-delete-selected" name="deleteSelected" value="Delete Selected" onClick={ () => { expect.any(Function); } }/>
-				<input type="button" className="gip-action-button gip-action-button-save-progs"      name="saveProgs"      value="Save"            onClick={ saveProgramsMock }/>
+				<input type="button" className="gip-action-button gip-action-button-save-progs"      name="saveProgs"      value="Save"            onClick={ saveProgramsMock as unknown as MouseEventHandler<HTMLInputElement> }/>
 			</>
 		);
 		const expectedRendered = render( expectedJSX );
@@ -333,7 +338,7 @@ describe(MODULE_NAME + ':GipActionButtons', () => {
 	let GipActionButtons    : (args: Type_GipActionButtons_args) => Type_GipActionButtons_ret;
 	let onProgramChangeMock : jest.Mock;
 	let programsSavedMock   : jest.Mock;
-	let saveProgramsMock    : jest.Mock;
+	let saveProgramsMock    : jest.MockedFunction<Type_savePrograms_fn>;
 	let component           : RenderResult | null;
 
 	beforeEach( () => {
@@ -419,7 +424,7 @@ describe(MODULE_NAME + ':GipActionButtons', () => {
 					<input type="button" className="gip-action-button gip-action-button-clear-days"      name="clearDays"      value="Clear Days"      onClick={ () => { expect.any(Function); } }/>
 					<input type="button" className="gip-action-button gip-action-button-select-ok"       name="selectOK"       value="Select OK"       onClick={ () => { expect.any(Function); } }/>
 					<input type="button" className="gip-action-button gip-action-button-delete-selected" name="deleteSelected" value="Delete Selected" onClick={ () => { expect.any(Function); } }/>
-					<input type="button" className="gip-action-button gip-action-button-save-progs"      name="saveProgs"      value="Save"            onClick={ saveProgramsMock }/>
+					<input type="button" className="gip-action-button gip-action-button-save-progs"      name="saveProgs"      value="Save"            onClick={ saveProgramsMock as unknown as MouseEventHandler<HTMLInputElement> }/>
 				</div>
 			</div>
 		);

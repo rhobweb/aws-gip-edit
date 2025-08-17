@@ -13,14 +13,16 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
 import React     from 'react';
 import userEvent from '@testing-library/user-event';
 
-import GipProgramItem      from '../../../src/utils/gip_program_item';
-import GipProgramEditInput from '../../../src/utils/gip_program_edit_input';
+import GipProgramItem      from '#utils/gip_program_item';
+import GipProgramEditInput from '#utils/gip_program_edit_input';
 import {
 	REVERSE_FIELD_MAP_COLLECTION,
-} from '../../../src/utils/gip_prog_fields';
+} from '#utils/gip_prog_fields';
 
 import {
 	render,
@@ -30,13 +32,19 @@ import {
 	act, // See https://testing-library.com/docs/react-testing-library/api/#act
 } from '@testing-library/react';
 
+import { Type_DbProgramEditItem } from '#utils/gip_prog_fields';
+
+import { Type_DisplayProgramItem } from '#utils/gip_types';
+
+import * as TEST_MODULE from '#components/gip_edit';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_ProgramEditInput,
 	Type_ProgramEditOptions,
-} from '../../../src/utils/gip_types';
+} from '#utils/gip_types';
 
 import type {
 	Type_processProgramForSaving_args,
@@ -49,7 +57,7 @@ import type {
 	Type_processDrop_args,
 	Type_processDrop_ret,
 	Type_GipEdit_ret,
-} from '../../../src/components/gip_edit';
+} from '#components/gip_edit';
 
 import type { UserEvent } from '@testing-library/user-event';
 
@@ -103,9 +111,6 @@ const TEST_PROG_LINK_HTML = `
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_edit';
-import { Type_DbProgramEditItem } from '../../../src/utils/gip_prog_fields';
-import { Type_DisplayProgramItem } from '../../../src/utils/gip_types';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 const {
@@ -119,7 +124,7 @@ const {
 //const TEST_TIMEOUT_MS = 300 * 1000;
 //jest.setTimeout( TEST_TIMEOUT_MS );
 
-const fetchMock = jest.fn();
+const fetchMock = jest.fn() as jest.MockedFunction<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>;
 const alertMock = jest.fn();
 
 global.fetch = fetchMock;
@@ -167,7 +172,7 @@ function initFetchRet( arrProgram : Type_DbProgramEditItem[], ok = true, status 
 
 fetchMock.mockImplementation( async () => { // eslint-disable-line @typescript-eslint/require-await
 	if ( ! testFetchErr ) {
-		return testFetchRet;
+		return testFetchRet as Response; // It's really a Type_MutableResponse though
 	} else {
 		throw testFetchErr;
 	}
@@ -201,7 +206,8 @@ interface Type_setupUserEvent_ret extends RenderResult {
  */
 function setupUserEvent( jsx : React.JSX.Element ) : Type_setupUserEvent_ret {
 	return {
-		user: userEvent.setup(),
+		// @ts-expect-error this should be fine, but tsc thinks that setup does not exist
+		user: userEvent.setup(), // eslint-disable-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 		// Import `render` from the framework library of your choice.
 		// See https://testing-library.com/docs/dom-testing-library/install#wrappers
 		...render(jsx),
@@ -241,6 +247,7 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 	});
 
 	test('module initialises OK', async () => {
+		jest.resetModules(); // Otherwise Jest complains that one of the dependencies is already in the cache
 		await jest.isolateModulesAsync(async () => { // Load another instance of the module. This allows configuring a different environment
 			testModuleObj = await import( TEST_MODULE_PATH ) as Type_TestModule;
 		});
@@ -426,8 +433,8 @@ describe(MODULE_NAME + ':savePrograms', () => {
 		expect( actualResult ).toEqual( expectedResult );
 		// Stringified JSON cannot be matched directly, so match any string first, then match the stringified JSON
 		expect( fetchMock ).toHaveBeenCalledWith( expectedFetchURI, expectedFetchOptions );
-		// @ts-expect-error toMatchJSON is an expect extension
-		expect( fetchMock.mock.calls[ 0 ][ 1 ].body ).toMatchJSON( expectedFetchBody ); // eslint-disable-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+		// @ts-expect-error toMatchJSON is a matcher extension
+		expect( fetchMock.mock.calls[ 0 ][ 1 ]!.body ).toMatchJSON( expectedFetchBody ); // eslint-disable-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-non-null-assertion
 	});
 
 	test('Save failed', async () => {
@@ -567,7 +574,7 @@ describe(MODULE_NAME + ':processDrop', () => {
 	let actualResult        : Type_processDrop_ret;
 	let expectedResult      : Type_processDrop_ret;
 	let testProgramEditItem : GipProgramEditInput;
-	let getDataMock         : jest.Mock;
+	let getDataMock         : jest.MockedFunction<() => string>;
 	let getDataRetArr       : string[];
 
 	const getDataExpectedArgsHtml  = 'text/html';
@@ -578,13 +585,13 @@ describe(MODULE_NAME + ':processDrop', () => {
 		testModuleObj       = testModule.privateDefs;
 		getDataMock = jest.fn();
 		testArgs = {
-			// @ts-expect-error only define the required properties
+			// @ts-expect-error missing parameters
 			dataTransfer: {
 				getData: getDataMock,
 			},
 		};
 		getDataMock.mockImplementation( () => {
-			return getDataRetArr.shift();
+			return getDataRetArr.shift()!; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 		} );
 		testURI  = 'test/pid';
 		testHTML = TEST_PROG_LINK_HTML;

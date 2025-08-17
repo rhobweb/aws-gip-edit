@@ -1,25 +1,24 @@
-
-import parentConfigFn from '../../jest.common.config';
-
 /**
  * Jest configuration file for the system tests
  */
-import type { JestConfigWithTsJest } from 'ts-jest';
 
-const REL_TEST_DIR     : string = `../../../test/system/`; // Path from the .jest directory to the directory containing the system tests
-const REL_ROOT_DIR     : string = `../../../`;             // Path from the .jest directory to the project root directory
-const REL_COVERAGE_DIR : string = `../../output/`;
+import parentConfigFn from '../../jest.common.config.mjs'
+
+const REL_TEST_DIR = `../../../test/system/`; // Path from the .jest directory to the directory containing the system tests
+const REL_ROOT_DIR = `../../../`;             // Path from the .jest directory to the project root directory
+const REL_COVERAGE_DIR = `../../output/`;
 
 import path from 'node:path';
-const ENV_FILE       = `${__dirname}/jest.setEnvVars.ts`;
+const __dirname = import.meta.dirname;
+const ENV_FILE       = `${__dirname}/jest.setEnvVars.mjs`;
 const TEST_DIR       = path.resolve( `${__dirname}/${REL_TEST_DIR}` );
 const ROOT_DIR       = path.resolve(  `${__dirname}/${REL_ROOT_DIR}` );
 const TEST_PATH_DIRS = [ TEST_DIR ];
 const TEST_REGEX     = '.spec.ts';
 
-export default async (): Promise<JestConfigWithTsJest> => {
+export default async () => {
 	const parentConfig = await parentConfigFn();
-	const config : JestConfigWithTsJest = {
+	const config = {
 		...parentConfig,
 
 		// The root directory that Jest should scan for tests and modules within
@@ -35,7 +34,7 @@ export default async (): Promise<JestConfigWithTsJest> => {
 		  "mjs",
 		//   "cjs",
 		//   "jsx",
-		   "tsx",
+		  "tsx",
 		//   "json",
 		//   "node"
 		],
@@ -48,7 +47,16 @@ export default async (): Promise<JestConfigWithTsJest> => {
 
 		//collectCoverage: true,
 		coverageDirectory: REL_COVERAGE_DIR,
-	};
 
+		transform: {
+			...parentConfig.transform,
+			'\\.tsx?$': [ 'ts-jest',
+				{
+					tsconfig: './tsconfig-test.json',
+					preserveTsModule: true,
+				},
+			],
+		},
+	};
 	return config;
 }

@@ -1,5 +1,5 @@
 /**
- * Environment variables for the aws-gip-edit unit tests
+ * Environment variables for the aws-gip-edit system tests
  */
 
 const { REL_SRC_DIR = '../../src/' }  = process.env; // Relative path from the unit test directory to the source directory

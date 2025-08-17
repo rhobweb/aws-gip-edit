@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist",
-    "target": "ESNext",
+    "target": "esnext",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
@@ -16,10 +16,11 @@
     "baseUrl": "./",
     "esModuleInterop": true,
     "isolatedModules": true,
+    "rootDir": "."
   },
-	"include": [
-		"src/**/*.ts",
-		"src/**/*.tsx",
-		"handler.ts",
-	],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "handler.ts",
+  ]
 }

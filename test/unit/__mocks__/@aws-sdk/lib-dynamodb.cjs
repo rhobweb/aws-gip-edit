@@ -1,18 +1,28 @@
+/**
+ * FILE:        test/utils/__mocks__/@aws-sdk/lib-dynamodb.cjs
+ * DESCRIPTION: Mocks for the @aws-sdk/lib-dynamodb package.
+ *
+ * Usage:       ts-jest with ESM does not automatically pick up this mock.
+ *              Need to configure a Jest setup script to run:
+ *                 import {jest} from '@jest/globals';
+ *                 const libDynamodb = jest.requireActual( '../__mocks__/@aws-sdk/lib-dynamodb.cjs' );
+ *                 jest.mock( '@aws-sdk/lib-dynamodb', () => ({ __esModule: true, ...libDynamodb }) );
+ */
 'use strict';
 
 //const MODULE_NAME = '@aws-sdk/lib-dynamodb';
 
 //const mockedModule : object = jest.createMockFromModule( MODULE_NAME );
 
-import {
-	DynamoDBClient
-} from '@aws-sdk/client-dynamodb';
-
-import {
-	BatchWriteCommandInput,
-	ScanCommandInput,
-	TransactWriteCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+//import {
+//	DynamoDBClient
+//} from '@aws-sdk/client-dynamodb';
+//
+//import {
+//	BatchWriteCommandInput,
+//	ScanCommandInput,
+//	TransactWriteCommandInput,
+//} from '@aws-sdk/lib-dynamodb';
 
 
 /**
@@ -22,91 +32,86 @@ import {
  * @param {Object} sourceObj
  * @return a copy of the object.
  */
-function copyObject( sourceObj : object ) : object {
-	return JSON.parse( JSON.stringify( sourceObj ) ) as object;
+function copyObject( sourceObj ) {
+	return JSON.parse( JSON.stringify( sourceObj ) );
 }
 
-const dynamoDBDocumentClientMock : DynamoDBDocumentClient = {
+const dynamoDBDocumentClientMock = {
 	testProps: {
 		name:      'DynamoDBDocumentClient mock',
 		destroyed: false,
 		dbClient:  null,
 	},
 	// @ts-expect-error just a stub, test shall mock this
-	send: () : Promise<unknown> => ({}),
-	destroy: () : void => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+	send: () => ({}),
+	destroy: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
 };
 
-interface DynamoDBDocumentClientTestProps {
-	name:      string,
-	destroyed: boolean,
-	dbClient: (DynamoDBClient | null),
-};
-
-export class DynamoDBDocumentClient {
-	testProps : DynamoDBDocumentClientTestProps = {
+class DynamoDBDocumentClient {
+	testProps = {
 		name:      'DynamoDBDocumentClient mock',
 		destroyed: false,
 		dbClient:  null,
 	};
 
-	constructor ( dbClient: DynamoDBClient ) {
+	constructor ( dbClient ) {
 		dynamoDBDocumentClientMock.testProps.dbClient = dbClient;
 		return dynamoDBDocumentClientMock;
 	}
-	destroy() : void {
+	destroy() {
 		this.testProps.dbClient  = null;
 		this.testProps.destroyed = true;
 	}
-	static from( dbClient : DynamoDBClient ) : DynamoDBDocumentClient {
+	static from( dbClient ) {
 		const docClient = dynamoDBDocumentClientMock;
 		docClient.testProps.dbClient = dbClient;
 		return docClient;
 	}
 	// @ts-expect-error just a stub, test shall mock this
-	send( args : unknown ) : Promise<unknown> { return args; }; // Will be mocked in tests
+	send( args ) { return args; }; // Will be mocked in tests
 }
 
 //const scanCommandMock = {
 //	args: {},
 //};
 
-export class ScanCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
-	constructor ( args : ScanCommandInput ) {
+class ScanCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
+	constructor ( args ) {
 		const scanCommandRet = {
 			objType: 'ScanCommand',
-			args:    copyObject( args ) as ScanCommandInput,
+			args:    copyObject( args ),
 		};
 		return scanCommandRet;
 	}
 }
 
-export class BatchWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
-	constructor ( args : BatchWriteCommandInput ) {
+class BatchWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
+	constructor ( args ) {
 		const batchWriteCommandRet = {
 			objType: 'BatchWriteCommand',
-			args:    copyObject( args ) as BatchWriteCommandInput,
+			args:    copyObject( args ),
 		};
 		return batchWriteCommandRet;
 	}
 }
 
-export class TransactWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
-	constructor ( args : TransactWriteCommandInput ) {
+class TransactWriteCommand { // eslint-disable-line @typescript-eslint/no-extraneous-class
+	constructor ( args ) {
 		const transactWriteCommandRet = {
 			objType: 'TransactWriteCommand',
-			args:    copyObject( args ) as TransactWriteCommandInput,
+			args:    copyObject( args ),
 		};
 		return transactWriteCommandRet;
 	}
 }
 
-export const mocks = {
+const mocks = {
 	dynamoDBDocumentClientMock,
 	//scanCommandMock,
 };
 
-export default {
+//export default {
+module.exports = {
 	mocks,
 	BatchWriteCommand,
 	DynamoDBDocumentClient,

@@ -43,7 +43,7 @@ import {
 	PROG_FIELD_DAY_OF_WEEK,
 	PROG_FIELD_QUALITY,
 	PROG_FIELD_SELECTED
-} from './gip_types';
+} from '#utils/gip_types';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types

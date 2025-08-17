@@ -2,9 +2,23 @@
  * DESCRIPTION:
  * Unit Tests for gip_http_utils_priv.ts.
  */
+
+////////////////////////////////////////////////////////////////////////////////
+// Test module constants
+
 const REL_SRC_PATH     = '../../../src/utils/';
 const MODULE_NAME      = 'gip_http_utils_priv';
 const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
+
+////////////////////////////////////////////////////////////////////////////////
+// Imports
+
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
+import * as TEST_MODULE from '#utils/gip_http_utils_priv';
+
+////////////////////////////////////////////////////////////////////////////////
+// Types
 
 import type {
 	Nullable,
@@ -25,7 +39,6 @@ import type {
 	Type_genContent_ret,
 } from '../../../src/utils/gip_http_utils_priv.ts';
 
-
 interface Type_TestModule {
 	genParams:      ( params: Type_genParams_args )      => Type_genParams_ret,
 	genURI:         ( params: Type_genURI_args )         => Type_genURI_ret,
@@ -33,8 +46,16 @@ interface Type_TestModule {
 	genContent:     ( params: Type_genContent_args )     => Type_genContent_ret,
 };
 
-import * as TEST_MODULE from '../../../src/utils/gip_http_utils_priv';
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+
+////////////////////////////////////////////////////////////////////////////////
+// Definitions
+
 const testModule = TEST_MODULE as unknown as Type_TestModule;
+
+////////////////////////////////////////////////////////////////////////////////
+// Test utilities
 
 function commonBeforeEach() : void { // eslint-disable-next @typescript-eslint/no-empty-function
 }
@@ -51,6 +72,9 @@ function fail( err : Error | string ) : void {
 		throw err;
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Tests
 
 describe(MODULE_NAME + ':module can be loaded', () => {
 	let testModuleObj : Type_TestModule;

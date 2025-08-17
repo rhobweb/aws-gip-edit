@@ -12,9 +12,9 @@ import {
 	PROG_FIELD_SYNOPSIS,
 	PROG_FIELD_TITLE,
 	PROG_FIELD_IMAGE_URI,
-} from './gip_types';
+} from '#utils/gip_types';
 
-import { convertKnownTitle } from './gip_prog_title_utils';
+import { convertKnownTitle } from '#utils/gip_prog_title_utils';
 
 import logger  from '@rhobweb/console-logger';
 

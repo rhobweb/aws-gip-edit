@@ -1,7 +1,7 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-import manifest from "../../../public/manifest.json";
-import { Config } from "../../server/config";
+import manifest from "../../../public/manifest.json" with { type: 'json' };
+import { Config } from "../../server/config.js";
 
 const ConfigContext = createContext<Config>({
 	app: {

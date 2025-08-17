@@ -13,12 +13,17 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
 import React from 'react';
+
 import {
 	render,
 	RenderResult,
 	fireEvent,
 } from '@testing-library/react';
+
+import * as TEST_MODULE from '#components/gip_program_options';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types
@@ -28,7 +33,7 @@ import type {
 	Type_ProgramOptionsSelect_ret,
 	Type_GipProgramOptions_args,
 	Type_GipProgramOptions_ret,
-} from '../../../src/components/gip_program_options';
+} from '#components/gip_program_options';
 
 interface Type_TestModulePrivateDefs {
 	ProgramOptionSelect: (args: Type_ProgramOptionsSelect_args) => Type_ProgramOptionsSelect_ret,
@@ -45,7 +50,6 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_program_options';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////

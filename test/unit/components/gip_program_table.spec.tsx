@@ -13,6 +13,8 @@ const TEST_MODULE_PATH = REL_SRC_PATH + MODULE_NAME;
 ////////////////////////////////////////////////////////////////////////////////
 // Imports
 
+import {jest} from '@jest/globals'; // For isolateModulesAsync
+
 import React from 'react';
 
 import {
@@ -21,12 +23,14 @@ import {
 	fireEvent,
 } from '@testing-library/react';
 
+import * as TEST_MODULE from '#components/gip_program_table';
+
 ////////////////////////////////////////////////////////////////////////////////
 // Types
 
 import type {
 	Type_DisplayProgramItem,
-} from '../../../src/utils/gip_types';
+} from '#utils/gip_types';
 
 import type {
 	Type_genSelectedStyle_args,
@@ -43,7 +47,7 @@ import type {
 	Type_ProgInputFields_ret,
 	Type_ProgramTable_args,
 	Type_ProgramTable_ret,
-} from '../../../src/components/gip_program_table';
+} from '#components/gip_program_table';
 
 interface Type_TestModulePrivateDefs {
 	genSelectedStyle:   (args: Type_genSelectedStyle_args)   => Type_genSelectedStyle_ret,
@@ -65,7 +69,6 @@ interface Type_TestModule {
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-import * as TEST_MODULE from '../../../src/components/gip_program_table';
 const testModule = TEST_MODULE as unknown as Type_TestModule;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +126,7 @@ describe(MODULE_NAME + ':genSelectedStyle', () => {
 	test('Not selected', () => {
 		testArgs       = false;
 		expectedResult = {};
-		actualResult = testModuleObj.genSelectedStyle( testArgs );
+		actualResult   = testModuleObj.genSelectedStyle( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
 

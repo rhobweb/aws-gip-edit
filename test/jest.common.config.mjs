@@ -2,12 +2,10 @@
  * Common Jest config for all tests.
  * This file is pulled in by the unit test jest config.
  */
-import type { JestConfigWithTsJest } from 'ts-jest';
-//import { defaults as tsjPreset } from 'ts-jest/presets'
-//import { jsWithTs as tsjPreset } from 'ts-jest/presets'
-//import { jsWithBabel as tsjPreset } from 'ts-jest/presets'
+//import type { JestConfigWithTsJest } from 'ts-jest';
 import { createJsWithBabelPreset as createPreset } from 'ts-jest';
-//import { createJsWithBabelEsmPreset as createPreset } from 'ts-jest';
+//import { createJsWithTsEsmPreset as createPreset } from 'ts-jest';
+//import { createJsWithTsEsmPreset as createPreset } from 'ts-jest';
 //import { createJsWithTsPreset as createPreset } from 'ts-jest';
 //import type {Config} from 'jest';
 //import { createDefaultPreset as createPreset } from 'ts-jest';
@@ -16,7 +14,7 @@ const defaultPreset = createPreset();
 //const tsJestTransformCfg = createPreset().transform;
 //import jestModuleNameMapper from 'jest-module-name-mapper';
 
-export default async (): Promise<JestConfigWithTsJest> => ({
+export default async () => ({
 	...defaultPreset,
 	// If using Babel, add transformIgnorePatterns to allow ESM in node_modules:
 	transformIgnorePatterns: [
@@ -94,6 +92,7 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 	//moduleNameMapper: {
 	//	'\\.(jpg|jpeg|png)$': 'identity-obj-proxy',
 	//},
+	extensionsToTreatAsEsm: [ '.tsx', '.ts' ],
 	modulePathIgnorePatterns: [
 		'<rootDir>/dist',
 	],
@@ -107,6 +106,7 @@ export default async (): Promise<JestConfigWithTsJest> => ({
 	setupFilesAfterEnv: [ '<rootDir>/test/jestMatcherSetup.mjs' ],
 	transform: {
 		'\\.tsx?$':           'ts-jest',
+		//'\\.tsx?$':           [ 'ts-jest', { useESM: true } ],
 		'\\.(jpg|jpeg|png)$': '<rootDir>/test/jestFileTransform.mjs',
 	},
 });
