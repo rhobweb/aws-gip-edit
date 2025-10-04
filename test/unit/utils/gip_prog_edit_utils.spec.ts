@@ -759,6 +759,34 @@ describe(MODULE_NAME + ':cookEpisode', () => {
 		expect( actualResult ).toEqual( expectedResult );
 	});
 
+	test( 'Just series and ep dot text', () => {
+		testArgs       = 'Series 5. Ep.2';
+		expectedResult = 'S05E02';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Just series and ep space text', () => {
+		testArgs       = 'Series 5. ep 2';
+		expectedResult = 'S05E02';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Series and ep mid-string', () => {
+		testArgs       = 'This is Series 5. ep 2. A good episode.';
+		expectedResult = 'S05E02-ThisIs-AGoodEpisode';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Series and ep no-space text, with trailing text', () => {
+		testArgs       = 'Series 5. ep09.Last bit';
+		expectedResult = 'S05E09-LastBit';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
 	test( 'Series followed by a dash', () => {
 		testArgs       = 'Series 8-Spon';
 		expectedResult = 'S08-Spon';

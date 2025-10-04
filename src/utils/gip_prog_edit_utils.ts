@@ -459,6 +459,7 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 	const arrMatch = [
 		[ /^(.*)Series ([0-9]+)-([0-9]+)(.*)$/i,               [ 2, 3, 0, 1, 4 ] ], // Series 1-2
 		[ /^(.*)Series ([0-9]+).*?Episode.?([0-9]+)\.?(.*)$/i, [ 2, 3, 0, 1, 4 ] ], // Series 1  Episode 2
+		[ /^(.*)Series ([0-9]+).*?Ep.?([0-9]+)\.?(.*)$/i,      [ 2, 3, 0, 1, 4 ] ], // Series 1  Ep 2
 		[ /^(.*)Series ([0-9]+)\.\s*([0-9]+)\.(.*)$/i,         [ 2, 3, 0, 1, 4 ] ], // 1. 2.
 		[ /^(.*)Series ([0-9]+)-?(.*)$/i,                      [ 2, 0, 0, 1, 3 ] ],
 		[ /^(.*)Episode ([0-9]+)-?(.*)$/i,                     [ 0, 2, 0, 1, 3 ] ],
