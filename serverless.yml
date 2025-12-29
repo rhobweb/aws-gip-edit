@@ -179,10 +179,14 @@ functions:
           path: /favicon.ico
           method: get
           cors: false
-#      - http:
-#          path: /{any+}
-#          method: any
-#          cors: true
+      - http:
+          path: /manifest.json
+          method: get
+          cors: false
+      #- http:
+      #    path: /{any+}
+      #    method: any
+      #    cors: true
 
 resources:
   - ${file(serverless/resources/dynamodb-tables.yml)}

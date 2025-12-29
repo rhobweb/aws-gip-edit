@@ -15,34 +15,34 @@ import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
 import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
 import webpack                   from 'webpack';
-//import { copyFileSync }          from 'node:fs';
+import { copyFileSync }          from 'node:fs';
 import { fileURLToPath }         from 'url';
 
 const { ProvidePlugin, DefinePlugin } = webpack;
 
-//function copyFiles() {
-//	const arrFileToCopy = [
-//		{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname, './dist/src/browser/index.css') },
-//		{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname, './dist/public/gip-common.css') },
-//		{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname, './dist/public/favicon.ico') },
-//		{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname, './dist/public/program_image_placeholder.png') },
-//	];
-//
-//	for ( const fileToCopy of arrFileToCopy ) {
-//		try {
-//			copyFileSync( fileToCopy.from, fileToCopy.to );
-//		}
-//		catch ( err ) {
-//			console.log( `Failed to copy: ${fileToCopy.from}` );
-//			throw err;
-//		}
-//	}
-//}
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 console.log( `dirname is ${__dirname}` );
+
+function copyFiles() {
+	const arrFileToCopy = [
+		{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname + '/dist/src/browser/index.css') },
+		{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname + '/dist/public/gip-common.css') },
+		{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname + '/dist/public/favicon.ico') },
+		{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname + '/dist/public/program_image_placeholder.png') },
+	];
+
+	for ( const fileToCopy of arrFileToCopy ) {
+		try {
+			console.log(`Copying: ${fileToCopy.from} to ${fileToCopy.to}`)
+			copyFileSync( fileToCopy.from, fileToCopy.to );
+		}
+		catch ( err ) {
+			console.log( `Failed to copy: ${fileToCopy.from}` );
+			throw err;
+		}
+	}
+}
 
 const isOffline      = !!process.env.IS_OFFLINE;
 const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
@@ -114,11 +114,11 @@ export default {
 				//	context: "./public/",
 				//	from: "**/*",
 				//},
-				{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname, './dist/src/browser/index.css') },
-				{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname, './dist/public/gip-common.css') },
-				{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname, './dist/public/favicon.ico') },
-				{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname, './dist/public/program_image_placeholder.png') },
-
+				{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize( path.join(__dirname, 'dist/src/browser/index.css')) },
+				{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize( path.join(__dirname, 'dist/public/gip-common.css')) },
+				{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize( path.join(__dirname, 'dist/public/favicon.ico')) },
+				{ from: path.resolve(__dirname, './public/manifest.json'),                 to: path.normalize( path.join(__dirname, 'dist/public/manifest.json')) },
+				{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize( path.join(__dirname, 'dist/public/program_image_placeholder.png')) },
 			],
 		}),
 		new MiniCssExtractPlugin({
