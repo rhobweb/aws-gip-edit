@@ -175,14 +175,6 @@ functions:
           method: any
           cors: true
           integration: aws_proxy
-      - http:
-          path: /favicon.ico
-          method: get
-          cors: false
-      - http:
-          path: /manifest.json
-          method: get
-          cors: false
       #- http:
       #    path: /{any+}
       #    method: any

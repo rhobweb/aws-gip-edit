@@ -15,7 +15,6 @@ import { CleanWebpackPlugin }    from 'clean-webpack-plugin';
 import CopyWebpackPlugin         from 'copy-webpack-plugin';
 import TsconfigPathsPlugin       from 'tsconfig-paths-webpack-plugin';
 import webpack                   from 'webpack';
-import { copyFileSync }          from 'node:fs';
 import { fileURLToPath }         from 'url';
 
 const { ProvidePlugin, DefinePlugin } = webpack;
@@ -24,32 +23,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 console.log( `dirname is ${__dirname}` );
 
-function copyFiles() {
-	const arrFileToCopy = [
-		{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize(__dirname + '/dist/src/browser/index.css') },
-		{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize(__dirname + '/dist/public/gip-common.css') },
-		{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize(__dirname + '/dist/public/favicon.ico') },
-		{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize(__dirname + '/dist/public/program_image_placeholder.png') },
-	];
-
-	for ( const fileToCopy of arrFileToCopy ) {
-		try {
-			console.log(`Copying: ${fileToCopy.from} to ${fileToCopy.to}`)
-			copyFileSync( fileToCopy.from, fileToCopy.to );
-		}
-		catch ( err ) {
-			console.log( `Failed to copy: ${fileToCopy.from}` );
-			throw err;
-		}
-	}
-}
-
 const isOffline      = !!process.env.IS_OFFLINE;
 const NODE_LOG_LEVEL = process.env.NODE_LOG_LEVEL || 'info';
 const AUTH_URI       = process.env.AUTH_URI || 'undefined';
 console.log( 'webpack: browser isOffline: ' + isOffline );
-
-//copyFiles();
 
 export default {
 	context: __dirname,
@@ -110,14 +87,13 @@ export default {
 		new CopyWebpackPlugin({
 			patterns: [
 				//{
-				//	// Copy content from `./public/` folder to our output directory
-				//	context: "./public/",
-				//	from: "**/*",
+				// Copy content from `./public/` folder to our output directory
+				// manifest.json and favicon.ico must be in root directory.
 				//},
 				{ from: path.resolve(__dirname, './src/browser/index.css'),                to: path.normalize( path.join(__dirname, 'dist/src/browser/index.css')) },
 				{ from: path.resolve(__dirname, './public/gip-common.css'),                to: path.normalize( path.join(__dirname, 'dist/public/gip-common.css')) },
-				{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize( path.join(__dirname, 'dist/public/favicon.ico')) },
-				{ from: path.resolve(__dirname, './public/manifest.json'),                 to: path.normalize( path.join(__dirname, 'dist/public/manifest.json')) },
+				{ from: path.resolve(__dirname, './public/favicon.ico'),                   to: path.normalize( path.join(__dirname, 'dist/favicon.ico')) },
+				{ from: path.resolve(__dirname, './public/manifest.json'),                 to: path.normalize( path.join(__dirname, 'dist/manifest.json')) },
 				{ from: path.resolve(__dirname, './public/program_image_placeholder.png'), to: path.normalize( path.join(__dirname, 'dist/public/program_image_placeholder.png')) },
 			],
 		}),
