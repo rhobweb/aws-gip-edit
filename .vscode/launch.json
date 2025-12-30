@@ -14,7 +14,7 @@
 			"command": "npm start",
 			"preLaunchTask": "typescript build",
 			"outFiles": [
-				"${workspaceFolder}/dist/**/*.js"
+				"${workspaceFolder}/.webpack/**/*.mjs"
 			],
 			"env": {
 				"AWS_REGION":     "eu-west-1",
@@ -69,7 +69,7 @@
 				//"--testPathPatterns=./test/unit/utils/gip_http_utils_priv.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_http_utils.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_prog_db_utils.spec.ts",
-				//"--testPathPatterns=./test/unit/utils/gip_prog_edit_utils.spec.ts",
+				"--testPathPatterns=./test/unit/utils/gip_prog_edit_utils.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_prog_fields.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_prog_filter_utils.spec.ts",
 				//"--testPathPatterns=./test/unit/utils/gip_prog_title_utils.spec.ts",

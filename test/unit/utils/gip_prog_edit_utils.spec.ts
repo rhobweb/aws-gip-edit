@@ -53,6 +53,8 @@ import * as TEST_MODULE from '#utils/gip_prog_edit_utils';
 // Imported types
 
 import type {
+	Type_formatCamelCaseDate_args,
+	Type_formatCamelCaseDate_ret,
 	Type_convertToCamelCase_args,
 	Type_convertToCamelCase_ret,
 	Type_elementClassTagMatches_args,
@@ -78,6 +80,7 @@ import type {
 ////////////////////////////////////////
 // Test module types
 interface Type_TestModulePrivateDefs {
+	formatCamelCaseDate:               ( ...args: Type_formatCamelCaseDate_args )            => Type_formatCamelCaseDate_ret,
 	convertToCamelCase:                ( args: Type_convertToCamelCase_args )                => Type_convertToCamelCase_ret,
 	elementClassTagMatches:            ( args: Type_elementClassTagMatches_args )            => Type_elementClassTagMatches_ret,
 	getDecendentsByTagNameAndClassTag: ( args: Type_getDecendentsByTagNameAndClassTag_args ) => Type_getDecendentsByTagNameAndClassTag_ret,
@@ -303,6 +306,31 @@ describe(MODULE_NAME + ':module can be loaded', () => {
 	});
 });
 
+describe(MODULE_NAME + ':formatCamelCaseDate', () => {
+	let testModuleObj  : Type_TestModulePrivateDefs;
+	let testArgs       : Type_formatCamelCaseDate_args;
+	let actualResult   : Type_formatCamelCaseDate_ret;
+	let expectedResult : Type_formatCamelCaseDate_ret;
+
+	beforeEach( () => {
+		commonBeforeEach();
+		testModuleObj = testModule.privateDefs;
+		testArgs = [ '', '2025', '12', '25'];
+		expectedResult = '';
+	});
+
+	afterEach( () => {
+		commonAfterEach();
+	});
+
+	test( 'A date', () => {
+		testArgs       = [ '', '2025', '12', '25' ];
+		expectedResult = '2025Dec25';
+		actualResult   = testModuleObj.formatCamelCaseDate( ...testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+});
+
 describe(MODULE_NAME + ':convertToCamelCase', () => {
 	let testModuleObj  : Type_TestModulePrivateDefs;
 	let testArgs       : Type_convertToCamelCase_args;
@@ -335,6 +363,20 @@ describe(MODULE_NAME + ':convertToCamelCase', () => {
 	test( 'Episode 2', () => {
 		testArgs       = 'Episode 2';
 		expectedResult = 'Episode2';
+		actualResult   = testModuleObj.convertToCamelCase( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'A dash separated date, no whitespace so no camelcasing', () => {
+		testArgs       = '2025-12-09';
+		expectedResult = '2025-12-09';
+		actualResult   = testModuleObj.convertToCamelCase( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Multiple dash separated dates', () => {
+		testArgs       = '1945-12-09 to 2025-11-10 via 2000-01-31';
+		expectedResult = '1945Dec09To2025Nov10Via2000Jan31';
 		actualResult   = testModuleObj.convertToCamelCase( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});
@@ -811,6 +853,13 @@ describe(MODULE_NAME + ':cookEpisode', () => {
 	test( 'Percent sign', () => {
 		testArgs       = 'Are 4% of women?';
 		expectedResult = 'Are 4 percent of women?';
+		actualResult   = testModuleObj.cookEpisode( testArgs );
+		expect( actualResult ).toEqual( expectedResult );
+	});
+
+	test( 'Slash date at end of string', () => {
+		testArgs       = 'From 30/12/1954';
+		expectedResult = 'From 1954-12-30';
 		actualResult   = testModuleObj.cookEpisode( testArgs );
 		expect( actualResult ).toEqual( expectedResult );
 	});

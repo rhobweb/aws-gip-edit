@@ -48,6 +48,9 @@ type Type_FoundElement = Record<string,Type_HtmlElement | Type_HtmlElement[]>;
 ////////////////////////////////////////
 // Exported types
 
+export type Type_formatCamelCaseDate_args = string[];
+export type Type_formatCamelCaseDate_ret = string;
+
 export type Type_convertToCamelCase_args = string;
 export type Type_convertToCamelCase_ret  = string;
 export interface Type_elementClassTagMatches_args {
@@ -127,6 +130,20 @@ const ELEMENT_SEPARATOR = '-';
 // Local definitions
 
 /**
+ * @param arrArg: result of a regex match on a numeric date string, with:
+ *                 - 1: the year, e.g., '2025';
+ *                 - 2: the month, e.g., '12';
+ *                 - 3: the day, e.g. '09';
+ * @returns the date in camelcase with a short month name, e.g., '2025Dec09'.
+ */
+function formatCamelCaseDate( ...arrArg : Type_formatCamelCaseDate_args ) : Type_formatCamelCaseDate_ret {
+	const rawDate = new Date([ arrArg.slice(1,4) ].join('/'));
+	const monthName = rawDate.toLocaleString('en-GB', { month: 'short' });
+	const arrPart = [ arrArg[1], monthName, arrArg[3] ];
+	return arrPart.join('');
+}
+
+/**
  * Convert the specified string to camelcase, with first letter capitalised.
  * @param str - string to convert.
  * @return string in camelcase format.
@@ -138,10 +155,11 @@ function convertToCamelCase( str : Type_convertToCamelCase_args ) : Type_convert
 	if ( /\s/g.test(str) ) // Only camelcase if the string contains whitespace
 	{
 		const preCookedStr = str
-			.normalize( 'NFD' ).replace(/\p{Diacritic}/gu, '')  // Replace accented characters with the unaccented equivalent
-			.replace( /[-_]+/g, ' ')                            // Replaces any - or _ characters with a space
-			.replace( /[^\w\s]/g, '')                           // Removes any non alphanumeric characters
-			.replace( /\s+/g, ' ' )                             // Shrink multiple spaces
+			.normalize( 'NFD' ).replace(/\p{Diacritic}/gu, '')                  // Replace accented characters with the unaccented equivalent
+			.replace( /([0-9]{4})-([0-9]{2})-([0-9]{2})/g, formatCamelCaseDate) // Format any dates so that they look OK in camelcase
+			.replace( /[-_]+/g, ' ')                                            // Replaces any - or _ characters with a space
+			.replace( /[^\w\s]/g, '')                                           // Removes any non alphanumeric characters
+			.replace( /\s+/g, ' ' )                                             // Shrink multiple spaces
 		;
 
 		const arrWord = preCookedStr.split( ' ' )
@@ -398,10 +416,12 @@ const padSeries  = ( series : string ) : string => padNumberString( series, 2 );
  * @returns the date as a string in format, 'YYYY-MM-DD', e.g., '2025-06-24'
  */
 function formatDashDate( ...arrArg : string[] ) : string {
+	const defaultCentury = '20';
 	const day   = padNumberString( arrArg[ 1 ], 2 );
 	const month = padNumberString( arrArg[ 2 ], 2 );
-	const year  = (arrArg[ 3 ].length === 2 ) ? `20${arrArg[3]}` : arrArg[3];
-	return `${year}-${month}-${day}`;
+	const year  = (arrArg[ 3 ].length === 2 ) ? `${defaultCentury}${arrArg[3]}` : arrArg[3];
+	const arrPart = [year, month, day];
+	return arrPart.join('-');
 }
 
 /**
@@ -419,6 +439,8 @@ function preProcessEpisode( rawText : Type_preProcessEpisode_args ) : Type_prePr
 	for ( const arrRe of arrPreprocess ) {
 		cookedText = cookedText.replace( arrRe[ 0 ], arrRe[ 1 ] );
 	};
+
+	console.log(`preProcessEpisode: result: ${cookedText}`);
 
 	return cookedText;
 }
@@ -514,6 +536,8 @@ function cookEpisode( rawText : Type_cookEpisode_args ) : Type_cookEpisode_ret
 		cookedEpisode = preProcessedText;
 	}
 
+	//console.log(`cookEpisode: result: ${cookedEpisode}`);
+
 	return cookedEpisode;
 }
 
@@ -531,7 +555,7 @@ function cookRawEpisode( arrRawText : Type_cookRawEpisode_args ) : Type_cookRawE
 
 	const precookedText = arrRawText.join( ELEMENT_SEPARATOR );
 
-	//console.log( `cookeRawEpisode: precooked: "${precookedText}"` );
+	//console.log( `cookRawEpisode: precooked: "${precookedText}"` );
 	//console.log( `cookeRawEpisode: cooked: "${cookEpisode( precookedText )}"` );
 
 	return cookEpisode( precookedText );
@@ -548,7 +572,7 @@ function cookRawEpisode( arrRawText : Type_cookRawEpisode_args ) : Type_cookRawE
  */
 export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
 {
-	//console.log( `rawTitle: "${rawTitle}"` );
+	//console.log( `cookTitle: rawTitle: "${rawTitle}"` );
 	const arrConversion : Type_TextConversionList = [
 		...ARR_COMMON_TEXT_CONVERSIONS,
 		[ /[/?\s]/g,          '-' ], // TODO - need to replace more special characters
@@ -558,6 +582,8 @@ export function cookTitle( rawTitle : Type_cookTitle_args ) : Type_cookTitle_ret
 	//const normalisedTitle = rawTitle.normalize( 'NFD' ).replace(/\p{Diacritic}/gu, '');
 	const knownTitle      = convertKnownTitle( rawTitle );
 	const convertedTitle  = convertText( { arrConversion, rawText: knownTitle } );
+
+	//console.log( `cookTitle: cookedTitle: "${rawTitle}"` );
 
 	return convertedTitle;
 }
@@ -635,6 +661,7 @@ export const privateDefs = {};
 
 if ( process.env.NODE_ENV === 'test-unit' ) {
 	Object.assign( privateDefs, {
+		formatCamelCaseDate,
 		convertToCamelCase,
 		elementClassTagMatches,
 		getDecendentsByTagNameAndClassTag,
